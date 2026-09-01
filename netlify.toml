@@ -1,0 +1,13 @@
+# devotion2vote-web · sitio estático en Netlify (www.devotion2vote.com)
+[build]
+  publish = "."
+[[headers]]
+  for = "/sala.html"
+  [headers.values]
+    Cache-Control = "no-store"
+    X-Robots-Tag = "noindex"
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "no-referrer"

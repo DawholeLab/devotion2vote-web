@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sala de Método — devotion2vote</title>
+<meta name="d2v-api" content="https://devotion2vote-api.onrender.com">
+<meta name="robots" content="noindex,nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Piel de trabajo neutra (equipo). La identidad de devotion2vote se aplica después sin tocar la lógica. */
+:root{--bg:#0b1020;--bg2:#101733;--ink:#eef2fb;--mut:#8fa0c4;--linea:rgba(120,160,230,.16);--acc:#e0a92c;--teal:#2fd4a7;--rojo:#e35d6a;--vio:#b3a6e0}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,sans-serif;min-height:100vh;font-size:13.5px}
+header{display:flex;justify-content:space-between;align-items:center;padding:14px 24px;border-bottom:1px solid var(--linea)}
+header b{font-family:'Space Grotesk';letter-spacing:.12em}
+header b span{color:var(--acc)}
+header a{color:var(--mut);text-decoration:none;font-size:12px}
+nav{display:flex;gap:6px;padding:12px 24px;border-bottom:1px solid var(--linea);flex-wrap:wrap}
+nav button{background:transparent;border:1px solid var(--linea);color:var(--mut)}
+nav button.on{border-color:var(--acc);color:var(--acc)}
+main{padding:22px 24px;max-width:1280px}
+section{display:none} section.on{display:block}
+h2{font-family:'Space Grotesk';font-size:12.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--mut);margin:0 0 14px}
+h3{font-size:14px;margin:18px 0 10px;font-weight:600}
+.caja{border:1px solid var(--linea);border-radius:12px;padding:16px;background:var(--bg2);margin-bottom:16px}
+button{border:none;border-radius:9px;padding:9px 14px;font:600 12.5px 'Inter';cursor:pointer;background:#1c2c55;color:var(--ink);transition:.15s}
+button:hover{background:#24376b} button.acc{background:var(--acc);color:#111} button.mini{padding:5px 9px;font-size:11px} button.ghost{background:transparent;border:1px solid var(--linea);color:var(--mut)}
+button:disabled{opacity:.45;cursor:not-allowed}
+input,textarea,select{width:100%;background:#0c1428;border:1px solid var(--linea);border-radius:9px;color:var(--ink);padding:9px 11px;font:400 13px 'Inter';margin-bottom:9px}
+textarea{font-family:ui-monospace,Menlo,monospace;font-size:12px;line-height:1.55;resize:vertical;min-height:110px}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--acc)}
+.rej{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.dos{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:900px){.dos{grid-template-columns:1fr}}
+.fila{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;color:var(--mut);font-weight:500;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;padding:7px 8px;border-bottom:1px solid var(--linea)}
+td{padding:7px 8px;border-bottom:1px solid rgba(120,160,230,.07);vertical-align:top}
+tr:hover td{background:rgba(120,160,230,.05)}
+.aviso{font-size:11.5px;color:var(--mut);line-height:1.6}
+.pill{display:inline-block;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--linea);border-radius:8px;padding:2px 7px;color:var(--mut);white-space:nowrap}
+.pill.ok{color:var(--teal);border-color:rgba(47,212,167,.4)} .pill.sim{color:var(--acc);border-color:rgba(224,169,44,.4)} .pill.mal{color:var(--rojo);border-color:rgba(227,93,106,.4)} .pill.vio{color:var(--vio);border-color:rgba(179,166,224,.4)}
+.kpi{display:flex;gap:22px;flex-wrap:wrap;margin-bottom:14px}
+.kpi div b{display:block;font-family:'Space Grotesk';font-size:24px;color:var(--acc)}
+.kpi div small{color:var(--mut);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase}
+#login{max-width:380px;margin:12vh auto;background:var(--bg2);border:1px solid var(--linea);border-radius:16px;padding:30px}
+.ok{color:var(--teal)} .mal{color:var(--rojo)}
+code,pre{background:#0c1428;border-radius:6px;font-size:11.5px;font-family:ui-monospace,Menlo,monospace}
+code{padding:1px 5px} pre{padding:10px;overflow:auto;max-height:420px;line-height:1.5;white-space:pre-wrap}
+/* diálogo */
+#chat{display:grid;grid-template-columns:260px 1fr;gap:16px;min-height:60vh}
+@media(max-width:900px){#chat{grid-template-columns:1fr}}
+#sesiones{max-height:60vh;overflow:auto}
+#sesiones div{padding:8px 10px;border-radius:8px;cursor:pointer;color:var(--mut);font-size:12px}
+#sesiones div.on{background:#1c2c55;color:var(--ink)}
+#hilo{max-height:56vh;overflow:auto;display:flex;flex-direction:column;gap:12px;padding:6px 2px}
+.msg{max-width:88%;padding:10px 14px;border-radius:12px;line-height:1.55;white-space:pre-wrap;font-size:13px}
+.msg.u{align-self:flex-end;background:#1c2c55}
+.msg.d{align-self:flex-start;background:#0c1428;border:1px solid var(--linea)}
+.msg .meta{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
+.msg .meta small{color:var(--mut);font-size:10.5px}
+#entrada{display:flex;gap:8px;margin-top:10px}
+#entrada textarea{min-height:64px;margin:0;font-family:'Inter'}
+</style></head><body>
+
+<header><b>DEVOTION<span>2</span>VOTE <small style="font-weight:400;opacity:.6;letter-spacing:.03em">· sala de método</small></b>
+<span><a href="index.html">← devotion2vote.com</a> &nbsp; <span class="aviso" id="quien"></span> <button class="mini ghost" id="salir" style="display:none" onclick="salir()">salir</button></span></header>
+
+<div id="login">
+  <h2>Acceso nominal</h2>
+  <p class="aviso" style="margin-bottom:12px">Entra con tu nombre de usuario y tu código de acceso. Cada acción queda firmada con tu nombre.</p>
+  <input id="lu" placeholder="usuario" autocomplete="username">
+  <input id="lp" type="password" placeholder="código de acceso" autocomplete="current-password" onkeydown="if(event.key==='Enter')entrar()">
+  <button class="acc" onclick="entrar()">Entrar</button>
+  <div id="lmsg" class="aviso" style="margin-top:10px"></div>
+</div>
+
+<div id="app" style="display:none">
+<nav>
+  <button class="on" onclick="ver('dialogo',this)">1 · Diálogo</button>
+  <button onclick="ver('bases',this)">2 · Bases</button>
+  <button onclick="ver('cuaderno',this)">3 · Cuaderno</button>
+  <button onclick="ver('lab',this)">4 · Laboratorio</button>
+  <button onclick="ver('eval',this)">5 · Evaluación</button>
+</nav>
+<main>
+
+<!-- 1 · DIÁLOGO -->
+<section id="dialogo" class="on">
+  <h2>Diálogo con DANTE</h2>
+  <div id="chat">
+    <div class="caja" style="margin:0">
+      <div class="fila"><button class="acc mini" onclick="nuevaSesion()">Nueva sesión</button><select id="ses_base" style="margin:0;width:auto;flex:1"><option value="">sin base abierta</option></select></div>
+      <div id="sesiones"></div>
+    </div>
+    <div class="caja" style="margin:0">
+      <div class="fila" style="justify-content:space-between"><b id="ses_titulo">—</b><span id="ses_estado" class="aviso"></span></div>
+      <div id="hilo"></div>
+      <div id="entrada"><textarea id="txt" placeholder="Escribe a DANTE… (Ctrl+Enter para enviar)" onkeydown="if(event.ctrlKey&&event.key==='Enter')enviar()"></textarea><button class="acc" id="btn_enviar" onclick="enviar()">Enviar</button></div>
+      <p class="aviso" style="margin-top:8px">Sobre cada respuesta de DANTE puedes marcar <b>regla</b> (crea el borrador de regla), <b>paso</b> (crea el borrador de paso del cuaderno), <b>referencia</b> o <b>error</b> (con tu razón). Así el método se inscribe.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 2 · BASES -->
+<section id="bases">
+  <h2>Bases</h2>
+  <div class="dos">
+    <div class="caja">
+      <h3 style="margin-top:0">Importar una base (.sav o .csv)</h3>
+      <input type="file" id="arch" accept=".sav,.csv,.txt,.tsv">
+      <div class="fila"><button class="mini" onclick="previsualizar()">Previsualizar</button><span class="aviso" id="prev_msg"></span></div>
+      <div id="prev" style="display:none">
+        <div class="rej">
+          <input id="b_codigo" placeholder="código (p. ej. dom_2024-05)">
+          <input id="b_pais" placeholder="país iso3" value="dom">
+          <input id="b_titulo" placeholder="título">
+          <input id="b_fecha" type="date" title="fecha de campo (inicio)">
+          <select id="b_pond"><option value="autoponderada">autoponderada</option><option value="no_declarada">ponderación no declarada</option></select>
+          <input id="b_origen" placeholder="origen" value="puente:dom_presidencia">
+        </div>
+        <input id="b_diseno" placeholder="diseño muestral (opcional)">
+        <div id="prev_resumen" class="aviso"></div>
+        <div style="max-height:320px;overflow:auto;margin:10px 0"><table id="prev_tabla"></table></div>
+        <button class="acc" onclick="importar()">Importar a cuarentena</button> <span class="aviso" id="imp_msg"></span>
+      </div>
+    </div>
+    <div class="caja">
+      <h3 style="margin-top:0">Bases cargadas</h3>
+      <div class="fila"><input id="f_pais" placeholder="país" value="dom" style="width:90px;margin:0"><button class="mini" onclick="cargarBases()">Actualizar</button></div>
+      <div style="max-height:520px;overflow:auto"><table id="t_bases"></table></div>
+    </div>
+  </div>
+  <div class="caja" id="base_det" style="display:none">
+    <h3 style="margin-top:0" id="bd_titulo"></h3>
+    <div id="bd_meta" class="aviso"></div>
+    <h3>Diccionario canónico <span class="aviso">(el sistema propone; el director confirma)</span></h3>
+    <div style="max-height:420px;overflow:auto"><table id="bd_dicc"></table></div>
+    <h3>Confirmar o corregir una correspondencia</h3>
+    <div class="rej"><input id="d_var" placeholder="variable nativa (p. ej. P12)"><input id="d_clave" placeholder="clave canónica (p. ej. voto_secreto)"><select id="d_fam"><option>transferencia</option><option>identidad</option><option>problematica</option><option>clima</option><option>emocion</option><option>sociodemo</option><option>territorio</option><option>otro</option></select><button class="mini" onclick="fijarDicc()">Confirmar</button></div>
+    <div class="fila"><span class="aviso">Estado de la base:</span><select id="bd_estado" style="width:auto;margin:0"><option>cuarentena</option><option>perfilada</option><option>canonica</option><option>activa</option><option>retirada</option></select><button class="mini" onclick="estadoBase()">Cambiar</button><span class="aviso" id="bd_msg"></span></div>
+  </div>
+</section>
+
+<!-- 3 · CUADERNO -->
+<section id="cuaderno">
+  <h2>Cuaderno VOTE-TRANSFER · metodología Salom</h2>
+  <div class="dos">
+    <div class="caja">
+      <h3 style="margin-top:0">Pasos</h3>
+      <div style="max-height:360px;overflow:auto"><table id="t_pasos"></table></div>
+      <h3>Reglas vigentes</h3>
+      <div style="max-height:300px;overflow:auto"><table id="t_reglas"></table></div>
+    </div>
+    <div class="caja">
+      <h3 style="margin-top:0">Escribir o editar un paso</h3>
+      <div class="rej"><input id="p_clave" placeholder="clave (p01_recuerdo_x_intencion)"><input id="p_orden" placeholder="orden" value="10"><input id="p_pais" placeholder="país (vacío = universal)" value="dom"></div>
+      <input id="p_titulo" placeholder="título">
+      <textarea id="p_prop" placeholder="propósito, en lenguaje del método" style="min-height:70px;font-family:'Inter'"></textarea>
+      <input id="p_entradas" placeholder="entradas: claves canónicas separadas por coma">
+      <textarea id="p_codigo" placeholder="def paso(base, params, ctx):&#10;    t = base.cruce('voto_recuerdo', 'voto_intencion')&#10;    return {...}"></textarea>
+      <input id="p_valid" placeholder="criterio de validación («hecho cuando…»)">
+      <div class="fila"><button class="acc" onclick="guardarPaso()">Guardar paso</button><button class="mini" onclick="aprobarPaso()">Aprobar (director)</button><span class="aviso" id="p_msg"></span></div>
+      <h3>Escribir una regla</h3>
+      <div class="rej"><input id="r_clave" placeholder="clave (R001_…)"><input id="r_paso" placeholder="paso asociado (opcional)"></div>
+      <input id="r_titulo" placeholder="título">
+      <input id="r_cuando" placeholder="cuándo aplica">
+      <input id="r_que" placeholder="qué hace">
+      <input id="r_prueba" placeholder="cómo se prueba">
+      <div class="fila"><button class="acc" onclick="guardarRegla()">Guardar regla</button><span class="aviso" id="r_msg"></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 · LABORATORIO -->
+<section id="lab">
+  <h2>Laboratorio</h2>
+  <div class="dos">
+    <div class="caja">
+      <h3 style="margin-top:0">Correr un paso sobre una base</h3>
+      <select id="l_paso"></select>
+      <select id="l_base"></select>
+      <textarea id="l_params" placeholder='parámetros extra (JSON, opcional) — p. ej. {"denominador": "total"}' style="min-height:60px"></textarea>
+      <textarea id="l_ref" placeholder='cálculo de referencia del director (JSON, opcional) — el sistema calcula el desvío' style="min-height:60px"></textarea>
+      <div class="fila"><button class="acc" onclick="correr()">Correr</button><span class="aviso" id="l_msg"></span></div>
+      <h3>Últimas corridas</h3>
+      <div style="max-height:320px;overflow:auto"><table id="t_corridas"></table></div>
+    </div>
+    <div class="caja">
+      <h3 style="margin-top:0">Resultado</h3>
+      <div id="l_kpi" class="kpi"></div>
+      <pre id="l_res">—</pre>
+    </div>
+  </div>
+</section>
+
+<!-- 5 · EVALUACIÓN -->
+<section id="eval">
+  <h2>Evaluación del entrenamiento</h2>
+  <div class="caja">
+    <div class="fila"><input id="e_pais" value="dom" style="width:90px;margin:0"><button class="mini" onclick="cargarEval()">Actualizar</button><span id="e_lectura" class="aviso"></span></div>
+    <div class="kpi" id="e_kpi"></div>
+    <table id="t_eval"></table>
+  </div>
+  <div class="caja">
+    <h3 style="margin-top:0">Parámetros con nombre (P.SEG / P.MICRO / P.NANO)</h3>
+    <table id="t_param"></table>
+    <div class="rej" style="margin-top:10px"><input id="pa_clave" placeholder="clave (P.NANO.MIN)"><input id="pa_valor" placeholder='valor JSON ({"electores": 200})'><input id="pa_nota" placeholder="nota"><button class="mini" onclick="fijarParam()">Fijar (director)</button></div>
+  </div>
+</section>
+
+</main></div>
+
+<script>
+const API=(document.querySelector('meta[name=d2v-api]')||{}).content||'http://localhost:8000';
+let TOK=null, YO=null, SES=null, BASE_SEL=null;
+try{TOK=sessionStorage.getItem('d2v_tok');YO=JSON.parse(sessionStorage.getItem('d2v_yo')||'null')}catch(e){}
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+async function api(ruta,met='GET',cuerpo=null,form=null){
+  const h={...(TOK?{'Authorization':'Bearer '+TOK}:{})};
+  let body; if(form){body=form}else if(cuerpo){h['Content-Type']='application/json';body=JSON.stringify(cuerpo)}
+  const r=await fetch(API+ruta,{method:met,headers:h,body});
+  let j=null; try{j=await r.json()}catch(e){}
+  if(r.status===401){salir();throw new Error('Sesión caducada: vuelve a entrar.')}
+  if(!r.ok) throw new Error((j&&(j.detail||JSON.stringify(j)))||('HTTP '+r.status));
+  return j;
+}
+async function entrar(){
+  $('lmsg').textContent='…';
+  try{
+    const f=new URLSearchParams({username:$('lu').value.trim(),password:$('lp').value});
+    const r=await fetch(API+'/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:f});
+    const j=await r.json(); if(!r.ok) throw new Error(j.detail||'acceso denegado');
+    TOK=j.access_token; YO={usuario:$('lu').value.trim().toLowerCase(),rol:j.rol,nombre:j.nombre};
+    try{sessionStorage.setItem('d2v_tok',TOK);sessionStorage.setItem('d2v_yo',JSON.stringify(YO))}catch(e){}
+    arrancar();
+  }catch(e){$('lmsg').innerHTML='<span class=mal>'+esc(e.message)+'</span>'}
+}
+function salir(){TOK=null;YO=null;try{sessionStorage.clear()}catch(e){};$('app').style.display='none';$('login').style.display='block';$('salir').style.display='none';$('quien').textContent=''}
+async function arrancar(){
+  $('login').style.display='none';$('app').style.display='block';$('salir').style.display='inline-block';
+  $('quien').textContent=(YO.nombre||YO.usuario)+' · '+YO.rol;
+  await Promise.all([cargarSesiones(),cargarBases(),cargarCuaderno(),cargarEval()]);
+}
+function ver(id,btn){document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id===id));document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b===btn))}
+
+/* ---------- 1 · diálogo ---------- */
+async function cargarSesiones(){
+  const ss=await api('/dv/sesiones'); const c=$('sesiones'); c.innerHTML='';
+  ss.forEach(s=>{const d=document.createElement('div');d.className=(SES&&SES.id===s.id)?'on':'';d.innerHTML='<b>'+esc(s.titulo)+'</b><br><small>'+esc(s.usuario)+' · '+s.mensajes+' msg · '+new Date(s.creado).toLocaleDateString()+'</small>';d.onclick=()=>abrirSesion(s.id);c.appendChild(d)});
+  if(!SES&&ss.length) abrirSesion(ss[0].id);
+}
+async function nuevaSesion(){
+  const t=prompt('Título de la sesión','Sesión de método '+new Date().toLocaleDateString()); if(t===null) return;
+  const b=$('ses_base').value||null;
+  const s=await api('/dv/sesiones','POST',{titulo:t,base_id:b?Number(b):null}); await abrirSesion(s.id); cargarSesiones();
+}
+async function abrirSesion(id){
+  SES=await api('/dv/sesiones/'+id); $('ses_titulo').textContent=SES.titulo;
+  $('ses_estado').textContent=(SES.contexto&&SES.contexto.base_id)?'base abierta #'+SES.contexto.base_id:'sin base abierta';
+  document.querySelectorAll('#sesiones div').forEach(d=>d.classList.remove('on'));
+  pintarHilo();
+}
+function pintarHilo(){
+  const h=$('hilo'); h.innerHTML='';
+  SES.mensajes.forEach(m=>{
+    const d=document.createElement('div'); d.className='msg '+(m.rol==='usuario'?'u':'d');
+    let meta='';
+    if(m.rol==='dante'){
+      const sim=m.motor&&m.motor.startsWith('simulado');
+      meta='<div class=meta><small>'+esc(m.motor||'')+(m.meta&&m.meta.coste_usd!=null?' · '+m.meta.coste_usd.toFixed(4)+' USD':'')+'</small>'
+        +(m.marca?'<span class="pill vio">'+esc(m.marca)+'</span>':'')
+        +(YO.rol==='director'||YO.rol==='admin'?['regla','paso','referencia','error'].map(k=>'<button class="mini ghost" onclick="marcar('+m.id+',\''+k+'\')">'+k+'</button>').join(''):'')
+        +(sim?'<span class="pill sim">simulado</span>':'')+'</div>';
+    }
+    d.innerHTML=esc(m.contenido)+meta; h.appendChild(d);
+  });
+  h.scrollTop=h.scrollHeight;
+}
+async function enviar(){
+  const t=$('txt').value.trim(); if(!t) return;
+  if(!SES){await nuevaSesion(); if(!SES) return}
+  $('btn_enviar').disabled=true; $('txt').value='';
+  SES.mensajes.push({rol:'usuario',contenido:t}); pintarHilo();
+  try{const r=await api('/dv/dante','POST',{sesion_id:SES.id,mensaje:t}); await abrirSesion(SES.id);}
+  catch(e){alert(e.message)} finally{$('btn_enviar').disabled=false}
+}
+async function marcar(id,marca){
+  const nota=prompt(marca==='error'?'¿Qué está mal y por qué?':marca==='regla'?'Título breve de la regla':marca==='paso'?'Título breve del paso':'Nota (opcional)'); if(nota===null) return;
+  const r=await api('/dv/mensajes/'+id+'/marcar','POST',{marca,nota});
+  await abrirSesion(SES.id); if(r.creado){cargarCuaderno(); alert('Creado el borrador: '+JSON.stringify(r.creado)+'. Complétalo en la mesa Cuaderno.')}
+}
+
+/* ---------- 2 · bases ---------- */
+let PREV=null;
+async function previsualizar(){
+  const f=$('arch').files[0]; if(!f){$('prev_msg').textContent='Elige un archivo.';return}
+  $('prev_msg').textContent='leyendo…'; const fd=new FormData(); fd.append('archivo',f);
+  try{PREV=await api('/dv/bases/previsualizar','POST',null,fd);}catch(e){$('prev_msg').innerHTML='<span class=mal>'+esc(e.message)+'</span>';return}
+  $('prev_msg').textContent=''; $('prev').style.display='block'; $('b_titulo').value=f.name.replace(/\.[^.]+$/,'');
+  const m=f.name.toLowerCase().match(/(20\d\d)/); const meses={enero:1,febrero:2,marzo:3,abril:4,mayo:5,junio:6,julio:7,agosto:8,septiembre:9,octubre:10,noviembre:11,diciembre:12};
+  const mes=Object.keys(meses).find(k=>f.name.toLowerCase().includes(k));
+  if(m&&mes){$('b_codigo').value=$('b_pais').value+'_'+m[1]+'-'+String(meses[mes]).padStart(2,'0');$('b_fecha').value=m[1]+'-'+String(meses[mes]).padStart(2,'0')+'-01'}
+  $('prev_resumen').innerHTML='<b>'+PREV.n_registros+'</b> registros · <b>'+PREV.n_variables+'</b> variables · '+esc(PREV.formato)+(PREV.avisos.length?'<br>'+PREV.avisos.map(a=>'⚠ '+esc(a)).join('<br>'):'');
+  $('prev_tabla').innerHTML='<tr><th>variable</th><th>etiqueta</th><th>clase</th><th>válidos</th><th>propuesta canónica</th></tr>'+PREV.variables.map(v=>'<tr><td><code>'+esc(v.nombre_nativo)+'</code></td><td>'+esc((v.etiqueta||'').slice(0,90))+'</td><td>'+esc(v.clasificacion)+'</td><td>'+v.n_validos+'</td><td>'+(v.canon_propuesta?'<span class="pill vio">'+esc(v.canon_propuesta)+'</span>':'')+'</td></tr>').join('');
+}
+async function importar(){
+  const f=$('arch').files[0]; const fd=new FormData(); fd.append('archivo',f);
+  for(const [k,id] of [['codigo','b_codigo'],['pais','b_pais'],['titulo','b_titulo'],['origen','b_origen'],['fecha_campo_ini','b_fecha'],['diseno','b_diseno'],['ponderacion','b_pond']]){const v=$(id).value; if(v) fd.append(k,v)}
+  $('imp_msg').textContent='importando…';
+  try{const r=await api('/dv/bases','POST',null,fd); $('imp_msg').innerHTML='<span class=ok>cargada #'+r.id+' · '+r.diccionario_propuestas+' propuestas de diccionario</span>'; cargarBases(); $('prev').style.display='none';}
+  catch(e){$('imp_msg').innerHTML='<span class=mal>'+esc(e.message)+'</span>'}
+}
+async function cargarBases(){
+  const bs=await api('/dv/bases?pais='+encodeURIComponent($('f_pais').value||''));
+  $('t_bases').innerHTML='<tr><th>código</th><th>campo</th><th>n</th><th>vars</th><th>pond.</th><th>estado</th><th></th></tr>'+bs.map(b=>'<tr><td><b>'+esc(b.codigo)+'</b><br><small class=aviso>'+esc(b.titulo)+'</small></td><td>'+esc(b.fecha_campo_ini||'—')+'</td><td>'+b.n_registros+'</td><td>'+b.n_variables+'</td><td>'+esc(b.ponderacion)+'</td><td><span class=pill>'+esc(b.estado)+'</span></td><td><button class="mini ghost" onclick="verBase('+b.id+')">abrir</button></td></tr>').join('');
+  const opts=bs.map(b=>'<option value="'+b.id+'">'+esc(b.codigo)+' · n='+b.n_registros+'</option>').join('');
+  $('ses_base').innerHTML='<option value="">sin base abierta</option>'+opts; $('l_base').innerHTML=opts;
+}
+async function verBase(id){
+  const b=await api('/dv/bases/'+id); BASE_SEL=b; $('base_det').style.display='block'; $('bd_titulo').textContent=b.codigo+' · '+b.titulo;
+  $('bd_meta').innerHTML='país '+esc(b.pais)+' · origen '+esc(b.origen)+' · '+b.n_registros+' registros · '+b.n_variables+' variables · ponderación '+esc(b.ponderacion)+' · clase '+esc(b.clase_epistemica)+' · sha256 <code>'+esc(b.sha256.slice(0,12))+'…</code>'+(b.avisos&&b.avisos.length?'<br>'+b.avisos.map(a=>'⚠ '+esc(a)).join('<br>'):'');
+  $('bd_estado').value=b.estado;
+  $('bd_dicc').innerHTML='<tr><th>clave canónica</th><th>familia</th><th>variable</th><th>estado</th></tr>'+b.diccionario.map(d=>'<tr><td><code>'+esc(d.clave)+'</code></td><td>'+esc(d.familia)+'</td><td>'+esc(d.variable)+'</td><td><span class="pill '+(d.estado==='confirmado'?'ok':'')+'">'+esc(d.estado)+'</span></td></tr>').join('');
+  $('base_det').scrollIntoView({behavior:'smooth'});
+}
+async function fijarDicc(){
+  try{await api('/dv/bases/'+BASE_SEL.id+'/diccionario','POST',{variable:$('d_var').value.trim(),clave:$('d_clave').value.trim(),familia:$('d_fam').value}); $('bd_msg').innerHTML='<span class=ok>confirmado</span>'; verBase(BASE_SEL.id);}catch(e){$('bd_msg').innerHTML='<span class=mal>'+esc(e.message)+'</span>'}
+}
+async function estadoBase(){
+  try{await api('/dv/bases/'+BASE_SEL.id,'PATCH',{estado:$('bd_estado').value}); $('bd_msg').innerHTML='<span class=ok>estado cambiado</span>'; cargarBases();}catch(e){$('bd_msg').innerHTML='<span class=mal>'+esc(e.message)+'</span>'}
+}
+
+/* ---------- 3 · cuaderno ---------- */
+async function cargarCuaderno(){
+  const ps=await api('/dv/cuaderno'); const rs=await api('/dv/reglas');
+  $('t_pasos').innerHTML='<tr><th>#</th><th>clave</th><th>título</th><th>v</th><th>estado</th><th></th></tr>'+ps.map(p=>'<tr><td>'+p.orden+'</td><td><code>'+esc(p.clave)+'</code></td><td>'+esc(p.titulo)+'<br><small class=aviso>'+esc((p.proposito||'').slice(0,110))+'</small></td><td>'+p.version+(p.tiene_codigo?'':' <span class="pill mal">sin código</span>')+'</td><td><span class="pill '+(p.estado==='aprobado'?'ok':'')+'">'+esc(p.estado)+'</span></td><td><button class="mini ghost" onclick="editarPaso(\''+esc(p.clave)+'\')">editar</button></td></tr>').join('');
+  $('t_reglas').innerHTML='<tr><th>clave</th><th>regla</th><th>paso</th><th>estado</th></tr>'+rs.map(r=>'<tr><td><code>'+esc(r.clave)+'</code></td><td><b>'+esc(r.titulo)+'</b><br><small class=aviso>cuando '+esc(r.cuando)+' → '+esc(r.que_hace.slice(0,140))+(r.prueba?' · prueba: '+esc(r.prueba.slice(0,80)):' · <span class=mal>sin prueba</span>')+'</small></td><td>'+esc(r.paso_clave||'—')+'</td><td><span class="pill '+(r.estado==='vigente'?'ok':'')+'">'+esc(r.estado)+'</span></td></tr>').join('');
+  $('l_paso').innerHTML=ps.filter(p=>p.tiene_codigo).map(p=>'<option value="'+esc(p.clave)+'">'+esc(p.clave)+' v'+p.version+' · '+esc(p.titulo)+'</option>').join('');
+}
+async function editarPaso(clave){
+  const p=await api('/dv/cuaderno/'+clave);
+  $('p_clave').value=p.clave;$('p_orden').value=p.orden;$('p_pais').value=p.pais||'';$('p_titulo').value=p.titulo;$('p_prop').value=p.proposito;$('p_entradas').value=(p.entradas||[]).join(', ');$('p_codigo').value=p.codigo||'';$('p_valid').value=p.validacion||'';
+  ver('cuaderno',document.querySelectorAll('nav button')[2]); $('p_clave').scrollIntoView({behavior:'smooth'});
+}
+async function guardarPaso(){
+  try{const r=await api('/dv/cuaderno','POST',{clave:$('p_clave').value.trim(),orden:Number($('p_orden').value||0),pais:$('p_pais').value.trim()||null,titulo:$('p_titulo').value,proposito:$('p_prop').value,entradas:$('p_entradas').value.split(',').map(s=>s.trim()).filter(Boolean),codigo:$('p_codigo').value||null,validacion:$('p_valid').value||null});
+    $('p_msg').innerHTML='<span class=ok>guardado v'+r.version+'</span>'; cargarCuaderno();}catch(e){$('p_msg').innerHTML='<span class=mal>'+esc(e.message)+'</span>'}
+}
+async function aprobarPaso(){try{await api('/dv/cuaderno/'+$('p_clave').value.trim()+'/aprobar','POST',{}); $('p_msg').innerHTML='<span class=ok>aprobado</span>'; cargarCuaderno(); cargarEval();}catch(e){$('p_msg').innerHTML='<span class=mal>'+esc(e.message)+'</span>'}}
+async function guardarRegla(){
+  try{await api('/dv/reglas','POST',{clave:$('r_clave').value.trim(),titulo:$('r_titulo').value,cuando:$('r_cuando').value,que_hace:$('r_que').value,prueba:$('r_prueba').value||null,paso_clave:$('r_paso').value.trim()||null,origen:'dictado'}); $('r_msg').innerHTML='<span class=ok>guardada</span>'; cargarCuaderno();}catch(e){$('r_msg').innerHTML='<span class=mal>'+esc(e.message)+'</span>'}
+}
+
+/* ---------- 4 · laboratorio ---------- */
+async function correr(){
+  let params=null,ref=null;
+  try{params=$('l_params').value.trim()?JSON.parse($('l_params').value):null; ref=$('l_ref').value.trim()?JSON.parse($('l_ref').value):null}catch(e){$('l_msg').innerHTML='<span class=mal>JSON inválido</span>';return}
+  $('l_msg').textContent='corriendo…';
+  try{const r=await api('/dv/corridas','POST',{paso_clave:$('l_paso').value,base_id:Number($('l_base').value),parametros:params,referencia:ref});
+    $('l_msg').innerHTML=r.ok?'<span class=ok>ok · '+r.ms+' ms</span>':'<span class=mal>'+esc(r.error)+'</span>';
+    $('l_kpi').innerHTML='<div><b>'+(r.ok?'✓':'✗')+'</b><small>corrida #'+r.id+'</small></div><div><b>v'+r.version+'</b><small>versión</small></div><div><b>'+(r.desvio==null?'—':r.desvio)+'</b><small>desvío vs referencia</small></div><div><b>'+r.ms+'</b><small>ms</small></div>';
+    $('l_res').textContent=JSON.stringify(r.resultado??{error:r.error},null,1); cargarCorridas(); cargarEval();
+  }catch(e){$('l_msg').innerHTML='<span class=mal>'+esc(e.message)+'</span>'}
+}
+async function cargarCorridas(){
+  const cs=await api('/dv/corridas');
+  $('t_corridas').innerHTML='<tr><th>#</th><th>paso</th><th>base</th><th>ok</th><th>desvío</th><th>quién</th><th>cuándo</th></tr>'+cs.slice(0,40).map(c=>'<tr><td>'+c.id+'</td><td><code>'+esc(c.paso_clave)+'</code> v'+c.version+'</td><td>'+c.base_id+'</td><td>'+(c.ok?'<span class="pill ok">ok</span>':'<span class="pill mal">error</span>')+'</td><td>'+(c.desvio==null?'—':c.desvio)+'</td><td>'+esc(c.ejecutada_por)+'</td><td>'+new Date(c.creado).toLocaleString()+'</td></tr>').join('');
+}
+
+/* ---------- 5 · evaluación ---------- */
+async function cargarEval(){
+  const pais=$('e_pais').value||'dom';
+  const e=await api('/dv/evaluacion?pais='+pais); const pa=await api('/dv/parametros?pais='+pais);
+  $('e_lectura').innerHTML=(e.pais_calibrado?'<span class="pill ok">país calibrado</span> ':'<span class="pill sim">en entrenamiento</span> ')+esc(e.lectura);
+  const bases=e.bases.reduce((a,b)=>a+Number(b.n),0), aprob=e.pasos.filter(p=>p.estado==='aprobado').length, solos=e.pasos.filter(p=>p.reproduce_solo).length;
+  $('e_kpi').innerHTML='<div><b>'+bases+'</b><small>bases</small></div><div><b>'+e.pasos.length+'</b><small>pasos</small></div><div><b>'+aprob+'</b><small>aprobados</small></div><div><b>'+solos+'</b><small>reproducen solos</small></div><div><b>'+e.reglas.vigentes+'</b><small>reglas vigentes</small></div><div><b>'+e.reglas.con_prueba+'/'+e.reglas.total+'</b><small>reglas con prueba</small></div>';
+  $('t_eval').innerHTML='<tr><th>paso</th><th>estado</th><th>corridas</th><th>ok</th><th>desvío medio</th><th>reproduce solo</th></tr>'+e.pasos.map(p=>'<tr><td><code>'+esc(p.clave)+'</code> '+esc(p.titulo)+'</td><td><span class="pill '+(p.estado==='aprobado'?'ok':'')+'">'+esc(p.estado)+'</span></td><td>'+p.corridas+'</td><td>'+p.corridas_ok+'</td><td>'+(p.desvio_medio==null?'—':p.desvio_medio)+'</td><td>'+(p.reproduce_solo?'<span class="pill ok">sí</span>':'<span class="pill">no</span>')+'</td></tr>').join('');
+  $('t_param').innerHTML='<tr><th>clave</th><th>valor</th><th>nota</th><th>autor</th></tr>'+pa.map(p=>'<tr><td><code>'+esc(p.clave)+'</code></td><td>'+esc(JSON.stringify(p.valor))+'</td><td class=aviso>'+esc(p.nota||'')+'</td><td>'+esc(p.autor)+'</td></tr>').join('');
+  cargarCorridas();
+}
+async function fijarParam(){
+  try{await api('/dv/parametros/'+($('e_pais').value||'dom'),'PUT',{clave:$('pa_clave').value.trim(),valor:JSON.parse($('pa_valor').value),nota:$('pa_nota').value||null}); cargarEval();}catch(e){alert(e.message)}
+}
+if(TOK&&YO) arrancar();
+</script>
+</body></html>
