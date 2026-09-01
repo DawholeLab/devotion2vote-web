@@ -56,6 +56,8 @@ code{padding:1px 5px} pre{padding:10px;overflow:auto;max-height:420px;line-heigh
 #sesiones{max-height:60vh;overflow:auto}
 #sesiones div{padding:8px 10px;border-radius:8px;cursor:pointer;color:var(--mut);font-size:12px}
 #sesiones div.on{background:var(--bg2);color:var(--ink)}
+.rastro{font-size:11px;color:var(--mut);margin-top:8px}.rastro code{background:var(--bg2);padding:1px 6px;border-radius:6px;margin-right:2px}.rastro code.mal{color:#b3261e}
+#bd_codigos td:nth-child(3){font-size:12px}#bd_codigos small{display:block;color:var(--mut)}
 #hilo{max-height:56vh;overflow:auto;display:flex;flex-direction:column;gap:12px;padding:6px 2px}
 .msg{max-width:88%;padding:10px 14px;border-radius:12px;line-height:1.55;white-space:pre-wrap;font-size:13px}
 .msg.u{align-self:flex-end;background:var(--bg3)}
@@ -89,8 +91,8 @@ code{padding:1px 5px} pre{padding:10px;overflow:auto;max-height:420px;line-heigh
   <h3>Cómo funciona la Sala de Método</h3>
   <p class="aviso" style="margin-bottom:10px">Cinco mesas, en el orden natural del trabajo. Cada casilla tiene un botón <span class="ayuda inline" style="cursor:default">?</span> que explica qué poner y para qué.</p>
   <ol>
-    <li><b>Diálogo.</b> Habla con DANTE como con un colega analista. Cuando diga algo que es método, márcalo como <b>regla</b> o como <b>paso</b>. No hace falta escribir código: pídele «escríbeme el paso para…».</li>
-    <li><b>Bases.</b> Las 65 olas ya están. Tu tarea es confirmar, ola a ola, qué variable es cada pregunta del método (intención, recuerdo, eje gobierno/oposición…). El sistema lo propone; tú confirmas.</li>
+    <li><b>Diálogo.</b> Habla con DANTE como con un colega analista. Abre una ola en la sesión: así tiene su libro de códigos (cada código con su etiqueta) y puede calcular tablas y cruces él mismo. Cuando diga algo que es método, márcalo como <b>regla</b> o como <b>paso</b>. No hace falta escribir código: pídele «escríbeme el paso para…».</li>
+    <li><b>Bases.</b> Las 65 olas ya están. Tu tarea es confirmar, ola a ola, qué variable es cada pregunta del método (intención, recuerdo, eje gobierno/oposición…). El sistema lo propone; tú confirmas. En cada ola puedes ver su libro de códigos y subir su cuestionario.</li>
     <li><b>Cuaderno.</b> Tu método escrito en pasos y reglas. Revisa los cuatro pasos propuestos, corrígelos y aprueba los que estén bien. Solo tú puedes aprobar.</li>
     <li><b>Laboratorio.</b> Ejecuta un paso sobre una ola y compara con tu SPSS. Si escribes tu resultado, el sistema te dice el desvío.</li>
     <li><b>Evaluación.</b> Cuánto reproduce ya el sistema sin ti. Cuando todos los pasos están aprobados y dentro del umbral, el país está calibrado.</li>
@@ -122,7 +124,7 @@ code{padding:1px 5px} pre{padding:10px;overflow:auto;max-height:420px;line-heigh
 <!-- 1 · DIÁLOGO -->
 <section id="dialogo" class="on">
   <h2>1 · Diálogo con DANTE</h2>
-  <div class="intro"><b>Qué es.</b> DANTE es el analista de la casa. Tiene delante las bases cargadas, el cuaderno y las reglas. <b>Qué haces aquí.</b> Le cuentas cómo analizas tú, le pides cálculos o borradores y corriges lo que devuelve. <b>Para qué.</b> Cada respuesta buena se convierte en un paso o una regla del método con un clic: así el método queda escrito y el sistema aprende a repetirlo sin ti.</div>
+  <div class="intro"><b>Qué es.</b> DANTE es el analista de la casa. Tiene delante las bases cargadas, el cuaderno y las reglas, y si abres una ola en la sesión tiene también su <b>libro de códigos</b> (qué significa cada código de respuesta) y su cuestionario, si lo has subido. Además puede consultar las bases por su cuenta: calcula tablas y cruces y lee etiquetas antes de responder; debajo de cada respuesta verás qué consultó. <b>Qué haces aquí.</b> Le cuentas cómo analizas tú, le pides cálculos o borradores y corriges lo que devuelve. <b>Para qué.</b> Cada respuesta buena se convierte en un paso o una regla del método con un clic: así el método queda escrito y el sistema aprende a repetirlo sin ti.</div>
   <div id="chat">
     <div class="caja" style="margin:0">
       <div class="fila"><button class="acc mini" id="btn_nueva" onclick="nuevaSesion()">Nueva sesión</button><select id="ses_base" style="margin:0;width:auto;flex:1"><option value="">sin ola abierta (opcional)</option></select></div>
@@ -175,6 +177,13 @@ code{padding:1px 5px} pre{padding:10px;overflow:auto;max-height:420px;line-heigh
     <h3>Qué pregunta es cada variable (diccionario) <span class="aviso">— el sistema propone, tú confirmas</span></h3>
     <p class="aviso">Cada fila dice: esta pregunta del método («clave») está en esta variable de la base. «Propuesto» = lo adivinó el sistema; «confirmado» = lo has validado tú. Corrige lo que esté mal en el formulario de abajo.</p>
     <div style="max-height:420px;overflow:auto"><table id="bd_dicc"></table></div>
+    <h3>Libro de códigos <span class="aviso">— qué significa cada código de respuesta (lo mismo que ve DANTE)</span></h3>
+    <div class="fila"><input id="lc_buscar" placeholder="buscar variable o texto de pregunta (p. ej. P12, votaría, recuerdo)" style="flex:1;margin:0" onkeydown="if(event.key==='Enter')verCodigos()"><button class="mini" id="btn_codigos" onclick="verCodigos()">Ver</button><span class="aviso" id="lc_msg"></span></div>
+    <div style="max-height:440px;overflow:auto"><table id="bd_codigos"></table></div>
+    <h3>Cuestionario y documentos de la ola <span class="aviso">— DANTE los lee cuando lo necesita</span></h3>
+    <p class="aviso">Sube aquí el cuestionario de esta ola (.docx, .pdf con texto o .txt). Con el libro de códigos y el cuestionario, DANTE sabe qué se preguntó exactamente, en qué orden y con qué opciones.</p>
+    <div class="fila"><input type="file" id="doc_arch" accept=".pdf,.docx,.txt,.md" style="margin:0"><select id="doc_tipo" style="width:auto;margin:0"><option value="cuestionario">cuestionario</option><option value="informe">informe</option><option value="notas">notas</option><option value="otro">otro</option></select><button class="mini" id="btn_doc" onclick="subirDocumento()">Subir</button><span class="aviso" id="doc_msg"></span></div>
+    <div id="bd_docs" class="aviso"></div>
     <h3>Confirmar o corregir una correspondencia</h3>
     <div class="rej"><input id="d_var" placeholder="variable de la base (p. ej. P12)"><input id="d_clave" placeholder="pregunta del método (p. ej. voto_intencion)"><select id="d_fam"><option>transferencia</option><option>identidad</option><option>problematica</option><option>clima</option><option>emocion</option><option>sociodemo</option><option>territorio</option><option>otro</option></select><button class="mini" id="btn_dicc" onclick="fijarDicc()">Confirmar</button></div>
     <div class="fila"><span class="aviso">Estado de la base:</span><select id="bd_estado" style="width:auto;margin:0"><option>cuarentena</option><option>perfilada</option><option>canonica</option><option>activa</option><option>retirada</option></select><button class="mini" onclick="estadoBase()">Cambiar</button><span class="aviso" id="bd_msg"></span></div>
@@ -261,7 +270,7 @@ code{padding:1px 5px} pre{padding:10px;overflow:auto;max-height:420px;line-heigh
 
 <script>
 const API=(document.querySelector('meta[name=d2v-api]')||{}).content||'http://localhost:8000';
-let TOK=null, YO=null, SES=null, BASE_SEL=null;
+let TOK=null, YO=null, SES=null, BASE_SEL=null, BASES=[];
 try{TOK=sessionStorage.getItem('d2v_tok');YO=JSON.parse(sessionStorage.getItem('d2v_yo')||'null')}catch(e){}
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -309,7 +318,8 @@ async function nuevaSesion(){
 }
 async function abrirSesion(id){
   SES=await api('/dv/sesiones/'+id); $('ses_titulo').textContent=SES.titulo;
-  $('ses_estado').textContent=(SES.contexto&&SES.contexto.base_id)?'ola abierta #'+SES.contexto.base_id:'sin ola abierta';
+  const ob=(SES.contexto&&SES.contexto.base_id)?(BASES.find(b=>b.id===SES.contexto.base_id)||{}).codigo||('#'+SES.contexto.base_id):null;
+  $('ses_estado').textContent=ob?'ola abierta: '+ob:'sin ola abierta (DANTE puede consultar cualquier ola por su código)';
   document.querySelectorAll('#sesiones div').forEach(d=>d.classList.remove('on'));
   pintarHilo();
 }
@@ -320,7 +330,9 @@ function pintarHilo(){
     let meta='';
     if(m.rol==='dante'){
       const sim=m.motor&&m.motor.startsWith('simulado');
-      meta='<div class=meta><small>'+esc(m.motor||'')+(m.meta&&m.meta.coste_usd!=null?' · '+m.meta.coste_usd.toFixed(4)+' USD':'')+'</small>'
+      const hs=(m.meta&&m.meta.herramientas)||[];
+      const rastro=hs.length?'<div class="rastro">consultó: '+hs.map(h=>'<code'+(h.error?' class=mal':'')+'>'+esc(h.nombre)+'('+esc(Object.values(h.args||{}).join(', '))+')</code>').join(' · ')+'</div>':'';
+      meta=rastro+'<div class=meta><small>'+esc(m.motor||'')+(m.meta&&m.meta.coste_usd!=null?' · '+m.meta.coste_usd.toFixed(4)+' USD':'')+'</small>'
         +(m.marca?'<span class="pill vio">'+esc(m.marca)+'</span>':'')
         +(YO.rol==='director'||YO.rol==='admin'?['regla','paso','referencia','error'].map(k=>'<button class="mini ghost" onclick="marcar('+m.id+',\''+k+'\')">'+k+'</button>').join(''):'')
         +(sim?'<span class="pill sim">simulado</span>':'')+'</div>';
@@ -364,7 +376,7 @@ async function importar(){
   catch(e){$('imp_msg').innerHTML='<span class=mal>'+esc(e.message)+'</span>'}
 }
 async function cargarBases(){
-  const bs=await api('/dv/bases?pais='+encodeURIComponent($('f_pais').value||''));
+  const bs=await api('/dv/bases?pais='+encodeURIComponent($('f_pais').value||'')); BASES=bs;
   $('t_bases').innerHTML='<tr><th>código</th><th>campo</th><th>n</th><th>vars</th><th>pond.</th><th>estado</th><th></th></tr>'+bs.map(b=>'<tr><td><b>'+esc(b.codigo)+'</b><br><small class=aviso>'+esc(b.titulo)+'</small></td><td>'+esc(b.fecha_campo_ini||'—')+'</td><td>'+b.n_registros+'</td><td>'+b.n_variables+'</td><td>'+esc(b.ponderacion)+'</td><td><span class=pill>'+esc(b.estado)+'</span></td><td><button class="mini ghost" onclick="verBase('+b.id+')">abrir</button></td></tr>').join('');
   const opts=bs.map(b=>'<option value="'+b.id+'">'+esc(b.codigo)+' · n='+b.n_registros+'</option>').join('');
   $('ses_base').innerHTML='<option value="">sin ola abierta (opcional)</option>'+opts; $('l_base').innerHTML=opts;
@@ -374,7 +386,34 @@ async function verBase(id){
   $('bd_meta').innerHTML='país '+esc(b.pais)+' · origen '+esc(b.origen)+' · '+b.n_registros+' registros · '+b.n_variables+' variables · ponderación '+esc(b.ponderacion)+' · clase '+esc(b.clase_epistemica)+' · sha256 <code>'+esc(b.sha256.slice(0,12))+'…</code>'+(b.avisos&&b.avisos.length?'<br>'+b.avisos.map(a=>'⚠ '+esc(a)).join('<br>'):'');
   $('bd_estado').value=b.estado;
   $('bd_dicc').innerHTML='<tr><th>clave canónica</th><th>familia</th><th>variable</th><th>estado</th></tr>'+b.diccionario.map(d=>'<tr><td><code>'+esc(d.clave)+'</code></td><td>'+esc(d.familia)+'</td><td>'+esc(d.variable)+'</td><td><span class="pill '+(d.estado==='confirmado'?'ok':'')+'">'+esc(d.estado)+'</span></td></tr>').join('');
+  $('bd_codigos').innerHTML=''; $('lc_buscar').value=''; $('lc_msg').textContent='';
+  verDocumentos();
   $('base_det').scrollIntoView({behavior:'smooth'});
+}
+async function verCodigos(){
+  $('lc_msg').textContent='leyendo…';
+  try{
+    const lc=await api('/dv/bases/'+BASE_SEL.id+'/codigos?buscar='+encodeURIComponent($('lc_buscar').value.trim()));
+    const vs=lc.variables.filter(v=>v.clasificacion!=='sin_datos');
+    $('lc_msg').textContent=vs.length+' variables';
+    $('bd_codigos').innerHTML='<tr><th>variable</th><th>pregunta</th><th>códigos y etiquetas (n)</th></tr>'+vs.slice(0,150).map(v=>'<tr><td><b>'+esc(v.variable)+'</b>'+(v.canon_propuesta?'<small>'+esc(v.canon_propuesta)+'</small>':'')+'</td><td>'+esc(v.etiqueta||'')+'<small>'+esc(v.clasificacion)+' · '+v.n_validos+' válidos</small></td><td>'+(v.categorias.length?v.categorias.map(c=>'<b>'+esc(c.codigo)+'</b>='+esc(c.etiqueta==null?'':c.etiqueta)+' <span class=aviso>('+c.n+')</span>').join(' · '):'<span class=aviso>sin categorías (numérica o texto libre)</span>')+'</td></tr>').join('');
+  }catch(e){$('lc_msg').innerHTML='<span class=mal>'+esc(e.message)+'</span>'}
+}
+async function verDocumentos(){
+  try{const ds=await api('/dv/bases/'+BASE_SEL.id+'/documentos');
+    $('bd_docs').innerHTML=ds.length?ds.map(d=>'📄 <b>'+esc(d.titulo)+'</b> · '+esc(d.tipo)+' · '+esc(d.formato)+' · '+d.caracteres+' caracteres · subido por '+esc(d.cargado_por)+(YO.rol==='director'||YO.rol==='admin'?' <button class="mini ghost" onclick="borrarDocumento('+d.id+')">quitar</button>':'')).join('<br>'):'Esta ola no tiene todavía cuestionario ni documentos.';
+  }catch(e){$('bd_docs').textContent=e.message}
+}
+async function subirDocumento(){
+  const f=$('doc_arch').files[0]; if(!f){alert('Elige primero el archivo del cuestionario.');return}
+  const fd=new FormData(); fd.append('archivo',f); fd.append('tipo',$('doc_tipo').value); fd.append('titulo',f.name.replace(/\.[^.]+$/,''));
+  $('doc_msg').textContent='subiendo y leyendo…'; $('btn_doc').disabled=true;
+  try{const r=await api('/dv/bases/'+BASE_SEL.id+'/documentos','POST',null,fd); $('doc_msg').innerHTML='<span class=ok>leído: '+r.caracteres+' caracteres</span>'; $('doc_arch').value=''; verDocumentos();}
+  catch(e){$('doc_msg').innerHTML='<span class=mal>'+esc(e.message)+'</span>'} finally{$('btn_doc').disabled=false}
+}
+async function borrarDocumento(id){
+  if(!confirm('¿Quitar este documento de la ola?')) return;
+  try{await api('/dv/documentos/'+id,'DELETE'); verDocumentos();}catch(e){alert(e.message)}
 }
 async function fijarDicc(){
   try{await api('/dv/bases/'+BASE_SEL.id+'/diccionario','POST',{variable:$('d_var').value.trim(),clave:$('d_clave').value.trim(),familia:$('d_fam').value}); $('bd_msg').innerHTML='<span class=ok>confirmado</span>'; verBase(BASE_SEL.id);}catch(e){$('bd_msg').innerHTML='<span class=mal>'+esc(e.message)+'</span>'}
@@ -437,7 +476,7 @@ async function fijarParam(){
 
 /* ---------- ayudas contextuales ---------- */
 const AYUDA={
-  ses_base:{t:'Base abierta en la sesión',q:'Elige la ola sobre la que vas a trabajar antes de crear la sesión (opcional).',p:'DANTE tendrá delante las variables y el diccionario de esa ola y podrá proponer cálculos concretos sobre ella.'},
+  ses_base:{t:'Ola abierta en la sesión',q:'Elige la ola sobre la que vas a trabajar antes de crear la sesión. Muy recomendable.',p:'DANTE tendrá delante su libro de códigos completo (cada código con su etiqueta), su diccionario y su cuestionario, y podrá calcular tablas y cruces sobre ella sin que le pegues nada.'},
   btn_nueva:{t:'Nueva sesión',q:'Pulsa y ponle un título (por ejemplo «Matriz de transferencia 2020-2024»).',p:'Cada sesión guarda la conversación completa; puedes volver a ella y seguir donde lo dejaste.'},
   txt:{t:'Tu mensaje a DANTE',q:'Escribe con naturalidad: describe cómo haces tú un análisis, pide un cálculo, corrige un resultado.',p:'Lo que expliques aquí es la materia prima del cuaderno. Cuanto más concreto (qué variables, qué denominador, qué umbral), mejor lo escribe DANTE como paso o regla.'},
   arch:{t:'Archivo de la ola',q:'Elige el .sav de SPSS (o un CSV) de la ola nueva.',p:'El sistema lee variables, etiquetas y categorías y propone qué pregunta del método es cada variable. No guarda nada hasta que pulses «Guardar».'},
@@ -450,6 +489,8 @@ const AYUDA={
   b_origen:{t:'Origen',q:'De dónde viene la base: puente:dom_presidencia (cámara de la Presidencia), propia, publica…',p:'Trazabilidad: cada base sabe de dónde salió.'},
   b_diseno:{t:'Diseño muestral',q:'Una frase: «polietápico estratificado, cara a cara, n=1500, ±2,21 %».',p:'Queda en la ficha técnica de la ola.'},
   btn_imp:{t:'Guardar la base',q:'Segundo paso: guarda la ola en cuarentena con su ficha y sus propuestas de diccionario.',p:'A partir de aquí aparece en «Bases cargadas» y puede abrirse en el Diálogo y el Laboratorio.'},
+  lc_buscar:{t:'Libro de códigos',q:'Escribe una variable (P12) o una palabra de la pregunta (votaría) y pulsa Ver; vacío muestra todas.',p:'Es lo que en SPSS ves en la vista de variables con sus etiquetas de valor. DANTE tiene exactamente esta información delante cuando la ola está abierta en la sesión.'},
+  doc_arch:{t:'Cuestionario de la ola',q:'El cuestionario en .docx, .pdf (con texto, no escaneado) o .txt. Uno por ola; puedes añadir también informes o notas.',p:'DANTE lo lee cuando necesita saber el enunciado exacto, el orden de las preguntas o los saltos. Sin cuestionario trabaja solo con las etiquetas de la base.'},
   f_pais:{t:'Filtro por país',q:'dom para ver solo las olas dominicanas.',p:'Filtra la lista.'},
   d_var:{t:'Variable de la base',q:'El nombre tal como está en el SPSS: P12, P25, P41…',p:'Es la variable que vas a asociar a una pregunta del método.'},
   d_clave:{t:'Pregunta del método',q:'El nombre canónico: voto_intencion, voto_recuerdo, voto_secreto, eje_gob_opos, simpatia_partido, problema_principal… (los ves en la tabla de arriba).',p:'El cuaderno trabaja con estos nombres, no con P12 o P25, porque cambian de ola en ola.'},
