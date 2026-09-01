@@ -64,10 +64,40 @@ code{padding:1px 5px} pre{padding:10px;overflow:auto;max-height:420px;line-heigh
 .msg .meta small{color:var(--mut);font-size:10.5px}
 #entrada{display:flex;gap:8px;margin-top:10px}
 #entrada textarea{min-height:64px;margin:0;font-family:'Montserrat'}
+/* ayudas */
+.intro{background:#fff;border:1px solid var(--linea);border-left:3px solid var(--acc);border-radius:0 10px 10px 0;padding:10px 14px;margin:0 0 16px;font-size:12.5px;line-height:1.6;color:var(--ink);max-width:1100px}
+.intro b{color:var(--acc2)}
+.etq{display:block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);font-weight:600;margin:6px 0 4px}
+.campo{position:relative;display:block}
+.campo>input,.campo>select,.campo>textarea{padding-right:34px}
+.ayuda{position:absolute;right:8px;top:7px;width:20px;height:20px;border-radius:50%;border:1px solid var(--acc);background:#fff;color:var(--acc2);font:700 11px 'Montserrat';padding:0;line-height:18px;text-align:center;cursor:help}
+.ayuda:hover{background:var(--acc);color:#fff}
+.ayuda.inline{position:static;display:inline-block;vertical-align:middle;margin-left:6px}
+#pop{position:absolute;z-index:50;max-width:340px;background:#fff;border:1px solid var(--linea);border-radius:10px;padding:12px 14px;box-shadow:0 8px 24px rgba(40,40,39,.14);font-size:12.5px;line-height:1.55;display:none}
+#pop b{display:block;font-family:'Bodoni Moda',serif;font-size:15px;font-weight:500;margin-bottom:4px}
+#pop .q{margin-bottom:6px} #pop .p{color:var(--mut)} #pop .p::before,#pop .q::before{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc2);font-weight:700;display:block}
+#pop .q::before{content:"Qué poner"} #pop .p::before{content:"Para qué sirve"}
+#guia{position:fixed;inset:0;background:rgba(40,40,39,.45);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
+#guia .caja{max-width:640px;width:100%;max-height:90vh;overflow:auto;margin:0}
+#guia h3{margin-top:0} #guia ol{padding-left:20px;line-height:1.6;font-size:13.5px} #guia li{margin-bottom:8px}
 </style></head><body>
 
 <header><span class="marca"><img src="assets/monograma.png" alt="devotion2vote"><b>Devotion<span>2</span>Vote</b><small>sala de método</small></span>
-<span><a href="index.html">← devotion2vote.com</a> &nbsp; <span class="aviso" id="quien"></span> <button class="mini ghost" id="salir" style="display:none" onclick="salir()">salir</button></span></header>
+<span><a href="index.html">← devotion2vote.com</a> &nbsp; <span class="aviso" id="quien"></span> <button class="mini ghost" id="btn_guia" style="display:none" onclick="abrirGuia()">¿Cómo funciona?</button> <button class="mini ghost" id="salir" style="display:none" onclick="salir()">salir</button></span></header>
+<div id="pop"></div>
+<div id="guia"><div class="caja">
+  <h3>Cómo funciona la Sala de Método</h3>
+  <p class="aviso" style="margin-bottom:10px">Cinco mesas, en el orden natural del trabajo. Cada casilla tiene un botón <span class="ayuda inline" style="cursor:default">?</span> que explica qué poner y para qué.</p>
+  <ol>
+    <li><b>Diálogo.</b> Habla con DANTE como con un colega analista. Cuando diga algo que es método, márcalo como <b>regla</b> o como <b>paso</b>. No hace falta escribir código: pídele «escríbeme el paso para…».</li>
+    <li><b>Bases.</b> Las 65 olas ya están. Tu tarea es confirmar, ola a ola, qué variable es cada pregunta del método (intención, recuerdo, eje gobierno/oposición…). El sistema lo propone; tú confirmas.</li>
+    <li><b>Cuaderno.</b> Tu método escrito en pasos y reglas. Revisa los cuatro pasos propuestos, corrígelos y aprueba los que estén bien. Solo tú puedes aprobar.</li>
+    <li><b>Laboratorio.</b> Ejecuta un paso sobre una ola y compara con tu SPSS. Si escribes tu resultado, el sistema te dice el desvío.</li>
+    <li><b>Evaluación.</b> Cuánto reproduce ya el sistema sin ti. Cuando todos los pasos están aprobados y dentro del umbral, el país está calibrado.</li>
+  </ol>
+  <p class="aviso">Regla de la casa: el método no se memoriza, se inscribe. Todo lo que marques, guardes o apruebes queda firmado con tu nombre.</p>
+  <div class="fila" style="margin-top:12px"><button class="acc" onclick="cerrarGuia()">Empezar</button></div>
+</div></div>
 
 <div id="login">
   <img src="assets/logo.png" alt="Devotion2Vote by Dawhole System">
@@ -91,103 +121,115 @@ code{padding:1px 5px} pre{padding:10px;overflow:auto;max-height:420px;line-heigh
 
 <!-- 1 · DIÁLOGO -->
 <section id="dialogo" class="on">
-  <h2>Diálogo con DANTE</h2>
+  <h2>1 · Diálogo con DANTE</h2>
+  <div class="intro"><b>Qué es.</b> DANTE es el analista de la casa. Tiene delante las bases cargadas, el cuaderno y las reglas. <b>Qué haces aquí.</b> Le cuentas cómo analizas tú, le pides cálculos o borradores y corriges lo que devuelve. <b>Para qué.</b> Cada respuesta buena se convierte en un paso o una regla del método con un clic: así el método queda escrito y el sistema aprende a repetirlo sin ti.</div>
   <div id="chat">
     <div class="caja" style="margin:0">
-      <div class="fila"><button class="acc mini" onclick="nuevaSesion()">Nueva sesión</button><select id="ses_base" style="margin:0;width:auto;flex:1"><option value="">sin base abierta</option></select></div>
+      <div class="fila"><button class="acc mini" id="btn_nueva" onclick="nuevaSesion()">Nueva sesión</button><select id="ses_base" style="margin:0;width:auto;flex:1"><option value="">sin ola abierta (opcional)</option></select></div>
       <div id="sesiones"></div>
     </div>
     <div class="caja" style="margin:0">
       <div class="fila" style="justify-content:space-between"><b id="ses_titulo">—</b><span id="ses_estado" class="aviso"></span></div>
       <div id="hilo"></div>
-      <div id="entrada"><textarea id="txt" placeholder="Escribe a DANTE… (Ctrl+Enter para enviar)" onkeydown="if(event.ctrlKey&&event.key==='Enter')enviar()"></textarea><button class="acc" id="btn_enviar" onclick="enviar()">Enviar</button></div>
-      <p class="aviso" style="margin-top:8px">Sobre cada respuesta de DANTE puedes marcar <b>regla</b> (crea el borrador de regla), <b>paso</b> (crea el borrador de paso del cuaderno), <b>referencia</b> o <b>error</b> (con tu razón). Así el método se inscribe.</p>
+      <div id="entrada"><textarea id="txt" placeholder="Escribe aquí como le escribirías a un colega. Ejemplo: «Empecemos por la matriz recuerdo × intención de la ola de mayo de 2024». (Ctrl+Enter envía)" onkeydown="if(event.ctrlKey&&event.key==='Enter')enviar()"></textarea><button class="acc" id="btn_enviar" onclick="enviar()">Enviar</button></div>
+      <p class="aviso" style="margin-top:8px">Debajo de cada respuesta de DANTE verás cuatro botones: <b>regla</b> (esto es una norma del método: guárdala), <b>paso</b> (esto es un procedimiento: pásalo al cuaderno), <b>referencia</b> (este es mi cálculo correcto) y <b>error</b> (esto está mal, y por qué). Marcar es lo que entrena al sistema.</p>
     </div>
   </div>
 </section>
 
 <!-- 2 · BASES -->
 <section id="bases">
-  <h2>Bases</h2>
+  <h2>2 · Bases</h2>
+  <div class="intro"><b>Qué es.</b> El archivo de cada ola de encuesta (SPSS .sav o CSV). <b>Qué haces aquí.</b> Subir bases nuevas y confirmar, ola a ola, qué pregunta es cada variable: en esta serie el voto viaja de P4 a P12, P19 o P22 según el mes, así que el sistema propone la correspondencia y tú la confirmas, como cuando etiquetas variables en SPSS. <b>Para qué.</b> Sin esa correspondencia («diccionario»), el cuaderno no sabe dónde está la intención o el recuerdo en cada ola.</div>
   <div class="dos">
     <div class="caja">
-      <h3 style="margin-top:0">Importar una base (.sav o .csv)</h3>
+      <h3 style="margin-top:0">Subir una base nueva</h3>
+      <p class="aviso" style="margin-bottom:8px">Las 65 olas dominicanas ya están cargadas. Usa esto solo cuando llegue una ola nueva.</p>
       <input type="file" id="arch" accept=".sav,.csv,.txt,.tsv">
-      <div class="fila"><button class="mini" onclick="previsualizar()">Previsualizar</button><span class="aviso" id="prev_msg"></span></div>
+      <div class="fila"><button class="mini" id="btn_prev" onclick="previsualizar()">1 · Leer el archivo</button><span class="aviso" id="prev_msg"></span></div>
       <div id="prev" style="display:none">
+        <p class="aviso">Revisa la ficha de abajo y completa estos datos. Luego pulsa «Guardar».</p>
         <div class="rej">
-          <input id="b_codigo" placeholder="código (p. ej. dom_2024-05)">
-          <input id="b_pais" placeholder="país iso3" value="dom">
+          <input id="b_codigo" placeholder="código de la ola (p. ej. dom_2026-07)">
+          <input id="b_pais" placeholder="país (dom, esp, chl…)" value="dom">
           <input id="b_titulo" placeholder="título">
-          <input id="b_fecha" type="date" title="fecha de campo (inicio)">
-          <select id="b_pond"><option value="autoponderada">autoponderada</option><option value="no_declarada">ponderación no declarada</option></select>
-          <input id="b_origen" placeholder="origen" value="puente:dom_presidencia">
+          <input id="b_fecha" type="date" title="fecha de inicio del campo">
+          <select id="b_pond"><option value="autoponderada">muestra autoponderada (sin variable de peso)</option><option value="no_declarada">ponderación no declarada todavía</option></select>
+          <input id="b_origen" placeholder="de dónde viene la base" value="puente:dom_presidencia">
         </div>
-        <input id="b_diseno" placeholder="diseño muestral (opcional)">
+        <input id="b_diseno" placeholder="diseño muestral, en una frase (opcional)">
         <div id="prev_resumen" class="aviso"></div>
         <div style="max-height:320px;overflow:auto;margin:10px 0"><table id="prev_tabla"></table></div>
-        <button class="acc" onclick="importar()">Importar a cuarentena</button> <span class="aviso" id="imp_msg"></span>
+        <button class="acc" id="btn_imp" onclick="importar()">2 · Guardar la base</button> <span class="aviso" id="imp_msg"></span>
       </div>
     </div>
     <div class="caja">
       <h3 style="margin-top:0">Bases cargadas</h3>
-      <div class="fila"><input id="f_pais" placeholder="país" value="dom" style="width:90px;margin:0"><button class="mini" onclick="cargarBases()">Actualizar</button></div>
+      <div class="fila"><input id="f_pais" placeholder="país" value="dom" style="width:90px;margin:0"><button class="mini" onclick="cargarBases()">Actualizar</button><span class="aviso">Pulsa «abrir» en una ola para ver sus variables y confirmar su diccionario.</span></div>
       <div style="max-height:520px;overflow:auto"><table id="t_bases"></table></div>
     </div>
   </div>
   <div class="caja" id="base_det" style="display:none">
     <h3 style="margin-top:0" id="bd_titulo"></h3>
     <div id="bd_meta" class="aviso"></div>
-    <h3>Diccionario canónico <span class="aviso">(el sistema propone; el director confirma)</span></h3>
+    <h3>Qué pregunta es cada variable (diccionario) <span class="aviso">— el sistema propone, tú confirmas</span></h3>
+    <p class="aviso">Cada fila dice: esta pregunta del método («clave») está en esta variable de la base. «Propuesto» = lo adivinó el sistema; «confirmado» = lo has validado tú. Corrige lo que esté mal en el formulario de abajo.</p>
     <div style="max-height:420px;overflow:auto"><table id="bd_dicc"></table></div>
     <h3>Confirmar o corregir una correspondencia</h3>
-    <div class="rej"><input id="d_var" placeholder="variable nativa (p. ej. P12)"><input id="d_clave" placeholder="clave canónica (p. ej. voto_secreto)"><select id="d_fam"><option>transferencia</option><option>identidad</option><option>problematica</option><option>clima</option><option>emocion</option><option>sociodemo</option><option>territorio</option><option>otro</option></select><button class="mini" onclick="fijarDicc()">Confirmar</button></div>
+    <div class="rej"><input id="d_var" placeholder="variable de la base (p. ej. P12)"><input id="d_clave" placeholder="pregunta del método (p. ej. voto_intencion)"><select id="d_fam"><option>transferencia</option><option>identidad</option><option>problematica</option><option>clima</option><option>emocion</option><option>sociodemo</option><option>territorio</option><option>otro</option></select><button class="mini" id="btn_dicc" onclick="fijarDicc()">Confirmar</button></div>
     <div class="fila"><span class="aviso">Estado de la base:</span><select id="bd_estado" style="width:auto;margin:0"><option>cuarentena</option><option>perfilada</option><option>canonica</option><option>activa</option><option>retirada</option></select><button class="mini" onclick="estadoBase()">Cambiar</button><span class="aviso" id="bd_msg"></span></div>
   </div>
 </section>
 
 <!-- 3 · CUADERNO -->
 <section id="cuaderno">
-  <h2>Cuaderno VOTE-TRANSFER · metodología Salom</h2>
+  <h2>3 · Cuaderno VOTE-TRANSFER · metodología Salom</h2>
+  <div class="intro"><b>Qué es.</b> Tu método, escrito paso a paso. Un <b>paso</b> es un procedimiento con nombre (qué entra, qué calcula, cómo se comprueba), parecido a una sintaxis guardada de SPSS. Una <b>regla</b> es una norma que el sistema debe respetar siempre (por ejemplo, «el NS/NR cuenta en el denominador»). <b>Qué haces aquí.</b> Revisar los pasos que propone el sistema, corregirlos y aprobarlos; añadir reglas. <b>Para qué.</b> Lo que está aquí es lo que el sistema repetirá solo sobre cualquier ola. No hace falta escribir código: pide en el Diálogo «escríbeme el paso para…», marca la respuesta como <b>paso</b> y aparecerá aquí para revisarlo.</div>
   <div class="dos">
     <div class="caja">
-      <h3 style="margin-top:0">Pasos</h3>
+      <h3 style="margin-top:0">Pasos del método</h3>
+      <p class="aviso">Los cuatro primeros son propuestas de arranque en estado «borrador». Pulsa «editar» para leerlos o cambiarlos; cuando un paso esté bien, «Aprobar».</p>
       <div style="max-height:360px;overflow:auto"><table id="t_pasos"></table></div>
       <h3>Reglas vigentes</h3>
       <div style="max-height:300px;overflow:auto"><table id="t_reglas"></table></div>
     </div>
     <div class="caja">
       <h3 style="margin-top:0">Escribir o editar un paso</h3>
-      <div class="rej"><input id="p_clave" placeholder="clave (p01_recuerdo_x_intencion)"><input id="p_orden" placeholder="orden" value="10"><input id="p_pais" placeholder="país (vacío = universal)" value="dom"></div>
-      <input id="p_titulo" placeholder="título">
-      <textarea id="p_prop" placeholder="propósito, en lenguaje del método" style="min-height:70px;font-family:'Inter'"></textarea>
-      <input id="p_entradas" placeholder="entradas: claves canónicas separadas por coma">
-      <textarea id="p_codigo" placeholder="def paso(base, params, ctx):&#10;    t = base.cruce('voto_recuerdo', 'voto_intencion')&#10;    return {...}"></textarea>
-      <input id="p_valid" placeholder="criterio de validación («hecho cuando…»)">
-      <div class="fila"><button class="acc" onclick="guardarPaso()">Guardar paso</button><button class="mini" onclick="aprobarPaso()">Aprobar (director)</button><span class="aviso" id="p_msg"></span></div>
+      <div class="rej"><input id="p_clave" placeholder="nombre corto (p01_recuerdo_x_intencion)"><input id="p_orden" placeholder="orden (10, 20, 30…)" value="10"><input id="p_pais" placeholder="país (vacío = vale para todos)" value="dom"></div>
+      <input id="p_titulo" placeholder="título del paso">
+      <textarea id="p_prop" placeholder="qué hace este paso, explicado con tus palabras" style="min-height:70px;font-family:'Montserrat'"></textarea>
+      <input id="p_entradas" placeholder="preguntas del método que necesita, separadas por coma (p. ej. voto_recuerdo, voto_intencion)">
+      <textarea id="p_codigo" placeholder="código del paso (lo escribe DANTE si se lo pides en el Diálogo)&#10;def paso(base, params, ctx):&#10;    t = base.cruce('voto_recuerdo', 'voto_intencion')&#10;    return {...}"></textarea>
+      <input id="p_valid" placeholder="cómo sabremos que está bien («hecho cuando…»)">
+      <div class="fila"><button class="acc" id="btn_guardar_paso" onclick="guardarPaso()">Guardar paso</button><button class="mini" id="btn_aprobar" onclick="aprobarPaso()">Aprobar este paso</button><span class="aviso" id="p_msg"></span></div>
       <h3>Escribir una regla</h3>
-      <div class="rej"><input id="r_clave" placeholder="clave (R001_…)"><input id="r_paso" placeholder="paso asociado (opcional)"></div>
-      <input id="r_titulo" placeholder="título">
-      <input id="r_cuando" placeholder="cuándo aplica">
-      <input id="r_que" placeholder="qué hace">
-      <input id="r_prueba" placeholder="cómo se prueba">
-      <div class="fila"><button class="acc" onclick="guardarRegla()">Guardar regla</button><span class="aviso" id="r_msg"></span></div>
+      <div class="rej"><input id="r_clave" placeholder="nombre corto (R001_nsnr_denominador)"><input id="r_paso" placeholder="paso al que afecta (opcional)"></div>
+      <input id="r_titulo" placeholder="la regla en una frase">
+      <input id="r_cuando" placeholder="cuándo se aplica">
+      <input id="r_que" placeholder="qué hay que hacer">
+      <input id="r_prueba" placeholder="cómo se comprueba que se cumplió">
+      <div class="fila"><button class="acc" id="btn_guardar_regla" onclick="guardarRegla()">Guardar regla</button><span class="aviso" id="r_msg"></span></div>
     </div>
   </div>
 </section>
 
 <!-- 4 · LABORATORIO -->
 <section id="lab">
-  <h2>Laboratorio</h2>
+  <h2>4 · Laboratorio</h2>
+  <div class="intro"><b>Qué es.</b> Donde se ejecuta un paso del cuaderno sobre una ola concreta y se ve el resultado. <b>Qué haces aquí.</b> Eliges paso y ola, pulsas «Ejecutar» y comparas con lo que tú obtendrías en SPSS. Si escribes tu resultado en la casilla de referencia, el sistema calcula el desvío. <b>Para qué.</b> Es la prueba de que el paso hace lo que tú harías: cuando el desvío es pequeño de forma estable, el paso está listo.</div>
   <div class="dos">
     <div class="caja">
-      <h3 style="margin-top:0">Correr un paso sobre una base</h3>
+      <h3 style="margin-top:0">Ejecutar un paso sobre una ola</h3>
+      <label class="etq">Paso del cuaderno</label>
       <select id="l_paso"></select>
+      <label class="etq">Ola (base)</label>
       <select id="l_base"></select>
-      <textarea id="l_params" placeholder='parámetros extra (JSON, opcional) — p. ej. {"denominador": "total"}' style="min-height:60px"></textarea>
-      <textarea id="l_ref" placeholder='cálculo de referencia del director (JSON, opcional) — el sistema calcula el desvío' style="min-height:60px"></textarea>
-      <div class="fila"><button class="acc" onclick="correr()">Correr</button><span class="aviso" id="l_msg"></span></div>
-      <h3>Últimas corridas</h3>
+      <label class="etq">Ajustes del paso (opcional)</label>
+      <textarea id="l_params" placeholder='Normalmente vacío. Formato: {"nombre": valor} — p. ej. {"bateria_potencial": "P23_"}' style="min-height:56px"></textarea>
+      <label class="etq">Tu resultado de referencia (opcional)</label>
+      <textarea id="l_ref" placeholder='Lo que te dio SPSS, con los mismos nombres que devuelve el paso — p. ej. {"fidelidad_ganador_pct": 63.7}' style="min-height:56px"></textarea>
+      <div class="fila"><button class="acc" id="btn_correr" onclick="correr()">Ejecutar</button><span class="aviso" id="l_msg"></span></div>
+      <h3>Últimas ejecuciones</h3>
       <div style="max-height:320px;overflow:auto"><table id="t_corridas"></table></div>
     </div>
     <div class="caja">
@@ -200,16 +242,18 @@ code{padding:1px 5px} pre{padding:10px;overflow:auto;max-height:420px;line-heigh
 
 <!-- 5 · EVALUACIÓN -->
 <section id="eval">
-  <h2>Evaluación del entrenamiento</h2>
+  <h2>5 · Evaluación · ¿cuánto ha aprendido el sistema?</h2>
+  <div class="intro"><b>Qué es.</b> El tablero del entrenamiento. <b>Qué ves aquí.</b> Cuántos pasos están aprobados, cuántos reproducen tu resultado sin ayuda, cuántas reglas tienen prueba. <b>Para qué.</b> Un país queda «calibrado» cuando todos sus pasos están aprobados y reproducen tu análisis dentro del umbral acordado (±3 puntos frente a la urna). Abajo están los parámetros con nombre del método (tamaños mínimos, umbrales), que solo tú cambias.</div>
   <div class="caja">
     <div class="fila"><input id="e_pais" value="dom" style="width:90px;margin:0"><button class="mini" onclick="cargarEval()">Actualizar</button><span id="e_lectura" class="aviso"></span></div>
     <div class="kpi" id="e_kpi"></div>
     <table id="t_eval"></table>
   </div>
   <div class="caja">
-    <h3 style="margin-top:0">Parámetros con nombre (P.SEG / P.MICRO / P.NANO)</h3>
+    <h3 style="margin-top:0">Parámetros del método (P.SEG / P.MICRO / P.NANO)</h3>
+    <p class="aviso">Valores acordados en el plan: tamaños mínimos de segmento, microsegmento y celda, umbral de contraste con la urna, número esperado de segmentos. Cámbialos solo si el método lo pide; queda registrado con tu nombre.</p>
     <table id="t_param"></table>
-    <div class="rej" style="margin-top:10px"><input id="pa_clave" placeholder="clave (P.NANO.MIN)"><input id="pa_valor" placeholder='valor JSON ({"electores": 200})'><input id="pa_nota" placeholder="nota"><button class="mini" onclick="fijarParam()">Fijar (director)</button></div>
+    <div class="rej" style="margin-top:10px"><input id="pa_clave" placeholder="parámetro (p. ej. P.NANO.MIN)"><input id="pa_valor" placeholder='nuevo valor, formato {"electores": 200}'><input id="pa_nota" placeholder="por qué se cambia"><button class="mini" id="btn_param" onclick="fijarParam()">Fijar</button></div>
   </div>
 </section>
 
@@ -241,10 +285,13 @@ async function entrar(){
     arrancar();
   }catch(e){$('lmsg').innerHTML='<span class=mal>'+esc(e.message)+'</span>'}
 }
-function salir(){TOK=null;YO=null;try{sessionStorage.clear()}catch(e){};$('app').style.display='none';$('login').style.display='block';$('salir').style.display='none';$('quien').textContent=''}
+function salir(){TOK=null;YO=null;try{sessionStorage.clear()}catch(e){};$('app').style.display='none';$('login').style.display='block';$('salir').style.display='none';$('btn_guia').style.display='none';$('quien').textContent=''}
 async function arrancar(){
   $('login').style.display='none';$('app').style.display='block';$('salir').style.display='inline-block';
-  $('quien').textContent=(YO.nombre||YO.usuario)+' · '+YO.rol;
+  $('quien').textContent=(YO.nombre||YO.usuario)+' · '+YO.rol; $('btn_guia').style.display='inline-block';
+  montarAyudas();
+  let vista=false; try{vista=!!localStorage.getItem('d2v_guia_vista')}catch(e){}
+  if(!vista) abrirGuia();
   await Promise.all([cargarSesiones(),cargarBases(),cargarCuaderno(),cargarEval()]);
 }
 function ver(id,btn){document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id===id));document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b===btn))}
@@ -262,7 +309,7 @@ async function nuevaSesion(){
 }
 async function abrirSesion(id){
   SES=await api('/dv/sesiones/'+id); $('ses_titulo').textContent=SES.titulo;
-  $('ses_estado').textContent=(SES.contexto&&SES.contexto.base_id)?'base abierta #'+SES.contexto.base_id:'sin base abierta';
+  $('ses_estado').textContent=(SES.contexto&&SES.contexto.base_id)?'ola abierta #'+SES.contexto.base_id:'sin ola abierta';
   document.querySelectorAll('#sesiones div').forEach(d=>d.classList.remove('on'));
   pintarHilo();
 }
@@ -291,15 +338,15 @@ async function enviar(){
   catch(e){alert(e.message)} finally{$('btn_enviar').disabled=false}
 }
 async function marcar(id,marca){
-  const nota=prompt(marca==='error'?'¿Qué está mal y por qué?':marca==='regla'?'Título breve de la regla':marca==='paso'?'Título breve del paso':'Nota (opcional)'); if(nota===null) return;
+  const nota=prompt(marca==='error'?'¿Qué está mal y por qué? (esto queda registrado como corrección)':marca==='regla'?'Escribe la regla en una frase (se crea como borrador en el Cuaderno)':marca==='paso'?'Título del paso (se crea como borrador en el Cuaderno)':'Nota (opcional): por qué es tu referencia'); if(nota===null) return;
   const r=await api('/dv/mensajes/'+id+'/marcar','POST',{marca,nota});
-  await abrirSesion(SES.id); if(r.creado){cargarCuaderno(); alert('Creado el borrador: '+JSON.stringify(r.creado)+'. Complétalo en la mesa Cuaderno.')}
+  await abrirSesion(SES.id); if(r.creado){cargarCuaderno(); const k=Object.keys(r.creado)[0]; alert('Hecho: se ha creado el borrador de '+k+' «'+r.creado[k]+'». Lo encontrarás en la mesa 3 · Cuaderno para revisarlo, completarlo y aprobarlo.')}
 }
 
 /* ---------- 2 · bases ---------- */
 let PREV=null;
 async function previsualizar(){
-  const f=$('arch').files[0]; if(!f){$('prev_msg').textContent='Elige un archivo.';return}
+  const f=$('arch').files[0]; if(!f){$('prev_msg').textContent='Primero elige un archivo .sav o .csv.';return}
   $('prev_msg').textContent='leyendo…'; const fd=new FormData(); fd.append('archivo',f);
   try{PREV=await api('/dv/bases/previsualizar','POST',null,fd);}catch(e){$('prev_msg').innerHTML='<span class=mal>'+esc(e.message)+'</span>';return}
   $('prev_msg').textContent=''; $('prev').style.display='block'; $('b_titulo').value=f.name.replace(/\.[^.]+$/,'');
@@ -320,7 +367,7 @@ async function cargarBases(){
   const bs=await api('/dv/bases?pais='+encodeURIComponent($('f_pais').value||''));
   $('t_bases').innerHTML='<tr><th>código</th><th>campo</th><th>n</th><th>vars</th><th>pond.</th><th>estado</th><th></th></tr>'+bs.map(b=>'<tr><td><b>'+esc(b.codigo)+'</b><br><small class=aviso>'+esc(b.titulo)+'</small></td><td>'+esc(b.fecha_campo_ini||'—')+'</td><td>'+b.n_registros+'</td><td>'+b.n_variables+'</td><td>'+esc(b.ponderacion)+'</td><td><span class=pill>'+esc(b.estado)+'</span></td><td><button class="mini ghost" onclick="verBase('+b.id+')">abrir</button></td></tr>').join('');
   const opts=bs.map(b=>'<option value="'+b.id+'">'+esc(b.codigo)+' · n='+b.n_registros+'</option>').join('');
-  $('ses_base').innerHTML='<option value="">sin base abierta</option>'+opts; $('l_base').innerHTML=opts;
+  $('ses_base').innerHTML='<option value="">sin ola abierta (opcional)</option>'+opts; $('l_base').innerHTML=opts;
 }
 async function verBase(id){
   const b=await api('/dv/bases/'+id); BASE_SEL=b; $('base_det').style.display='block'; $('bd_titulo').textContent=b.codigo+' · '+b.titulo;
@@ -363,14 +410,14 @@ async function correr(){
   try{params=$('l_params').value.trim()?JSON.parse($('l_params').value):null; ref=$('l_ref').value.trim()?JSON.parse($('l_ref').value):null}catch(e){$('l_msg').innerHTML='<span class=mal>JSON inválido</span>';return}
   $('l_msg').textContent='corriendo…';
   try{const r=await api('/dv/corridas','POST',{paso_clave:$('l_paso').value,base_id:Number($('l_base').value),parametros:params,referencia:ref});
-    $('l_msg').innerHTML=r.ok?'<span class=ok>ok · '+r.ms+' ms</span>':'<span class=mal>'+esc(r.error)+'</span>';
-    $('l_kpi').innerHTML='<div><b>'+(r.ok?'✓':'✗')+'</b><small>corrida #'+r.id+'</small></div><div><b>v'+r.version+'</b><small>versión</small></div><div><b>'+(r.desvio==null?'—':r.desvio)+'</b><small>desvío vs referencia</small></div><div><b>'+r.ms+'</b><small>ms</small></div>';
+    $('l_msg').innerHTML=r.ok?'<span class=ok>ejecutado en '+r.ms+' ms</span>':'<span class=mal>'+esc(r.error)+'</span>';
+    $('l_kpi').innerHTML='<div><b>'+(r.ok?'✓':'✗')+'</b><small>corrida #'+r.id+'</small></div><div><b>v'+r.version+'</b><small>versión</small></div><div><b>'+(r.desvio==null?'—':r.desvio)+'</b><small>desvío frente a tu referencia</small></div><div><b>'+r.ms+'</b><small>ms</small></div>';
     $('l_res').textContent=JSON.stringify(r.resultado??{error:r.error},null,1); cargarCorridas(); cargarEval();
   }catch(e){$('l_msg').innerHTML='<span class=mal>'+esc(e.message)+'</span>'}
 }
 async function cargarCorridas(){
   const cs=await api('/dv/corridas');
-  $('t_corridas').innerHTML='<tr><th>#</th><th>paso</th><th>base</th><th>ok</th><th>desvío</th><th>quién</th><th>cuándo</th></tr>'+cs.slice(0,40).map(c=>'<tr><td>'+c.id+'</td><td><code>'+esc(c.paso_clave)+'</code> v'+c.version+'</td><td>'+c.base_id+'</td><td>'+(c.ok?'<span class="pill ok">ok</span>':'<span class="pill mal">error</span>')+'</td><td>'+(c.desvio==null?'—':c.desvio)+'</td><td>'+esc(c.ejecutada_por)+'</td><td>'+new Date(c.creado).toLocaleString()+'</td></tr>').join('');
+  $('t_corridas').innerHTML='<tr><th>#</th><th>paso</th><th>ola</th><th>resultado</th><th>desvío</th><th>quién</th><th>cuándo</th></tr>'+cs.slice(0,40).map(c=>'<tr><td>'+c.id+'</td><td><code>'+esc(c.paso_clave)+'</code> v'+c.version+'</td><td>'+c.base_id+'</td><td>'+(c.ok?'<span class="pill ok">bien</span>':'<span class="pill mal">error</span>')+'</td><td>'+(c.desvio==null?'—':c.desvio)+'</td><td>'+esc(c.ejecutada_por)+'</td><td>'+new Date(c.creado).toLocaleString()+'</td></tr>').join('');
 }
 
 /* ---------- 5 · evaluación ---------- */
@@ -380,13 +427,81 @@ async function cargarEval(){
   $('e_lectura').innerHTML=(e.pais_calibrado?'<span class="pill ok">país calibrado</span> ':'<span class="pill sim">en entrenamiento</span> ')+esc(e.lectura);
   const bases=e.bases.reduce((a,b)=>a+Number(b.n),0), aprob=e.pasos.filter(p=>p.estado==='aprobado').length, solos=e.pasos.filter(p=>p.reproduce_solo).length;
   $('e_kpi').innerHTML='<div><b>'+bases+'</b><small>bases</small></div><div><b>'+e.pasos.length+'</b><small>pasos</small></div><div><b>'+aprob+'</b><small>aprobados</small></div><div><b>'+solos+'</b><small>reproducen solos</small></div><div><b>'+e.reglas.vigentes+'</b><small>reglas vigentes</small></div><div><b>'+e.reglas.con_prueba+'/'+e.reglas.total+'</b><small>reglas con prueba</small></div>';
-  $('t_eval').innerHTML='<tr><th>paso</th><th>estado</th><th>corridas</th><th>ok</th><th>desvío medio</th><th>reproduce solo</th></tr>'+e.pasos.map(p=>'<tr><td><code>'+esc(p.clave)+'</code> '+esc(p.titulo)+'</td><td><span class="pill '+(p.estado==='aprobado'?'ok':'')+'">'+esc(p.estado)+'</span></td><td>'+p.corridas+'</td><td>'+p.corridas_ok+'</td><td>'+(p.desvio_medio==null?'—':p.desvio_medio)+'</td><td>'+(p.reproduce_solo?'<span class="pill ok">sí</span>':'<span class="pill">no</span>')+'</td></tr>').join('');
+  $('t_eval').innerHTML='<tr><th>paso</th><th>estado</th><th>ejecuciones</th><th>bien</th><th>desvío medio</th><th>lo reproduce solo</th></tr>'+e.pasos.map(p=>'<tr><td><code>'+esc(p.clave)+'</code> '+esc(p.titulo)+'</td><td><span class="pill '+(p.estado==='aprobado'?'ok':'')+'">'+esc(p.estado)+'</span></td><td>'+p.corridas+'</td><td>'+p.corridas_ok+'</td><td>'+(p.desvio_medio==null?'—':p.desvio_medio)+'</td><td>'+(p.reproduce_solo?'<span class="pill ok">sí</span>':'<span class="pill">no</span>')+'</td></tr>').join('');
   $('t_param').innerHTML='<tr><th>clave</th><th>valor</th><th>nota</th><th>autor</th></tr>'+pa.map(p=>'<tr><td><code>'+esc(p.clave)+'</code></td><td>'+esc(JSON.stringify(p.valor))+'</td><td class=aviso>'+esc(p.nota||'')+'</td><td>'+esc(p.autor)+'</td></tr>').join('');
   cargarCorridas();
 }
 async function fijarParam(){
   try{await api('/dv/parametros/'+($('e_pais').value||'dom'),'PUT',{clave:$('pa_clave').value.trim(),valor:JSON.parse($('pa_valor').value),nota:$('pa_nota').value||null}); cargarEval();}catch(e){alert(e.message)}
 }
+
+/* ---------- ayudas contextuales ---------- */
+const AYUDA={
+  ses_base:{t:'Base abierta en la sesión',q:'Elige la ola sobre la que vas a trabajar antes de crear la sesión (opcional).',p:'DANTE tendrá delante las variables y el diccionario de esa ola y podrá proponer cálculos concretos sobre ella.'},
+  btn_nueva:{t:'Nueva sesión',q:'Pulsa y ponle un título (por ejemplo «Matriz de transferencia 2020-2024»).',p:'Cada sesión guarda la conversación completa; puedes volver a ella y seguir donde lo dejaste.'},
+  txt:{t:'Tu mensaje a DANTE',q:'Escribe con naturalidad: describe cómo haces tú un análisis, pide un cálculo, corrige un resultado.',p:'Lo que expliques aquí es la materia prima del cuaderno. Cuanto más concreto (qué variables, qué denominador, qué umbral), mejor lo escribe DANTE como paso o regla.'},
+  arch:{t:'Archivo de la ola',q:'Elige el .sav de SPSS (o un CSV) de la ola nueva.',p:'El sistema lee variables, etiquetas y categorías y propone qué pregunta del método es cada variable. No guarda nada hasta que pulses «Guardar».'},
+  btn_prev:{t:'Leer el archivo',q:'Primer paso: lee el archivo y muestra su ficha (n, variables, avisos).',p:'Para comprobar que se lee bien antes de guardarlo.'},
+  b_codigo:{t:'Código de la ola',q:'País, año y mes: dom_2026-07. Si hay dos olas el mismo mes, añade _b a la segunda.',p:'Es el nombre con el que la ola aparecerá en todas las mesas y en los resultados.'},
+  b_pais:{t:'País',q:'Tres letras: dom (República Dominicana), esp, chl, mex…',p:'Los parámetros del método y el diccionario se organizan por país.'},
+  b_titulo:{t:'Título',q:'Un nombre legible; por defecto, el del archivo.',p:'Solo para reconocerla en las listas.'},
+  b_fecha:{t:'Fecha de campo',q:'Día de inicio del trabajo de campo (si no lo sabes, el día 1 del mes).',p:'Ordena las olas en el tiempo; las series y las ventanas de olas apiladas dependen de esto.'},
+  b_pond:{t:'Ponderación',q:'En esta serie: «autoponderada» (no hay variable de peso; se publica el % directo sobre 1.500).',p:'Declararlo es una regla de la casa: ningún dato entra sin decir cómo se pondera.'},
+  b_origen:{t:'Origen',q:'De dónde viene la base: puente:dom_presidencia (cámara de la Presidencia), propia, publica…',p:'Trazabilidad: cada base sabe de dónde salió.'},
+  b_diseno:{t:'Diseño muestral',q:'Una frase: «polietápico estratificado, cara a cara, n=1500, ±2,21 %».',p:'Queda en la ficha técnica de la ola.'},
+  btn_imp:{t:'Guardar la base',q:'Segundo paso: guarda la ola en cuarentena con su ficha y sus propuestas de diccionario.',p:'A partir de aquí aparece en «Bases cargadas» y puede abrirse en el Diálogo y el Laboratorio.'},
+  f_pais:{t:'Filtro por país',q:'dom para ver solo las olas dominicanas.',p:'Filtra la lista.'},
+  d_var:{t:'Variable de la base',q:'El nombre tal como está en el SPSS: P12, P25, P41…',p:'Es la variable que vas a asociar a una pregunta del método.'},
+  d_clave:{t:'Pregunta del método',q:'El nombre canónico: voto_intencion, voto_recuerdo, voto_secreto, eje_gob_opos, simpatia_partido, problema_principal… (los ves en la tabla de arriba).',p:'El cuaderno trabaja con estos nombres, no con P12 o P25, porque cambian de ola en ola.'},
+  d_fam:{t:'Familia',q:'A qué grupo pertenece la pregunta: transferencia (voto), identidad (eje, simpatía), problemática, clima, emoción, sociodemo, territorio.',p:'Ordena el diccionario y sirve para las validaciones.'},
+  btn_dicc:{t:'Confirmar',q:'Guarda la correspondencia con tu firma.',p:'Pasa de «propuesto» a «confirmado»: el cuaderno solo usa las confirmadas.'},
+  bd_estado:{t:'Estado de la base',q:'cuarentena → perfilada → canónica (diccionario confirmado) → activa (lista para el cuaderno). «retirada» la saca de uso.',p:'Deja constancia de en qué punto del proceso está cada ola.'},
+  p_clave:{t:'Nombre corto del paso',q:'Minúsculas, sin espacios, con orden delante: p05_pisos_por_candidato.',p:'Es su identificador en todo el sistema.'},
+  p_orden:{t:'Orden',q:'10, 20, 30… para dejar hueco entre pasos.',p:'Los pasos se muestran y se encadenan en este orden.'},
+  p_pais:{t:'País',q:'dom si el paso es específico de la serie dominicana; vacío si vale para cualquier país.',p:'Permite que el método tenga pasos universales y pasos locales.'},
+  p_titulo:{t:'Título',q:'Cómo lo llamarías en un informe: «Matriz de transferencia recuerdo × intención».',p:'Nombre legible en listas y evaluación.'},
+  p_prop:{t:'Propósito',q:'Con tus palabras: qué calcula, con qué denominador, qué debe salir.',p:'Es la parte del método que se lee; el código solo la ejecuta. Si esto está claro, DANTE puede escribir el código.'},
+  p_entradas:{t:'Preguntas que necesita',q:'Las claves del diccionario que usa: voto_recuerdo, voto_intencion…',p:'Antes de ejecutar, el sistema comprueba que la ola tiene confirmadas esas preguntas.'},
+  p_codigo:{t:'Código del paso',q:'No hace falta que lo escribas tú: pídeselo a DANTE en el Diálogo y marca su respuesta como «paso». Si lo editas, cada cambio sube la versión y vuelve a «borrador».',p:'Es la receta exacta que el sistema ejecuta sobre cualquier ola.'},
+  p_valid:{t:'Criterio de validación',q:'Cómo sabremos que el paso está bien: «cada fila suma 100», «la fidelidad del ganador supera el 70 %».',p:'Es la prueba que el paso tiene que seguir pasando en el futuro.'},
+  btn_guardar_paso:{t:'Guardar paso',q:'Guarda o actualiza el paso (queda en borrador).',p:'Nada se pierde; siempre se puede seguir editando.'},
+  btn_aprobar:{t:'Aprobar',q:'Solo el director aprueba. Aprueba cuando el paso reproduce tu análisis en el Laboratorio.',p:'Un paso aprobado forma parte oficial del método (metodología Salom).'},
+  r_clave:{t:'Nombre corto de la regla',q:'R + número + qué es: R002_denominador_1500.',p:'Identificador de la regla.'},
+  r_paso:{t:'Paso al que afecta',q:'El nombre corto del paso (opcional). Vacío = aplica a todos.',p:'El sistema muestra las reglas vigentes al ejecutar ese paso.'},
+  r_titulo:{t:'La regla en una frase',q:'«El NS/NR cuenta en el denominador».',p:'Lo que un analista nuevo tiene que saber.'},
+  r_cuando:{t:'Cuándo se aplica',q:'«Siempre en la serie dominicana», «solo en olas sin recuerdo»…',p:'Delimita el alcance.'},
+  r_que:{t:'Qué hay que hacer',q:'La instrucción concreta.',p:'Es lo que DANTE seguirá.'},
+  r_prueba:{t:'Cómo se comprueba',q:'«La suma de porcentajes incluye el código 9 y da 100».',p:'Una regla sin prueba no protege nada; con prueba se verifica en cada versión.'},
+  btn_guardar_regla:{t:'Guardar regla',q:'Guarda la regla como vigente, con tu firma.',p:'Aparece en «Reglas vigentes» y en el contexto de DANTE.'},
+  l_paso:{t:'Paso a ejecutar',q:'Solo aparecen los pasos que tienen código.',p:'El procedimiento que se va a correr.'},
+  l_base:{t:'Ola',q:'La base sobre la que se ejecuta. Debe tener confirmadas las preguntas que el paso necesita.',p:'Si falta una correspondencia, el resultado te lo dirá («no tiene confirmada la pregunta…»): confírmala en Bases.'},
+  l_params:{t:'Ajustes del paso',q:'Casi siempre vacío. Solo si el paso pide un dato extra, en formato {"nombre": valor}.',p:'Permite ejecutar el mismo paso con otra variante sin tocar el código.'},
+  l_ref:{t:'Tu resultado de referencia',q:'Lo que te dio SPSS, con los mismos nombres que devuelve el paso, p. ej. {"fidelidad_ganador_pct": 63.7}. Opcional.',p:'El sistema compara y te da el desvío: es la medida de cuánto reproduce tu análisis.'},
+  btn_correr:{t:'Ejecutar',q:'Corre el paso sobre la ola elegida (segundos).',p:'El resultado aparece a la derecha y queda registrado con tu nombre en «Últimas ejecuciones».'},
+  e_pais:{t:'País',q:'dom.',p:'Filtra el tablero.'},
+  pa_clave:{t:'Parámetro',q:'Nombre exacto: P.SEG.MIN, P.MICRO.VENTANA, P.NANO.MIN…',p:'Los pasos leen estos valores; cambiarlos cambia el método para todo el país.'},
+  pa_valor:{t:'Nuevo valor',q:'Con el mismo formato que ves en la tabla: {"electores": 200}.',p:'Queda registrado con fecha y autor.'},
+  pa_nota:{t:'Por qué se cambia',q:'Una frase.',p:'Trazabilidad de las decisiones metodológicas.'},
+  btn_param:{t:'Fijar',q:'Guarda el nuevo valor (solo director).',p:'Sustituye al anterior desde ese momento.'}
+};
+function montarAyudas(){
+  for(const [id,a] of Object.entries(AYUDA)){
+    const el=document.getElementById(id); if(!el||el.dataset.ayuda) continue; el.dataset.ayuda='1';
+    const b=document.createElement('button'); b.type='button'; b.className='ayuda'; b.textContent='?'; b.title=a.t;
+    b.onclick=(ev)=>{ev.stopPropagation();mostrarAyuda(b,a)};
+    if(el.tagName==='BUTTON'){b.classList.add('inline'); el.insertAdjacentElement('afterend',b);}
+    else{const w=document.createElement('span'); w.className='campo'; el.parentNode.insertBefore(w,el); w.appendChild(el); w.appendChild(b);}
+  }
+}
+function mostrarAyuda(btn,a){
+  const p=$('pop'); p.innerHTML='<b>'+esc(a.t)+'</b><div class=q>'+esc(a.q)+'</div><div class=p>'+esc(a.p)+'</div>';
+  const r=btn.getBoundingClientRect(); p.style.display='block';
+  let left=r.left+window.scrollX-300; if(left<8) left=8; p.style.left=left+'px'; p.style.top=(r.bottom+window.scrollY+6)+'px';
+}
+document.addEventListener('click',()=>{$('pop').style.display='none'});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){$('pop').style.display='none';cerrarGuia()}});
+function abrirGuia(){$('guia').style.display='flex'}
+function cerrarGuia(){$('guia').style.display='none';try{localStorage.setItem('d2v_guia_vista','1')}catch(e){}}
 if(TOK&&YO) arrancar();
 </script>
 </body></html>
