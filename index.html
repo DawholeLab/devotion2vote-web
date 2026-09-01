@@ -1,39 +1,43 @@
 <!DOCTYPE html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>devotion2vote — el ciclo electoral completo, cada mes</title>
-<meta name="description" content="devotion2vote convierte bases de datos en transferencia de voto, segmentación en tres niveles, estrategia, piezas, pauta y medición. Para municipios y candidaturas que merecen estrategia.">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<title>Devotion2Vote — el ciclo electoral completo, cada mes</title>
+<meta name="description" content="Devotion2Vote convierte bases de datos en transferencia de voto, segmentación en tres niveles, estrategia, piezas, pauta y medición. Para municipios y candidaturas que merecen estrategia.">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500;6..96,600&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* Página de arranque con piel provisional. La identidad definitiva de devotion2vote se aplica como línea aparte. */
-:root{--bg:#0b1020;--bg2:#101733;--ink:#eef2fb;--mut:#8fa0c4;--linea:rgba(120,160,230,.16);--acc:#e0a92c;--teal:#2fd4a7}
+/* Identidad Devotion2Vote (logo: crema · tinta · coral). Bodoni Moda + Montserrat. */
+:root{--bg:#FBF8F4;--bg2:#F3EEE7;--ink:#282827;--mut:#7A746E;--linea:rgba(40,40,39,.14);--acc:#E67C6C;--acc2:#C9614F}
 *{box-sizing:border-box;margin:0}
-body{background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,sans-serif;line-height:1.6}
-header{display:flex;justify-content:space-between;align-items:center;padding:18px 28px;border-bottom:1px solid var(--linea)}
-header b{font-family:'Space Grotesk';letter-spacing:.14em;font-size:15px} header b span{color:var(--acc)}
-header a{color:var(--mut);text-decoration:none;font-size:13px;border:1px solid var(--linea);padding:7px 12px;border-radius:9px}
-header a:hover{color:var(--acc);border-color:var(--acc)}
-main{max-width:1040px;margin:0 auto;padding:60px 28px 80px}
-.eyebrow{font-family:'Space Grotesk';font-size:11.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--acc)}
-h1{font-family:'Space Grotesk';font-size:clamp(30px,5vw,52px);line-height:1.08;margin:14px 0 18px;max-width:18ch}
-.lead{font-size:18px;color:var(--mut);max-width:60ch}
-.ciclo{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:48px 0}
-.ciclo div{border:1px solid var(--linea);border-radius:12px;padding:14px;background:var(--bg2)}
-.ciclo b{display:block;font-family:'Space Grotesk';font-size:13px;letter-spacing:.06em;margin-bottom:4px}
-.ciclo small{color:var(--mut);font-size:12px;line-height:1.45;display:block}
-.ciclo i{font-style:normal;color:var(--acc);font-family:'Space Grotesk';font-size:22px;display:block;margin-bottom:6px}
-h2{font-family:'Space Grotesk';font-size:22px;margin:48px 0 12px}
-p{max-width:66ch;margin-bottom:12px}
-.dos{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+body{background:var(--bg);color:var(--ink);font-family:'Montserrat',Arial,system-ui,sans-serif;line-height:1.65;font-size:15px}
+header{display:flex;justify-content:space-between;align-items:center;padding:18px 32px;border-bottom:1px solid var(--linea)}
+header img{height:44px;width:auto}
+header a{color:var(--ink);text-decoration:none;font-size:12.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--ink);padding:9px 16px;border-radius:999px}
+header a:hover{background:var(--ink);color:#fff}
+main{max-width:1060px;margin:0 auto;padding:72px 32px 90px}
+.eyebrow{font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--acc2);font-weight:600}
+h1{font-family:'Bodoni Moda','Times New Roman',serif;font-weight:500;font-size:clamp(34px,5.4vw,62px);line-height:1.05;margin:16px 0 22px;max-width:18ch;letter-spacing:-.005em}
+h1 em{font-style:italic;color:var(--acc)}
+.lead{font-size:18px;color:var(--mut);max-width:58ch}
+.btn{display:inline-block;background:var(--acc);color:#fff;font-weight:600;padding:12px 22px;border-radius:999px;text-decoration:none;margin-top:26px;font-size:13px;letter-spacing:.06em}
+.btn:hover{background:var(--acc2)}
+.ciclo{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:60px 0}
+.ciclo div{border:1px solid var(--linea);border-radius:12px;padding:16px 14px;background:#fff}
+.ciclo b{display:block;font-family:'Bodoni Moda',serif;font-size:19px;font-weight:500;margin-bottom:4px}
+.ciclo small{color:var(--mut);font-size:12.5px;line-height:1.5;display:block}
+.ciclo i{font-style:normal;color:var(--acc);font-family:'Bodoni Moda',serif;font-size:26px;display:block;margin-bottom:6px;line-height:1}
+h2{font-family:'Bodoni Moda',serif;font-weight:500;font-size:26px;margin:52px 0 12px}
+p{max-width:64ch;margin-bottom:12px}
+.dos{display:grid;grid-template-columns:1fr 1fr;gap:32px}
 @media(max-width:800px){.dos{grid-template-columns:1fr}}
-.regla{border-left:3px solid var(--acc);padding:10px 16px;background:var(--bg2);border-radius:0 10px 10px 0;margin:18px 0;color:var(--ink)}
-footer{border-top:1px solid var(--linea);padding:22px 28px;color:var(--mut);font-size:12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
-.btn{display:inline-block;background:var(--acc);color:#111;font-weight:600;padding:11px 18px;border-radius:10px;text-decoration:none;margin-top:22px}
+.regla{border-left:3px solid var(--acc);padding:12px 18px;background:#fff;border-radius:0 10px 10px 0;margin:18px 0;font-family:'Bodoni Moda',serif;font-size:19px;font-style:italic}
+footer{border-top:1px solid var(--linea);padding:26px 32px;color:var(--mut);font-size:12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;align-items:center}
+footer img{height:22px;opacity:.8}
 </style></head><body>
-<header><b>DEVOTION<span>2</span>VOTE</b><a href="sala.html">Acceso</a></header>
+<header><img src="assets/logo.png" alt="Devotion2Vote by Dawhole System"><a href="sala.html">Acceso</a></header>
 <main>
   <div class="eyebrow">Dawhole System · módulo electoral</div>
-  <h1>El ciclo electoral completo, cada mes, para quien no puede pagarlo por partes.</h1>
-  <p class="lead">devotion2vote recibe bases de datos y devuelve transferencia de voto, segmentación en tres niveles, estrategia, piezas, pauta y medición. Un solo sistema con las herramientas encadenadas, y una persona que firma cada etapa.</p>
+  <h1>El ciclo electoral completo, <em>cada mes</em>, para quien no puede pagarlo por partes.</h1>
+  <p class="lead">Devotion2Vote recibe bases de datos y devuelve transferencia de voto, segmentación en tres niveles, estrategia, piezas, pauta y medición. Un solo sistema con las herramientas encadenadas, y una persona que firma cada etapa.</p>
   <a class="btn" href="sala.html">Entrar a la sala</a>
 
   <div class="ciclo">
@@ -54,10 +58,10 @@ footer{border-top:1px solid var(--linea);padding:22px 28px;color:var(--mut);font
     </div>
     <div>
       <h2>Cómo trabaja</h2>
-      <div class="regla">«El método no se memoriza: se inscribe.» Cada procedimiento queda escrito como un paso ejecutable y cada corrección como una regla con prueba.</div>
-      <p>Los nanosegmentos son celdas territoriales con tamaño mínimo declarado, nunca personas. Las piezas generadas con IA llevan registro de procedencia. La pauta se prepara en el sistema y la lanza una persona, dentro de la ley de cada país.</p>
+      <div class="regla">«El método no se memoriza: se inscribe.»</div>
+      <p>Cada procedimiento queda escrito como un paso ejecutable y cada corrección como una regla con prueba. Los nanosegmentos son celdas territoriales con tamaño mínimo declarado, nunca personas. Las piezas generadas con IA llevan registro de procedencia. La pauta se prepara en el sistema y la lanza una persona, dentro de la ley de cada país.</p>
     </div>
   </div>
 </main>
-<footer><span>devotion2vote · Dawhole Lab · La Casa de Investigación</span><span>www.devotion2vote.com</span></footer>
+<footer><img src="assets/monograma.png" alt=""><span>Devotion2Vote · Dawhole Lab · La Casa de Investigación</span><span>www.devotion2vote.com</span></footer>
 </body></html>

@@ -3,28 +3,32 @@
 <title>Sala de Método — devotion2vote</title>
 <meta name="d2v-api" content="https://devotion2vote-api.onrender.com">
 <meta name="robots" content="noindex,nofollow">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500;6..96,600&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* Piel de trabajo neutra (equipo). La identidad de devotion2vote se aplica después sin tocar la lógica. */
-:root{--bg:#0b1020;--bg2:#101733;--ink:#eef2fb;--mut:#8fa0c4;--linea:rgba(120,160,230,.16);--acc:#e0a92c;--teal:#2fd4a7;--rojo:#e35d6a;--vio:#b3a6e0}
+/* Identidad devotion2vote (logo: crema · tinta · coral). Tipografía: Bodoni Moda (títulos) + Montserrat (texto). */
+:root{--bg:#FBF8F4;--bg2:#F3EEE7;--bg3:#EDE6DD;--ink:#282827;--mut:#7A746E;--linea:rgba(40,40,39,.14);--acc:#E67C6C;--acc2:#C9614F;--teal:#2E7D5B;--rojo:#B23A3A;--vio:#5A4E8C}
 *{box-sizing:border-box;margin:0}
-body{background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,sans-serif;min-height:100vh;font-size:13.5px}
-header{display:flex;justify-content:space-between;align-items:center;padding:14px 24px;border-bottom:1px solid var(--linea)}
-header b{font-family:'Space Grotesk';letter-spacing:.12em}
-header b span{color:var(--acc)}
+body{background:var(--bg);color:var(--ink);font-family:'Montserrat',Arial,system-ui,sans-serif;min-height:100vh;font-size:13.5px}
+header{display:flex;justify-content:space-between;align-items:center;padding:12px 24px;border-bottom:1px solid var(--linea);background:var(--bg)}
+header .marca{display:flex;align-items:center;gap:10px}
+header .marca img{height:30px;width:auto}
+header .marca b{font-family:'Bodoni Moda','Times New Roman',serif;font-weight:500;font-size:19px;letter-spacing:.01em}
+header .marca b span{color:var(--acc)}
+header .marca small{color:var(--mut);font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-left:6px}
 header a{color:var(--mut);text-decoration:none;font-size:12px}
-nav{display:flex;gap:6px;padding:12px 24px;border-bottom:1px solid var(--linea);flex-wrap:wrap}
+nav{display:flex;gap:6px;padding:12px 24px;border-bottom:1px solid var(--linea);flex-wrap:wrap;background:var(--bg)}
 nav button{background:transparent;border:1px solid var(--linea);color:var(--mut)}
-nav button.on{border-color:var(--acc);color:var(--acc)}
+nav button.on{border-color:var(--acc);color:var(--acc2);background:#fff}
 main{padding:22px 24px;max-width:1280px}
 section{display:none} section.on{display:block}
-h2{font-family:'Space Grotesk';font-size:12.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--mut);margin:0 0 14px}
-h3{font-size:14px;margin:18px 0 10px;font-weight:600}
-.caja{border:1px solid var(--linea);border-radius:12px;padding:16px;background:var(--bg2);margin-bottom:16px}
-button{border:none;border-radius:9px;padding:9px 14px;font:600 12.5px 'Inter';cursor:pointer;background:#1c2c55;color:var(--ink);transition:.15s}
-button:hover{background:#24376b} button.acc{background:var(--acc);color:#111} button.mini{padding:5px 9px;font-size:11px} button.ghost{background:transparent;border:1px solid var(--linea);color:var(--mut)}
+h2{font-family:'Montserrat',sans-serif;font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--mut);margin:0 0 14px;font-weight:600}
+h3{font-family:'Bodoni Moda',serif;font-size:17px;margin:18px 0 10px;font-weight:500}
+.caja{border:1px solid var(--linea);border-radius:12px;padding:16px;background:#fff;margin-bottom:16px}
+button{border:none;border-radius:9px;padding:9px 14px;font:600 12.5px 'Montserrat';cursor:pointer;background:var(--ink);color:#fff;transition:.15s}
+button:hover{background:#3d3d3b} button.acc{background:var(--acc);color:#fff} button.acc:hover{background:var(--acc2)} button.mini{padding:5px 9px;font-size:11px} button.ghost{background:transparent;border:1px solid var(--linea);color:var(--mut)} button.ghost:hover{background:var(--bg2)}
 button:disabled{opacity:.45;cursor:not-allowed}
-input,textarea,select{width:100%;background:#0c1428;border:1px solid var(--linea);border-radius:9px;color:var(--ink);padding:9px 11px;font:400 13px 'Inter';margin-bottom:9px}
+input,textarea,select{width:100%;background:#fff;border:1px solid var(--linea);border-radius:9px;color:var(--ink);padding:9px 11px;font:400 13px 'Montserrat';margin-bottom:9px}
 textarea{font-family:ui-monospace,Menlo,monospace;font-size:12px;line-height:1.55;resize:vertical;min-height:110px}
 input:focus,textarea:focus,select:focus{outline:none;border-color:var(--acc)}
 .rej{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
@@ -32,39 +36,41 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--acc)}
 @media(max-width:900px){.dos{grid-template-columns:1fr}}
 .fila{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
 table{width:100%;border-collapse:collapse;font-size:12px}
-th{text-align:left;color:var(--mut);font-weight:500;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;padding:7px 8px;border-bottom:1px solid var(--linea)}
-td{padding:7px 8px;border-bottom:1px solid rgba(120,160,230,.07);vertical-align:top}
-tr:hover td{background:rgba(120,160,230,.05)}
+th{text-align:left;color:var(--mut);font-weight:600;font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:7px 8px;border-bottom:1px solid var(--linea)}
+td{padding:7px 8px;border-bottom:1px solid rgba(40,40,39,.07);vertical-align:top}
+tr:hover td{background:var(--bg2)}
 .aviso{font-size:11.5px;color:var(--mut);line-height:1.6}
-.pill{display:inline-block;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--linea);border-radius:8px;padding:2px 7px;color:var(--mut);white-space:nowrap}
-.pill.ok{color:var(--teal);border-color:rgba(47,212,167,.4)} .pill.sim{color:var(--acc);border-color:rgba(224,169,44,.4)} .pill.mal{color:var(--rojo);border-color:rgba(227,93,106,.4)} .pill.vio{color:var(--vio);border-color:rgba(179,166,224,.4)}
+.pill{display:inline-block;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--linea);border-radius:8px;padding:2px 7px;color:var(--mut);white-space:nowrap;background:#fff}
+.pill.ok{color:var(--teal);border-color:rgba(46,125,91,.4)} .pill.sim{color:var(--acc2);border-color:rgba(230,124,108,.5)} .pill.mal{color:var(--rojo);border-color:rgba(178,58,58,.4)} .pill.vio{color:var(--vio);border-color:rgba(90,78,140,.4)}
 .kpi{display:flex;gap:22px;flex-wrap:wrap;margin-bottom:14px}
-.kpi div b{display:block;font-family:'Space Grotesk';font-size:24px;color:var(--acc)}
+.kpi div b{display:block;font-family:'Bodoni Moda',serif;font-size:26px;color:var(--acc2);font-weight:500}
 .kpi div small{color:var(--mut);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase}
-#login{max-width:380px;margin:12vh auto;background:var(--bg2);border:1px solid var(--linea);border-radius:16px;padding:30px}
+#login{max-width:400px;margin:10vh auto;background:#fff;border:1px solid var(--linea);border-radius:16px;padding:32px;text-align:left}
+#login img{display:block;width:260px;max-width:100%;margin:0 auto 22px}
 .ok{color:var(--teal)} .mal{color:var(--rojo)}
-code,pre{background:#0c1428;border-radius:6px;font-size:11.5px;font-family:ui-monospace,Menlo,monospace}
+code,pre{background:var(--bg2);border-radius:6px;font-size:11.5px;font-family:ui-monospace,Menlo,monospace}
 code{padding:1px 5px} pre{padding:10px;overflow:auto;max-height:420px;line-height:1.5;white-space:pre-wrap}
 /* diálogo */
 #chat{display:grid;grid-template-columns:260px 1fr;gap:16px;min-height:60vh}
 @media(max-width:900px){#chat{grid-template-columns:1fr}}
 #sesiones{max-height:60vh;overflow:auto}
 #sesiones div{padding:8px 10px;border-radius:8px;cursor:pointer;color:var(--mut);font-size:12px}
-#sesiones div.on{background:#1c2c55;color:var(--ink)}
+#sesiones div.on{background:var(--bg2);color:var(--ink)}
 #hilo{max-height:56vh;overflow:auto;display:flex;flex-direction:column;gap:12px;padding:6px 2px}
 .msg{max-width:88%;padding:10px 14px;border-radius:12px;line-height:1.55;white-space:pre-wrap;font-size:13px}
-.msg.u{align-self:flex-end;background:#1c2c55}
-.msg.d{align-self:flex-start;background:#0c1428;border:1px solid var(--linea)}
+.msg.u{align-self:flex-end;background:var(--bg3)}
+.msg.d{align-self:flex-start;background:#fff;border:1px solid var(--linea)}
 .msg .meta{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
 .msg .meta small{color:var(--mut);font-size:10.5px}
 #entrada{display:flex;gap:8px;margin-top:10px}
-#entrada textarea{min-height:64px;margin:0;font-family:'Inter'}
+#entrada textarea{min-height:64px;margin:0;font-family:'Montserrat'}
 </style></head><body>
 
-<header><b>DEVOTION<span>2</span>VOTE <small style="font-weight:400;opacity:.6;letter-spacing:.03em">· sala de método</small></b>
+<header><span class="marca"><img src="assets/monograma.png" alt="devotion2vote"><b>Devotion<span>2</span>Vote</b><small>sala de método</small></span>
 <span><a href="index.html">← devotion2vote.com</a> &nbsp; <span class="aviso" id="quien"></span> <button class="mini ghost" id="salir" style="display:none" onclick="salir()">salir</button></span></header>
 
 <div id="login">
+  <img src="assets/logo.png" alt="Devotion2Vote by Dawhole System">
   <h2>Acceso nominal</h2>
   <p class="aviso" style="margin-bottom:12px">Entra con tu nombre de usuario y tu código de acceso. Cada acción queda firmada con tu nombre.</p>
   <input id="lu" placeholder="usuario" autocomplete="username">
