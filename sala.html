@@ -152,7 +152,7 @@ code{padding:1px 5px} pre{padding:10px;overflow:auto;max-height:420px;line-heigh
 <!-- 2 · BASES -->
 <section id="bases">
   <h2>2 · Bases</h2>
-  <div class="intro"><b>Qué es.</b> El archivo de cada ola de encuesta o base de datos: SPSS (.sav), Excel (.xlsx), CSV o SQLite (.db). <b>Qué haces aquí.</b> Subir bases nuevas y confirmar, ola a ola, qué pregunta es cada variable: en esta serie el voto viaja de P4 a P12, P19 o P22 según el mes, así que el sistema propone la correspondencia y tú la confirmas, como cuando etiquetas variables en SPSS. <b>Para qué.</b> Sin esa correspondencia («diccionario»), el cuaderno no sabe dónde está la intención o el recuerdo en cada ola.</div>
+  <div class="intro"><b>Qué es.</b> El archivo de cada ola de encuesta o base de datos: SPSS (.sav), Excel (.xlsx), CSV o SQLite (.db). <b>Qué haces aquí.</b> Subir la base — y ya está: el sistema reconoce solo qué pregunta es cada variable, corre el método completo y te deja un <b>expediente</b> con todo lo que hizo y decidió. <b>Tu papel.</b> Supervisar: leer el expediente, mirar los avisos, y corregir solo si algo no es como debe ser.</div>
   <div class="dos">
     <div class="caja">
       <h3 style="margin-top:0">Subir una base nueva</h3>
@@ -172,7 +172,7 @@ code{padding:1px 5px} pre{padding:10px;overflow:auto;max-height:420px;line-heigh
         <input id="b_diseno" placeholder="diseño muestral, en una frase (opcional)">
         <div id="prev_resumen" class="aviso"></div>
         <div style="max-height:320px;overflow:auto;margin:10px 0"><table id="prev_tabla"></table></div>
-        <button class="acc" id="btn_imp" onclick="importar()">2 · Guardar la base</button> <span class="aviso" id="imp_msg"></span>
+        <button class="acc" id="btn_imp" onclick="importar()">2 · Cargar y analizar</button> <span class="aviso" id="imp_msg"></span>
       </div>
     </div>
     <div class="caja">
@@ -184,6 +184,8 @@ code{padding:1px 5px} pre{padding:10px;overflow:auto;max-height:420px;line-heigh
   <div class="caja" id="base_det" style="display:none">
     <h3 style="margin-top:0" id="bd_titulo"></h3>
     <div id="bd_meta" class="aviso"></div>
+    <div id="bd_exped"></div>
+    <div class="fila"><button class="mini" id="btn_reanalizar" onclick="reanalizar()">Analizar de nuevo</button><span class="aviso">Rehace el circuito completo sobre esta ola (respeta lo que ya confirmaste) y actualiza el expediente.</span><span class="aviso" id="rean_msg"></span></div>
     <h3>Qué pregunta es cada variable (diccionario) <span class="aviso">— el sistema propone, tú confirmas</span></h3>
     <p class="aviso">Cada fila dice: esta pregunta del método («clave») está en esta variable de la base. «Propuesto» = lo adivinó el sistema; «confirmado» = lo has validado tú. Corrige lo que esté mal en el formulario de abajo.</p>
     <div style="max-height:420px;overflow:auto"><table id="bd_dicc"></table></div>
@@ -446,9 +448,37 @@ async function previsualizar(){
 async function importar(){
   const f=$('arch').files[0]; const fd=new FormData(); fd.append('archivo',f);
   for(const [k,id] of [['codigo','b_codigo'],['pais','b_pais'],['titulo','b_titulo'],['origen','b_origen'],['fecha_campo_ini','b_fecha'],['diseno','b_diseno'],['ponderacion','b_pond']]){const v=$(id).value; if(v) fd.append(k,v)}
-  $('imp_msg').textContent='importando…';
-  try{const r=await api('/dv/bases','POST',null,fd); $('imp_msg').innerHTML='<span class=ok>cargada #'+r.id+' · '+r.diccionario_propuestas+' propuestas de diccionario</span>'; cargarBases(); $('prev').style.display='none';}
-  catch(e){$('imp_msg').innerHTML='<span class=mal>'+esc(e.message)+'</span>'}
+  $('imp_msg').textContent='cargando y analizando… (el sistema reconoce las preguntas y corre el método completo)'; $('btn_imp').disabled=true;
+  try{const r=await api('/dv/bases','POST',null,fd);
+    const ex=r.expediente||{};
+    $('imp_msg').innerHTML='<span class=ok>hecho: '+esc(ex.lectura||('cargada #'+r.id))+'</span>';
+    await cargarBases(); $('prev').style.display='none';
+    verBase(r.id);   // abre la ficha con el expediente a la vista
+  }catch(e){$('imp_msg').innerHTML='<span class=mal>'+esc(e.message)+'</span>'; if(typeof alarma==='function') alarma(e.message,'al cargar la base')}
+  finally{$('btn_imp').disabled=false}
+}
+function irA(id){const b=[...document.querySelectorAll('nav button')].find(x=>(x.getAttribute('onclick')||'').includes("'"+id+"'")); ver(id,b)}
+function expedienteHTML(x){
+  if(!x) return '<p class="aviso">Esta ola todavía no tiene expediente: pulsa «Analizar de nuevo» y el sistema corre el método completo sobre ella.</p>';
+  if(x.error) return '<p class="aviso">⚠ '+esc(x.error)+'</p>';
+  let h='<h3>Expediente del análisis automático <span class="aviso">— todo lo que el sistema hizo y decidió solo, para tu supervisión</span></h3>';
+  h+='<p><b>'+esc(x.lectura||'')+'</b> <span class="aviso">('+esc(x.generado||'')+(x.ms?' · '+(x.ms/1000).toFixed(1)+' s':'')+')</span></p>';
+  for(const a of (x.avisos||[])) h+='<p><span class="mal">⚠ '+esc(a.texto)+'</span></p>';
+  if((x.corridas||[]).length) h+='<div style="max-height:280px;overflow:auto"><table><tr><th>paso del método</th><th>resultado</th><th></th></tr>'+
+    x.corridas.map(c=>'<tr><td><b>'+esc(c.paso)+'</b><br><small class="aviso">'+esc(c.titulo||'')+'</small></td><td>'+
+      (c.ok?esc(c.resumen||'corrió bien'):'<span class="mal">'+esc(c.error||'error')+'</span>')+'</td><td>'+
+      (c.corrida_id?'<button class="mini ghost" onclick="irA(\'lab\');abrirCorrida('+c.corrida_id+')">ver</button>':'')+'</td></tr>').join('')+'</table></div>';
+  if((x.reconocimiento||[]).length) h+='<p class="aviso"><b>Preguntas reconocidas:</b> '+x.reconocimiento.map(r=>'<code>'+esc(r.pregunta)+'</code> → '+esc(r.variable)+(r.confianza>=1?' ✓':(r.confianza<0.9?' ⚠':''))).join(' · ')+'</p>';
+  if((x.decisiones||[]).length) h+='<p class="aviso"><b>Decisiones que tomó:</b><br>'+x.decisiones.map(d=>'· '+esc(d)).join('<br>')+'</p>';
+  if((x.no_corridos||[]).length) h+='<p class="aviso">'+x.no_corridos.map(d=>esc(d.texto)).join('<br>')+'</p>';
+  return h;
+}
+async function reanalizar(){
+  $('rean_msg').textContent='analizando…'; $('btn_reanalizar').disabled=true;
+  try{const r=await api('/dv/bases/'+BASE_SEL.id+'/analizar','POST',{});
+    $('rean_msg').innerHTML='<span class=ok>listo</span>'; verBase(BASE_SEL.id);
+  }catch(e){$('rean_msg').innerHTML='<span class=mal>'+esc(e.message)+'</span>'; if(typeof alarma==='function') alarma(e.message,'al analizar la ola')}
+  finally{$('btn_reanalizar').disabled=false}
 }
 async function cargarBases(){
   const bs=await api('/dv/bases?pais='+encodeURIComponent($('f_pais').value||'')); BASES=bs;
@@ -460,6 +490,7 @@ async function verBase(id){
   const b=await api('/dv/bases/'+id); BASE_SEL=b; $('base_det').style.display='block'; $('bd_titulo').textContent=b.codigo+' · '+b.titulo;
   $('bd_meta').innerHTML='país '+esc(b.pais)+' · origen '+esc(b.origen)+' · '+b.n_registros+' registros · '+b.n_variables+' variables · ponderación '+esc(b.ponderacion)+' · clase '+esc(b.clase_epistemica)+' · sha256 <code>'+esc(b.sha256.slice(0,12))+'…</code>'+(b.avisos&&b.avisos.length?'<br>'+b.avisos.map(a=>'⚠ '+esc(a)).join('<br>'):'');
   $('bd_estado').value=b.estado;
+  $('bd_exped').innerHTML=expedienteHTML(b.expediente);
   $('bd_dicc').innerHTML='<tr><th>clave canónica</th><th>familia</th><th>variable</th><th>estado</th></tr>'+b.diccionario.map(d=>'<tr><td><code>'+esc(d.clave)+'</code></td><td>'+esc(d.familia)+'</td><td>'+esc(d.variable)+'</td><td><span class="pill '+(d.estado==='confirmado'?'ok':'')+'">'+esc(d.estado)+'</span></td></tr>').join('');
   $('bd_codigos').innerHTML=''; $('lc_buscar').value=''; $('lc_msg').textContent='';
   verDocumentos();
