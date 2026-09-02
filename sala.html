@@ -89,12 +89,13 @@ code{padding:1px 5px} pre{padding:10px;overflow:auto;max-height:420px;line-heigh
 <div id="pop"></div>
 <div id="guia"><div class="caja">
   <h3>Cómo funciona la Sala de Método</h3>
-  <p class="aviso" style="margin-bottom:10px">Cinco mesas, en el orden natural del trabajo. Cada casilla tiene un botón <span class="ayuda inline" style="cursor:default">?</span> que explica qué poner y para qué.</p>
+  <p class="aviso" style="margin-bottom:10px">Seis mesas, en el orden natural del trabajo. Cada casilla tiene un botón <span class="ayuda inline" style="cursor:default">?</span> que explica qué poner y para qué.</p>
   <ol>
     <li><b>Diálogo.</b> Habla con DANTE como con un colega analista. Abre una ola en la sesión: así tiene su libro de códigos (cada código con su etiqueta) y puede calcular tablas y cruces él mismo. Cuando diga algo que es método, márcalo como <b>regla</b> o como <b>paso</b>. No hace falta escribir código: pídele «escríbeme el paso para…».</li>
     <li><b>Bases.</b> Las 65 olas ya están. Tu tarea es confirmar, ola a ola, qué variable es cada pregunta del método (intención, recuerdo, eje gobierno/oposición…). El sistema lo propone; tú confirmas. En cada ola puedes ver su libro de códigos y subir su cuestionario.</li>
     <li><b>Cuaderno.</b> Tu método escrito en pasos y reglas. Revisa los cuatro pasos propuestos, corrígelos y aprueba los que estén bien. Solo tú puedes aprobar.</li>
     <li><b>Laboratorio.</b> Ejecuta un paso sobre una ola y compara con tu SPSS. Si escribes tu resultado, el sistema te dice el desvío.</li>
+    <li><b>Láminas.</b> Elige una ola y unos datos (una pregunta, un cruce o una estimación ya calculada), elige el formato de gráfica, y descarga la lámina con la identidad de la casa, lista para pegar en tu informe.</li>
     <li><b>Evaluación.</b> Cuánto reproduce ya el sistema sin ti. Cuando todos los pasos están aprobados y dentro del umbral, el país está calibrado.</li>
   </ol>
   <p class="aviso">Regla de la casa: el método no se memoriza, se inscribe. Todo lo que marques, guardes o apruebes queda firmado con tu nombre.</p>
@@ -266,6 +267,37 @@ code{padding:1px 5px} pre{padding:10px;overflow:auto;max-height:420px;line-heigh
   </div>
 </section>
 
+
+<!-- 6 · LÁMINAS -->
+<section id="laminas">
+  <h2>6 · Láminas</h2>
+  <div class="intro"><b>Qué es.</b> El taller de gráficas para tus informes. <b>Qué haces aquí.</b> Eliges los datos (una pregunta de una ola, un cruce, o una estimación ya ejecutada en el Laboratorio), eliges el formato, y el sistema arma la lámina con la identidad de Devotion2Vote. <b>Para qué.</b> Descargas la imagen (PNG) y la pegas directamente en tu informe o presentación.</div>
+  <div class="caja">
+    <div class="rej">
+      <select id="lam_fuente" onchange="lamFuente()">
+        <option value="tabla">Distribución de una pregunta (una ola)</option>
+        <option value="cruce">Cruce / matriz de transferencia (una ola)</option>
+        <option value="corrida">Estimación en electores (corrida de p05)</option>
+        <option value="serie">Evolución en el tiempo (corridas de p07)</option>
+      </select>
+      <select id="lam_base"></select>
+      <input id="lam_var" placeholder="pregunta o variable (p. ej. voto_intencion o P10)" value="voto_intencion">
+      <input id="lam_var2" placeholder="segunda variable del cruce (p. ej. voto_recuerdo)" value="voto_recuerdo" style="display:none">
+      <select id="lam_corrida" style="display:none"></select>
+      <select id="lam_formato"></select>
+    </div>
+    <div class="rej">
+      <input id="lam_titulo" placeholder="título de la lámina (se propone solo; puedes cambiarlo)">
+      <input id="lam_sub" placeholder="subtítulo (opcional)">
+    </div>
+    <div class="fila"><button class="acc mini" id="btn_lamina" onclick="generarLamina()">Generar la lámina</button>
+      <button class="mini" id="btn_png" onclick="descargarLamina('png')" style="display:none">Descargar PNG</button>
+      <button class="mini ghost" id="btn_svg" onclick="descargarLamina('svg')" style="display:none">Descargar SVG</button>
+      <span class="aviso" id="lam_msg"></span></div>
+    <div id="lamina_vista" style="margin-top:14px;max-width:100%;overflow:auto;border:1px solid var(--linea);border-radius:12px;background:#fff"></div>
+  </div>
+</section>
+
 </main></div>
 
 <script>
@@ -379,7 +411,7 @@ async function cargarBases(){
   const bs=await api('/dv/bases?pais='+encodeURIComponent($('f_pais').value||'')); BASES=bs;
   $('t_bases').innerHTML='<tr><th>código</th><th>campo</th><th>n</th><th>vars</th><th>pond.</th><th>estado</th><th></th></tr>'+bs.map(b=>'<tr><td><b>'+esc(b.codigo)+'</b><br><small class=aviso>'+esc(b.titulo)+'</small></td><td>'+esc(b.fecha_campo_ini||'—')+'</td><td>'+b.n_registros+'</td><td>'+b.n_variables+'</td><td>'+esc(b.ponderacion)+'</td><td><span class=pill>'+esc(b.estado)+'</span></td><td><button class="mini ghost" onclick="verBase('+b.id+')">abrir</button></td></tr>').join('');
   const opts=bs.map(b=>'<option value="'+b.id+'">'+esc(b.codigo)+' · n='+b.n_registros+'</option>').join('');
-  $('ses_base').innerHTML='<option value="">sin ola abierta (opcional)</option>'+opts; $('l_base').innerHTML=opts;
+  $('ses_base').innerHTML='<option value="">sin ola abierta (opcional)</option>'+opts; $('l_base').innerHTML=opts; $('lam_base').innerHTML=opts; lamFuente();
 }
 async function verBase(id){
   const b=await api('/dv/bases/'+id); BASE_SEL=b; $('base_det').style.display='block'; $('bd_titulo').textContent=b.codigo+' · '+b.titulo;
@@ -491,6 +523,10 @@ const AYUDA={
   btn_imp:{t:'Guardar la base',q:'Segundo paso: guarda la ola en cuarentena con su ficha y sus propuestas de diccionario.',p:'A partir de aquí aparece en «Bases cargadas» y puede abrirse en el Diálogo y el Laboratorio.'},
   lc_buscar:{t:'Libro de códigos',q:'Escribe una variable (P12) o una palabra de la pregunta (votaría) y pulsa Ver; vacío muestra todas.',p:'Es lo que en SPSS ves en la vista de variables con sus etiquetas de valor. DANTE tiene exactamente esta información delante cuando la ola está abierta en la sesión.'},
   doc_arch:{t:'Cuestionario y documentos de la ola',q:'El cuestionario en .docx, .pdf (con texto) o .txt; también un Excel (.xlsx) con tu matriz o cálculos de referencia. Puedes añadir informes o notas.',p:'DANTE lo lee cuando necesita saber el enunciado exacto, el orden de las preguntas o los saltos. Sin cuestionario trabaja solo con las etiquetas de la base.'},
+  lam_fuente:{t:'Qué datos',q:'Distribución (una pregunta de una ola) · Cruce (matriz origen × destino) · Estimación (una corrida de p05 del Laboratorio) · Evolución (las corridas de p07).',p:'Cada fuente ofrece sus formatos de gráfica.'},
+  lam_formato:{t:'Formato de la gráfica',q:'Barras, columnas, matriz de calor, línea de evolución o tabla limpia.',p:'El mismo dato en el formato que pida tu informe.'},
+  btn_lamina:{t:'Generar',q:'Arma la lámina (1280×720, formato de diapositiva) con la identidad de la casa.',p:'Revísala; cambia título o subtítulo y vuelve a generar si quieres.'},
+  btn_png:{t:'Descargar PNG',q:'Imagen en alta resolución (2560×1440).',p:'Lista para pegar en Pages, PowerPoint, Word o WhatsApp.'},
   f_pais:{t:'Filtro por país',q:'dom para ver solo las olas dominicanas.',p:'Filtra la lista.'},
   d_var:{t:'Variable de la base',q:'El nombre tal como está en el SPSS: P12, P25, P41…',p:'Es la variable que vas a asociar a una pregunta del método.'},
   d_clave:{t:'Pregunta del método',q:'El nombre canónico: voto_intencion, voto_recuerdo, voto_secreto, eje_gob_opos, simpatia_partido, problema_principal… (los ves en la tabla de arriba).',p:'El cuaderno trabaja con estos nombres, no con P12 o P25, porque cambian de ola en ola.'},
@@ -525,6 +561,173 @@ const AYUDA={
   pa_nota:{t:'Por qué se cambia',q:'Una frase.',p:'Trazabilidad de las decisiones metodológicas.'},
   btn_param:{t:'Fijar',q:'Guarda el nuevo valor (solo director).',p:'Sustituye al anterior desde ese momento.'}
 };
+
+/* ---------- 6 · láminas ---------- */
+const PAL=['#C9614F','#2E6FB0','#B8912E','#1F8A5C','#8455B8','#C24E74'];
+const colorSerie=i=>i<PAL.length?PAL[i]:'#9A938C'; // más de 6: gris neutro (nunca repetir tono)
+const FORMATOS_LAM={tabla:[['barrash','Barras horizontales'],['columnas','Columnas'],['tabla','Tabla limpia']],
+  cruce:[['calor','Matriz de calor'],['tabla','Tabla limpia']],
+  corrida:[['barrash','Barras (electores)'],['barraspct','Barras (% sobre válidos)'],['tabla','Tabla limpia']],
+  serie:[['linea','Línea de evolución']]};
+let LAM_SVG=null;
+function lamFuente(){
+  const f=$('lam_fuente').value;
+  $('lam_var').style.display=(f==='tabla'||f==='cruce')?'':'none';
+  $('lam_var2').style.display=(f==='cruce')?'':'none';
+  $('lam_base').style.display=(f==='tabla'||f==='cruce')?'':'none';
+  $('lam_corrida').style.display=(f==='corrida')?'':'none';
+  $('lam_formato').innerHTML=FORMATOS_LAM[f].map(x=>'<option value="'+x[0]+'">'+x[1]+'</option>').join('');
+  if(f==='corrida') cargarCorridasLam('p05_matriz_electores_salom');
+}
+async function cargarCorridasLam(paso){
+  try{const cs=await api('/dv/corridas?paso_clave='+paso);
+    $('lam_corrida').innerHTML=cs.filter(c=>c.ok).map(c=>'<option value="'+c.id+'">corrida #'+c.id+' · ola '+c.base_id+' · '+new Date(c.creado).toLocaleDateString()+'</option>').join('')||'<option value="">(aún no hay corridas de p05: ejecútalo en el Laboratorio)</option>';
+  }catch(e){}
+}
+const fmtN=v=>v>=1000000?(v/1000000).toFixed(2).replace('.',',')+' M':v>=10000?Math.round(v/1000)+' mil':String(Math.round(v)).replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+function corto(t,n){t=String(t??'');t=t.replace(/\s*\(no mencionar\)\s*/i,'');return t.length>n?t.slice(0,n-1)+'…':t}
+function svgTxt(t){return String(t??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+
+function laminaMarco(cuerpo,titulo,sub,pie){
+  const W=1280,H=720;
+  return '<svg xmlns="http://www.w3.org/2000/svg" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" font-family="Montserrat,Helvetica,Arial,sans-serif">'
+   +'<rect width="'+W+'" height="'+H+'" fill="#FBF8F4"/>'
+   +'<rect x="0" y="0" width="'+W+'" height="6" fill="#E67C6C"/>'
+   +'<text x="64" y="86" font-size="34" font-weight="600" fill="#282827" font-family="Bodoni Moda,Didot,Times New Roman,serif">'+svgTxt(titulo)+'</text>'
+   +(sub?'<text x="64" y="118" font-size="17" fill="#7A746E">'+svgTxt(sub)+'</text>':'')
+   +cuerpo
+   +'<line x1="64" y1="'+(H-56)+'" x2="'+(W-64)+'" y2="'+(H-56)+'" stroke="rgba(40,40,39,.14)"/>'
+   +'<text x="64" y="'+(H-30)+'" font-size="13" fill="#7A746E">'+svgTxt(pie)+'</text>'
+   +'<text x="'+(W-64)+'" y="'+(H-30)+'" font-size="13" fill="#7A746E" text-anchor="end">Devotion2Vote · Dawhole Lab</text>'
+   +'</svg>';
+}
+function gBarrasH(items,unidad){ // items [{etiqueta, valor, texto}]
+  const x0=300,x1=1216,y0=150,y1=600;
+  const paso=(y1-y0)/items.length, alto=Math.min(56,Math.floor(paso-8)), sep=paso-alto;
+  const max=Math.max(...items.map(i=>i.valor));
+  let g='';
+  items.forEach((it,i)=>{
+    const y=y0+i*paso+sep/2, w=Math.max(3,(x1-x0-140)*it.valor/max), c=colorSerie(i);
+    g+='<rect x="'+x0+'" y="'+y+'" width="'+w+'" height="'+alto+'" rx="4" fill="'+c+'"><title>'+svgTxt(it.etiqueta+': '+it.texto)+'</title></rect>'
+     +'<text x="'+(x0-14)+'" y="'+(y+alto/2+6)+'" font-size="17" fill="#282827" text-anchor="end">'+svgTxt(corto(it.etiqueta,26))+'</text>'
+     +'<text x="'+(x0+w+12)+'" y="'+(y+alto/2+6)+'" font-size="17" font-weight="600" fill="#282827">'+svgTxt(it.texto)+'</text>';
+  });
+  return g;
+}
+function gColumnas(items){
+  const y1=608,y0=170,x0=90,anchoTot=1120,ancho=Math.min(110,Math.floor(anchoTot/items.length)-16);
+  const max=Math.max(...items.map(i=>i.valor));
+  let g='';
+  items.forEach((it,i)=>{
+    const x=x0+i*(anchoTot/items.length)+((anchoTot/items.length)-ancho)/2, h=Math.max(3,(y1-y0)*it.valor/max), c=colorSerie(i);
+    g+='<rect x="'+x+'" y="'+(y1-h)+'" width="'+ancho+'" height="'+h+'" rx="4" fill="'+c+'"><title>'+svgTxt(it.etiqueta+': '+it.texto)+'</title></rect>'
+     +'<text x="'+(x+ancho/2)+'" y="'+(y1-h-10)+'" font-size="17" font-weight="600" fill="#282827" text-anchor="middle">'+svgTxt(it.texto)+'</text>'
+     +'<text x="'+(x+ancho/2)+'" y="'+(y1+24)+'" font-size="14" fill="#282827" text-anchor="middle">'+svgTxt(corto(it.etiqueta,16))+'</text>';
+  });
+  g+='<line x1="'+x0+'" y1="'+y1+'" x2="'+(x0+anchoTot)+'" y2="'+y1+'" stroke="rgba(40,40,39,.3)"/>';
+  return g;
+}
+function gCalor(filasEt,colsEt,celdas){ // celdas[i][j]={pct,n}
+  const x0=280,y0=190,W=1216-x0,H=560-y0;
+  const cw=Math.min(150,W/colsEt.length), ch=Math.min(64,H/filasEt.length);
+  let g='';
+  colsEt.forEach((cl,j)=>{g+='<text x="'+(x0+j*cw+cw/2)+'" y="'+(y0-14)+'" font-size="13" fill="#282827" text-anchor="middle">'+svgTxt(corto(cl,16))+'</text>'});
+  filasEt.forEach((fl,i)=>{
+    g+='<text x="'+(x0-12)+'" y="'+(y0+i*ch+ch/2+5)+'" font-size="14" fill="#282827" text-anchor="end">'+svgTxt(corto(fl,26))+'</text>';
+    colsEt.forEach((cl,j)=>{
+      const c=celdas[i][j]||{pct:0,n:0}, t=Math.min(1,(c.pct||0)/100);
+      const claro=[251,240,235], oscuro=[160,58,38];
+      const col='rgb('+claro.map((v,k)=>Math.round(v+(oscuro[k]-v)*Math.pow(t,.7))).join(',')+')';
+      g+='<rect x="'+(x0+j*cw+1)+'" y="'+(y0+i*ch+1)+'" width="'+(cw-2)+'" height="'+(ch-2)+'" rx="3" fill="'+col+'"><title>'+svgTxt(fl+' → '+cl+': '+(c.pct??0)+'% ('+(c.n||0)+' casos)')+'</title></rect>';
+      if((c.pct||0)>=1) g+='<text x="'+(x0+j*cw+cw/2)+'" y="'+(y0+i*ch+ch/2+5)+'" font-size="13" '+(t>.55?'fill="#FFFFFF"':'fill="#282827"')+' text-anchor="middle">'+(Math.round(c.pct*10)/10)+'</text>';
+    });
+  });
+  g+='<text x="'+x0+'" y="'+(y0+filasEt.length*ch+30)+'" font-size="13" fill="#7A746E">Cada fila suma 100 %: de cada origen (fila), a dónde va hoy (columnas).</text>';
+  return g;
+}
+function gLinea(series,fechas){ // series [{nombre, puntos:[{x(fecha idx), y}]}]
+  const x0=110,x1=1030,y0=170,y1=600;
+  const maxY=Math.max(...series.flatMap(s=>s.puntos.map(p=>p.y)))*1.12;
+  const X=i=>x0+(x1-x0)*(fechas.length<2?0.5:i/(fechas.length-1)), Y=v=>y1-(y1-y0)*v/maxY;
+  let g='';
+  for(let v=0; v<=maxY; v+=(maxY>40?10:5)) g+='<line x1="'+x0+'" y1="'+Y(v)+'" x2="'+x1+'" y2="'+Y(v)+'" stroke="rgba(40,40,39,.08)"/>'+'<text x="'+(x0-10)+'" y="'+(Y(v)+4)+'" font-size="12" fill="#7A746E" text-anchor="end">'+v+'</text>';
+  fechas.forEach((f,i)=>{ if(fechas.length<=14||i%Math.ceil(fechas.length/12)===0) g+='<text x="'+X(i)+'" y="'+(y1+24)+'" font-size="12" fill="#7A746E" text-anchor="middle">'+svgTxt(f)+'</text>'});
+  series.forEach((s,k)=>{
+    const c=colorSerie(k);
+    const d=s.puntos.map((p,i)=>(i?'L':'M')+X(p.x)+' '+Y(p.y)).join(' ');
+    g+='<path d="'+d+'" fill="none" stroke="'+c+'" stroke-width="2.5" stroke-linejoin="round"/>';
+    const u=s.puntos[s.puntos.length-1];
+    g+='<circle cx="'+X(u.x)+'" cy="'+Y(u.y)+'" r="5" fill="'+c+'" stroke="#FBF8F4" stroke-width="2"><title>'+svgTxt(s.nombre+': '+u.y)+'</title></circle>'
+     +'<text x="'+(X(u.x)+12)+'" y="'+(Y(u.y)+5)+'" font-size="15" font-weight="600" fill="#282827">'+svgTxt(corto(s.nombre,20)+' · '+String(u.y).replace('.',','))+'</text>';
+  });
+  return g;
+}
+function gTabla(cab,filas){
+  const x0=64,y0=170,ch=40,cw=(1152)/cab.length;
+  let g='';
+  cab.forEach((c,j)=>{g+='<text x="'+(x0+j*cw+8)+'" y="'+(y0-12)+'" font-size="14" font-weight="700" fill="#282827">'+svgTxt(corto(c,Math.floor(cw/8)))+'</text>'});
+  g+='<line x1="'+x0+'" y1="'+(y0-4)+'" x2="'+(x0+cab.length*cw)+'" y2="'+(y0-4)+'" stroke="#282827" stroke-width="1.5"/>';
+  filas.slice(0,11).forEach((f,i)=>{
+    const y=y0+i*ch+22;
+    if(i%2) g+='<rect x="'+x0+'" y="'+(y0+i*ch)+'" width="'+(cab.length*cw)+'" height="'+ch+'" fill="#F3EEE7"/>';
+    f.forEach((v,j)=>{g+='<text x="'+(x0+j*cw+8)+'" y="'+y+'" font-size="15" fill="#282827">'+svgTxt(corto(v,Math.floor(cw/7.5)))+'</text>'});
+  });
+  return g;
+}
+async function generarLamina(){
+  const f=$('lam_fuente').value, fmt=$('lam_formato').value; $('lam_msg').textContent='calculando…';
+  try{
+    let cuerpo='', tituloAuto='', pie='';
+    if(f==='tabla'){
+      const b=$('lam_base'); const cod=b.options[b.selectedIndex]?.text.split(' ·')[0]||'';
+      const t=await api('/dv/analisis/tabla?base='+encodeURIComponent(cod)+'&variable='+encodeURIComponent($('lam_var').value.trim()));
+      const items=t.filas.filter(x=>x.etiqueta&&x.etiqueta!=='(sin respuesta registrada)').slice(0,10).map(x=>({etiqueta:x.etiqueta,valor:x.pct||0,texto:(x.pct??0).toFixed(1).replace('.',',')+' %'}));
+      cuerpo=(fmt==='barrash')?gBarrasH(items):(fmt==='columnas')?gColumnas(items):gTabla(['Respuesta','Casos','%'],t.filas.map(x=>[x.etiqueta||x.codigo,String(x.n),(x.pct??0).toFixed(1).replace('.',',')+' %']));
+      tituloAuto=corto(t.pregunta||t.variable,70); pie='Ola '+t.ola+' · n='+t.n_denominador+' · '+t.variable+' · muestra '+(t.ponderacion||'');
+    }else if(f==='cruce'){
+      const b=$('lam_base'); const cod=b.options[b.selectedIndex]?.text.split(' ·')[0]||'';
+      const cr=await api('/dv/analisis/cruce?base='+encodeURIComponent(cod)+'&fila='+encodeURIComponent($('lam_var2').value.trim())+'&columna='+encodeURIComponent($('lam_var').value.trim()));
+      const filasV=cr.filas.filter(x=>x.etiqueta).slice(0,8);
+      const colsSet=[]; filasV.forEach(fv=>fv.celdas.forEach(c=>{if(c.etiqueta&&!colsSet.includes(c.etiqueta))colsSet.push(c.etiqueta)}));
+      const colsUtiles=colsSet.filter(cl=>filasV.some(fv=>{const c=fv.celdas.find(x=>x.etiqueta===cl);return c&&(c.pct||0)>=1}));
+      const cols=colsUtiles.slice(0,7);
+      const celdas=filasV.map(fv=>cols.map(cl=>{const c=fv.celdas.find(x=>x.etiqueta===cl);return c?{pct:c.pct||0,n:c.n}:{pct:0,n:0}}));
+      cuerpo=(fmt==='calor')?gCalor(filasV.map(x=>x.etiqueta),cols,celdas):gTabla(['Origen \\\\ Destino'].concat(cols.map(c=>corto(c,14))),filasV.map((fv,i)=>[fv.etiqueta].concat(cols.map((cl,j)=>String(celdas[i][j].pct)+' %'))));
+      tituloAuto='Transferencia: '+corto(cr.fila,12)+' × '+corto(cr.columna,12); pie='Ola '+cr.ola+' · n='+cr.n+' · % por fila';
+    }else if(f==='corrida'){
+      const c=await api('/dv/corridas/'+$('lam_corrida').value);
+      const est=c.resultado&&c.resultado.estimacion; if(!est) throw new Error('Esa corrida no tiene estimación (¿es de p05?).');
+      const items=Object.entries(est).filter(([k,v])=>v.pct_validos!=null).slice(0,8).map(([k,v])=>({etiqueta:k,
+        valor:fmt==='barraspct'?v.pct_validos:v.electores,
+        texto:fmt==='barraspct'?String(v.pct_validos).replace('.',',')+' %':fmtN(v.electores)+' ('+String(v.pct_validos).replace('.',',')+' %)'}));
+      cuerpo=(fmt==='tabla')?gTabla(['Candidatura','Electores','% válidos'],Object.entries(est).map(([k,v])=>[k,fmtN(v.electores),v.pct_validos==null?'—':String(v.pct_validos).replace('.',',')+' %'])):gBarrasH(items);
+      tituloAuto='Estimación en electores · matriz de transferencia';
+      pie='Corrida #'+c.id+' · p05 (metodología Salom) · válidos '+fmtN(c.resultado.validos_estimados)+' · participación '+String(c.resultado.participacion_estimada_pct).replace('.',',')+' %';
+    }else{ // serie
+      const cs=await api('/dv/corridas?paso_clave=p07_fila_tracking&con_resultado=true');
+      const ok=cs.filter(c=>c.ok&&c.resultado&&c.resultado.candidatos).reverse();
+      if(!ok.length) throw new Error('Aún no hay corridas de p07: ejecuta p07 sobre varias olas en el Laboratorio.');
+      const fechas=ok.map(c=>String(c.resultado.fecha_campo||c.resultado.ola).slice(0,7));
+      const nombres=[]; ok.forEach(c=>Object.keys(c.resultado.candidatos).forEach(n=>{if(!nombres.includes(n))nombres.push(n)}));
+      const series=nombres.slice(0,6).map(n=>({nombre:n,puntos:ok.map((c,i)=>({x:i,y:(c.resultado.candidatos[n]||{}).pct_validos})).filter(p=>p.y!=null)}));
+      cuerpo=gLinea(series,fechas);
+      tituloAuto='Evolución de la intención de voto (% sobre válidos)'; pie=ok.length+' olas · corridas de p07 · % sobre válidos por ola';
+    }
+    const titulo=$('lam_titulo').value.trim()||tituloAuto; if(!$('lam_titulo').value.trim()) $('lam_titulo').value=tituloAuto;
+    LAM_SVG=laminaMarco(cuerpo,titulo,$('lam_sub').value.trim(),pie);
+    $('lamina_vista').innerHTML=LAM_SVG; $('btn_png').style.display='inline-block'; $('btn_svg').style.display='inline-block'; $('lam_msg').textContent='';
+  }catch(e){$('lam_msg').innerHTML='<span class=mal>'+esc(e.message)+'</span>'}
+}
+function descargarLamina(tipo){
+  if(!LAM_SVG) return;
+  const nombre=($('lam_titulo').value.trim()||'lamina').toLowerCase().replace(/[^a-z0-9áéíóúñ]+/gi,'_').slice(0,60);
+  if(tipo==='svg'){const b=new Blob([LAM_SVG],{type:'image/svg+xml'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=nombre+'.svg';a.click();return}
+  const img=new Image(); const url=URL.createObjectURL(new Blob([LAM_SVG],{type:'image/svg+xml'}));
+  img.onload=()=>{const c=document.createElement('canvas');c.width=2560;c.height=1440;const x=c.getContext('2d');x.fillStyle='#FBF8F4';x.fillRect(0,0,c.width,c.height);x.drawImage(img,0,0,c.width,c.height);
+    c.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=nombre+'.png';a.click()},'image/png')};
+  img.src=url;
+}
+
 function montarAyudas(){
   for(const [id,a] of Object.entries(AYUDA)){
     const el=document.getElementById(id); if(!el||el.dataset.ayuda) continue; el.dataset.ayuda='1';
