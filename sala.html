@@ -287,13 +287,15 @@ code{padding:1px 5px} pre{padding:10px;overflow:auto;max-height:420px;line-heigh
       <select id="lam_fuente" onchange="lamFuente()">
         <option value="tabla">Distribución de una pregunta (una ola)</option>
         <option value="cruce">Cruce / matriz de transferencia (una ola)</option>
-        <option value="corrida">Estimación en electores (corrida de p05)</option>
+        <option value="corrida">Resultado de un paso (cualquier corrida del Laboratorio)</option>
         <option value="serie">Evolución en el tiempo (corridas de p07)</option>
       </select>
       <select id="lam_base"></select>
       <input id="lam_var" placeholder="pregunta o variable (p. ej. voto_intencion o P10)" value="voto_intencion">
       <input id="lam_var2" placeholder="segunda variable del cruce (p. ej. voto_recuerdo)" value="voto_recuerdo" style="display:none">
-      <select id="lam_corrida" style="display:none"></select>
+      <select id="lam_paso" style="display:none" onchange="lamPasoElegido()"></select>
+      <select id="lam_corrida" style="display:none" onchange="lamCorridaElegida()"></select>
+      <select id="lam_campo" style="display:none"></select>
       <select id="lam_formato"></select>
     </div>
     <div class="rej">
@@ -577,6 +579,8 @@ const AYUDA={
   lc_buscar:{t:'Libro de códigos',q:'Escribe una variable (P12) o una palabra de la pregunta (votaría) y pulsa Ver; vacío muestra todas.',p:'Es lo que en SPSS ves en la vista de variables con sus etiquetas de valor. DANTE tiene exactamente esta información delante cuando la ola está abierta en la sesión.'},
   doc_arch:{t:'Cuestionario y documentos de la ola',q:'El cuestionario en .docx, .pdf (con texto) o .txt; también un Excel (.xlsx) con tu matriz o cálculos de referencia. Puedes añadir informes o notas.',p:'DANTE lo lee cuando necesita saber el enunciado exacto, el orden de las preguntas o los saltos. Sin cuestionario trabaja solo con las etiquetas de la base.'},
   lam_fuente:{t:'Qué datos',q:'Distribución (una pregunta de una ola) · Cruce (matriz origen × destino) · Estimación (una corrida de p05 del Laboratorio) · Evolución (las corridas de p07).',p:'Cada fuente ofrece sus formatos de gráfica.'},
+  lam_paso:{t:'Paso del método',q:'Cualquier paso del cuaderno con corridas, incluidos los nuevos que escribas con DANTE (recodificaciones, etc.).',p:'Si tu paso nuevo aún no aparece con corridas, ejecútalo antes en el Laboratorio sobre las olas que quieras.'},
+  lam_campo:{t:'Qué cifra graficar',q:'El sistema lee el resultado de la corrida y te ofrece todo lo que tiene números: estimaciones, matrices, repartos…',p:'El mismo paso puede dar varias gráficas distintas.'},
   lam_formato:{t:'Formato de la gráfica',q:'Barras, columnas, matriz de calor, línea de evolución o tabla limpia.',p:'El mismo dato en el formato que pida tu informe.'},
   btn_lamina:{t:'Generar',q:'Arma la lámina (1280×720, formato de diapositiva) con la identidad de la casa.',p:'Revísala; cambia título o subtítulo y vuelve a generar si quieres.'},
   btn_png:{t:'Descargar PNG',q:'Imagen en alta resolución (2560×1440).',p:'Lista para pegar en Pages, PowerPoint, Word o WhatsApp.'},
@@ -621,21 +625,59 @@ const PAL=['#C9614F','#2E6FB0','#B8912E','#1F8A5C','#8455B8','#C24E74'];
 const colorSerie=i=>i<PAL.length?PAL[i]:'#9A938C'; // más de 6: gris neutro (nunca repetir tono)
 const FORMATOS_LAM={tabla:[['barrash','Barras horizontales'],['columnas','Columnas'],['tabla','Tabla limpia']],
   cruce:[['calor','Matriz de calor'],['tabla','Tabla limpia']],
-  corrida:[['barrash','Barras (electores)'],['barraspct','Barras (% sobre válidos)'],['tabla','Tabla limpia']],
   serie:[['linea','Línea de evolución']]};
-let LAM_SVG=null;
+let LAM_SVG=null, LAM_CORRIDA=null;
+const esNum=v=>typeof v==='number'&&isFinite(v);
+const esMetrica=k=>/pct|elector|casos|^n(_|$)|valor|coste|ms$|total|median|promedio|diferencia/i.test(k);
+function camposGraficables(res){ // encuentra en el resultado de CUALQUIER paso lo que se puede graficar
+  const out=[];
+  for(const [k,v] of Object.entries(res||{})){
+    if(!v||typeof v!=='object'||Array.isArray(v)) continue;
+    const vals=Object.values(v);
+    if(vals.length&&vals.every(esNum)){ out.push({campo:k,sub:null,tipo:'kv',rotulo:k.replace(/_/g,' ')}); continue }
+    if(vals.length&&vals.every(x=>x&&typeof x==='object'&&!Array.isArray(x))){
+      const subclaves=[...new Set(vals.flatMap(x=>Object.keys(x)))];
+      const metricas=subclaves.filter(esMetrica).length>=subclaves.length/2;
+      const todasNum=vals.every(x=>Object.values(x).every(v2=>esNum(v2)||v2==null));
+      if(todasNum&&!metricas&&subclaves.length>2){ out.push({campo:k,sub:null,tipo:'matriz',rotulo:k.replace(/_/g,' ')+' (cruce)'}); continue }
+      const subNum={};
+      for(const x of vals) for(const [sk,sv] of Object.entries(x)) if(esNum(sv)) subNum[sk]=(subNum[sk]||0)+1;
+      for(const sk of Object.keys(subNum)) if(subNum[sk]>=vals.length*0.6) out.push({campo:k,sub:sk,tipo:'kv',rotulo:k.replace(/_/g,' ')+' · '+sk.replace(/_/g,' ')});
+    }
+  }
+  return out;
+}
 function lamFuente(){
   const f=$('lam_fuente').value;
   $('lam_var').style.display=(f==='tabla'||f==='cruce')?'':'none';
   $('lam_var2').style.display=(f==='cruce')?'':'none';
   $('lam_base').style.display=(f==='tabla'||f==='cruce')?'':'none';
-  $('lam_corrida').style.display=(f==='corrida')?'':'none';
-  $('lam_formato').innerHTML=FORMATOS_LAM[f].map(x=>'<option value="'+x[0]+'">'+x[1]+'</option>').join('');
-  if(f==='corrida') cargarCorridasLam('p05_matriz_electores_salom');
+  $('lam_paso').style.display=$('lam_corrida').style.display=$('lam_campo').style.display=(f==='corrida')?'':'none';
+  if(FORMATOS_LAM[f]) $('lam_formato').innerHTML=FORMATOS_LAM[f].map(x=>'<option value="'+x[0]+'">'+x[1]+'</option>').join('');
+  if(f==='corrida') cargarPasosLam();
 }
-async function cargarCorridasLam(paso){
-  try{const cs=await api('/dv/corridas?paso_clave='+paso);
-    $('lam_corrida').innerHTML=cs.filter(c=>c.ok).map(c=>'<option value="'+c.id+'">corrida #'+c.id+' · ola '+c.base_id+' · '+new Date(c.creado).toLocaleDateString()+'</option>').join('')||'<option value="">(aún no hay corridas de p05: ejecútalo en el Laboratorio)</option>';
+async function cargarPasosLam(){
+  try{const ps=await api('/dv/cuaderno');
+    $('lam_paso').innerHTML=ps.filter(p=>p.tiene_codigo).map(p=>'<option value="'+esc(p.clave)+'"'+(p.clave==='p05_matriz_electores_salom'?' selected':'')+'>'+esc(p.clave)+' · '+esc(p.titulo)+'</option>').join('');
+    lamPasoElegido();
+  }catch(e){}
+}
+async function lamPasoElegido(){
+  try{const cs=await api('/dv/corridas?paso_clave='+encodeURIComponent($('lam_paso').value));
+    const ok=cs.filter(c=>c.ok);
+    $('lam_corrida').innerHTML=ok.map(c=>'<option value="'+c.id+'">corrida #'+c.id+' · ola '+esc((BASES.find(b=>b.id===c.base_id)||{}).codigo||c.base_id)+' · '+new Date(c.creado).toLocaleDateString()+'</option>').join('')||'<option value="">(este paso aún no tiene corridas: ejecútalo en el Laboratorio)</option>';
+    if(ok.length) lamCorridaElegida(); else {$('lam_campo').innerHTML=''; LAM_CORRIDA=null}
+  }catch(e){}
+}
+async function lamCorridaElegida(){
+  if(!$('lam_corrida').value){LAM_CORRIDA=null;return}
+  try{LAM_CORRIDA=await api('/dv/corridas/'+$('lam_corrida').value);
+    const cs=camposGraficables(LAM_CORRIDA.resultado);
+    $('lam_campo').innerHTML=cs.length?cs.map((c,i)=>'<option value="'+i+'"'+(c.campo==='estimacion'&&c.sub==='pct_validos'?' selected':'')+'>'+esc(c.rotulo)+'</option>').join(''):'<option value="">(este resultado no tiene cifras graficables: usa Tabla limpia)</option>';
+    $('lam_campo').dataset.campos=JSON.stringify(cs);
+    const c0=cs[$('lam_campo').selectedIndex]||cs[0];
+    $('lam_formato').innerHTML=(c0&&c0.tipo==='matriz')?'<option value="calor">Matriz de calor</option><option value="tabla">Tabla limpia</option>'
+      :'<option value="barrash">Barras horizontales</option><option value="columnas">Columnas</option><option value="tabla">Tabla limpia</option>';
   }catch(e){}
 }
 const fmtN=v=>v>=1000000?(v/1000000).toFixed(2).replace('.',',')+' M':v>=10000?Math.round(v/1000)+' mil':String(Math.round(v)).replace(/\B(?=(\d{3})+(?!\d))/g,'.');
@@ -749,14 +791,32 @@ async function generarLamina(){
       cuerpo=(fmt==='calor')?gCalor(filasV.map(x=>x.etiqueta),cols,celdas):gTabla(['Origen \\\\ Destino'].concat(cols.map(c=>corto(c,14))),filasV.map((fv,i)=>[fv.etiqueta].concat(cols.map((cl,j)=>String(celdas[i][j].pct)+' %'))));
       tituloAuto='Transferencia: '+corto(cr.fila,12)+' × '+corto(cr.columna,12); pie='Ola '+cr.ola+' · n='+cr.n+' · % por fila';
     }else if(f==='corrida'){
-      const c=await api('/dv/corridas/'+$('lam_corrida').value);
-      const est=c.resultado&&c.resultado.estimacion; if(!est) throw new Error('Esa corrida no tiene estimación (¿es de p05?).');
-      const items=Object.entries(est).filter(([k,v])=>v.pct_validos!=null).slice(0,8).map(([k,v])=>({etiqueta:k,
-        valor:fmt==='barraspct'?v.pct_validos:v.electores,
-        texto:fmt==='barraspct'?String(v.pct_validos).replace('.',',')+' %':fmtN(v.electores)+' ('+String(v.pct_validos).replace('.',',')+' %)'}));
-      cuerpo=(fmt==='tabla')?gTabla(['Candidatura','Electores','% válidos'],Object.entries(est).map(([k,v])=>[k,fmtN(v.electores),v.pct_validos==null?'—':String(v.pct_validos).replace('.',',')+' %'])):gBarrasH(items);
-      tituloAuto='Estimación en electores · matriz de transferencia';
-      pie='Corrida #'+c.id+' · p05 (metodología Salom) · válidos '+fmtN(c.resultado.validos_estimados)+' · participación '+String(c.resultado.participacion_estimada_pct).replace('.',',')+' %';
+      if(!LAM_CORRIDA) await lamCorridaElegida();
+      const c=LAM_CORRIDA; if(!c) throw new Error('Elige un paso con corridas (ejecútalo antes en el Laboratorio).');
+      const campos=JSON.parse($('lam_campo').dataset.campos||'[]');
+      const sel=campos[$('lam_campo').selectedIndex]||campos[0];
+      const ola=(BASES.find(b=>b.id===c.base_id)||{}).codigo||c.base_id;
+      if(!sel){ // sin cifras graficables: tabla de los valores sueltos
+        const filas=Object.entries(c.resultado||{}).filter(([k,v])=>typeof v!=='object').map(([k,v])=>[k,String(v)]);
+        cuerpo=gTabla(['Concepto','Valor'],filas);
+      }else if(sel.tipo==='matriz'){
+        const m=c.resultado[sel.campo];
+        const filasEt=Object.keys(m).slice(0,8);
+        const colsSet=[]; filasEt.forEach(fk=>Object.keys(m[fk]).forEach(ck=>{if(!colsSet.includes(ck))colsSet.push(ck)}));
+        const cols=colsSet.slice(0,7);
+        const maxv=Math.max(...filasEt.flatMap(fk=>cols.map(ck=>m[fk][ck]||0)))||1;
+        const celdas=filasEt.map(fk=>cols.map(ck=>({pct:100*(m[fk][ck]||0)/maxv,n:m[fk][ck]||0})));
+        if(fmt==='calor'){cuerpo=gCalor(filasEt.map(x=>corto(x,24)),cols.map(x=>corto(x,14)),celdas)}
+        else{cuerpo=gTabla([sel.campo].concat(cols.map(x=>corto(x,12))),filasEt.map((fk,i)=>[corto(fk,20)].concat(cols.map(ck=>fmtN(m[fk][ck]||0)))))}
+      }else{
+        const obj=c.resultado[sel.campo];
+        const items=Object.entries(obj).map(([k,v])=>({etiqueta:k,valor:sel.sub?(v[sel.sub]??0):v}))
+          .filter(x=>esNum(x.valor)).sort((a,b)=>b.valor-a.valor).slice(0,10)
+          .map(x=>({...x,texto:String(Math.round(x.valor*10)/10).replace('.',',')+(String(sel.sub||'').includes('pct')?' %':'')}));
+        cuerpo=(fmt==='tabla')?gTabla([sel.campo,sel.sub||'valor'],items.map(x=>[x.etiqueta,x.texto])):(fmt==='columnas')?gColumnas(items):gBarrasH(items);
+      }
+      tituloAuto=(sel?sel.rotulo.replace(/_/g,' '):'Resultado')+' · '+c.paso_clave.replace(/_/g,' ');
+      pie='Corrida #'+c.id+' · '+c.paso_clave+' v'+c.version+' · ola '+ola+' · '+new Date(c.creado).toLocaleDateString();
     }else{ // serie
       const cs=await api('/dv/corridas?paso_clave=p07_fila_tracking&con_resultado=true');
       const ok=cs.filter(c=>c.ok&&c.resultado&&c.resultado.candidatos).reverse();
