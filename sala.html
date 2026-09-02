@@ -489,8 +489,11 @@ async function correr(){
 }
 async function abrirCorrida(id){
   try{const c=await api('/dv/corridas/'+id);
-    $('l_res').textContent='— corrida #'+c.id+' · '+c.paso_clave+' v'+c.version+' · ola '+((BASES.find(b=>b.id===c.base_id)||{}).codigo||c.base_id)+' · '+new Date(c.creado).toLocaleString()+' —\n\n'+JSON.stringify(c.resultado??{error:c.error},null,1);
-    $('l_res').scrollIntoView({behavior:'smooth'});
+    const ola=(BASES.find(b=>b.id===c.base_id)||{}).codigo||c.base_id;
+    $('l_kpi').innerHTML='<div><b>'+(c.ok?'✓':'✗')+'</b><small>corrida #'+c.id+'</small></div><div><b>'+esc(String(ola))+'</b><small>ola</small></div><div><b>'+esc(c.paso_clave.split('_')[0])+' v'+c.version+'</b><small>paso</small></div><div><b>'+(c.desvio==null?'—':c.desvio)+'</b><small>desvío</small></div>';
+    $('l_res').textContent='— corrida #'+c.id+' · '+c.paso_clave+' v'+c.version+' · ola '+ola+' · '+new Date(c.creado).toLocaleString()+' —\n\n'+JSON.stringify(c.resultado??{error:c.error},null,1);
+    const caja=$('l_res'); caja.style.transition='background .15s'; caja.style.background='#F3E2DC'; setTimeout(()=>{caja.style.background=''},400);
+    caja.scrollIntoView({behavior:'smooth',block:'nearest'});
   }catch(e){alert(e.message)}
 }
 async function cargarCorridas(){
