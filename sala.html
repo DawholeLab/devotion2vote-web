@@ -240,7 +240,8 @@ code{padding:1px 5px} pre{padding:10px;overflow:auto;max-height:420px;line-heigh
       <textarea id="l_ref" placeholder='Lo que te dio SPSS, con los mismos nombres que devuelve el paso — p. ej. {"fidelidad_ganador_pct": 63.7}' style="min-height:56px"></textarea>
       <div class="fila"><button class="acc" id="btn_correr" onclick="correr()">Ejecutar</button><span class="aviso" id="l_msg"></span></div>
       <h3>Últimas ejecuciones</h3>
-      <div style="max-height:320px;overflow:auto"><table id="t_corridas"></table></div>
+      <div class="fila"><select id="f_corr_paso" style="width:auto;margin:0" onchange="cargarCorridas()"><option value="">todos los pasos</option></select><span class="aviso">Pulsa «abrir» en cualquier fila para ver el resultado completo de esa ola (sale abajo, en «Resultado»).</span></div>
+      <div style="max-height:420px;overflow:auto"><table id="t_corridas"></table></div>
     </div>
     <div class="caja">
       <h3 style="margin-top:0">Resultado</h3>
@@ -486,9 +487,19 @@ async function correr(){
     $('l_res').textContent=JSON.stringify(r.resultado??{error:r.error},null,1); cargarCorridas(); cargarEval();
   }catch(e){$('l_msg').innerHTML='<span class=mal>'+esc(e.message)+'</span>'}
 }
+async function abrirCorrida(id){
+  try{const c=await api('/dv/corridas/'+id);
+    $('l_res').textContent='— corrida #'+c.id+' · '+c.paso_clave+' v'+c.version+' · ola '+((BASES.find(b=>b.id===c.base_id)||{}).codigo||c.base_id)+' · '+new Date(c.creado).toLocaleString()+' —\n\n'+JSON.stringify(c.resultado??{error:c.error},null,1);
+    $('l_res').scrollIntoView({behavior:'smooth'});
+  }catch(e){alert(e.message)}
+}
 async function cargarCorridas(){
   const cs=await api('/dv/corridas');
-  $('t_corridas').innerHTML='<tr><th>#</th><th>paso</th><th>ola</th><th>resultado</th><th>desvío</th><th>quién</th><th>cuándo</th></tr>'+cs.slice(0,40).map(c=>'<tr><td>'+c.id+'</td><td><code>'+esc(c.paso_clave)+'</code> v'+c.version+'</td><td>'+c.base_id+'</td><td>'+(c.ok?'<span class="pill ok">bien</span>':'<span class="pill mal">error</span>')+'</td><td>'+(c.desvio==null?'—':c.desvio)+'</td><td>'+esc(c.ejecutada_por)+'</td><td>'+new Date(c.creado).toLocaleString()+'</td></tr>').join('');
+  const filtro=($('f_corr_paso')&&$('f_corr_paso').value)||'';
+  const lista=cs.filter(c=>!filtro||c.paso_clave===filtro);
+  const pasosVistos=[...new Set(cs.map(c=>c.paso_clave))];
+  if($('f_corr_paso')) $('f_corr_paso').innerHTML='<option value="">todos los pasos</option>'+pasosVistos.map(p=>'<option'+(p===filtro?' selected':'')+'>'+esc(p)+'</option>').join('');
+  $('t_corridas').innerHTML='<tr><th>#</th><th>paso</th><th>ola</th><th>resultado</th><th>desvío</th><th>quién</th><th>cuándo</th><th></th></tr>'+lista.slice(0,80).map(c=>'<tr><td>'+c.id+'</td><td><code>'+esc(c.paso_clave)+'</code> v'+c.version+'</td><td>'+esc((BASES.find(b=>b.id===c.base_id)||{}).codigo||c.base_id)+'</td><td>'+(c.ok?'<span class="pill ok">bien</span>':'<span class="pill mal">error</span>')+'</td><td>'+(c.desvio==null?'—':c.desvio)+'</td><td>'+esc(c.ejecutada_por)+'</td><td>'+new Date(c.creado).toLocaleDateString()+'</td><td><button class="mini ghost" onclick="abrirCorrida('+c.id+')">abrir</button></td></tr>').join('');
 }
 
 /* ---------- 5 · evaluación ---------- */
@@ -553,6 +564,7 @@ const AYUDA={
   l_paso:{t:'Paso a ejecutar',q:'Solo aparecen los pasos que tienen código.',p:'El procedimiento que se va a correr.'},
   l_base:{t:'Ola',q:'La base sobre la que se ejecuta. Debe tener confirmadas las preguntas que el paso necesita.',p:'Si falta una correspondencia, el resultado te lo dirá («no tiene confirmada la pregunta…»): confírmala en Bases.'},
   l_params:{t:'Ajustes del paso',q:'Casi siempre vacío. Solo si el paso pide un dato extra, en formato {"nombre": valor}.',p:'Permite ejecutar el mismo paso con otra variante sin tocar el código.'},
+  f_corr_paso:{t:'Filtrar ejecuciones',q:'Elige un paso (p. ej. p05) para ver solo sus corridas, ordenadas de la más nueva a la más vieja.',p:'La serie completa de un paso, ola por ola.'},
   l_ref:{t:'Tu resultado de referencia',q:'Lo que te dio SPSS, con los mismos nombres que devuelve el paso, p. ej. {"fidelidad_ganador_pct": 63.7}. Opcional.',p:'El sistema compara y te da el desvío: es la medida de cuánto reproduce tu análisis.'},
   btn_correr:{t:'Ejecutar',q:'Corre el paso sobre la ola elegida (segundos).',p:'El resultado aparece a la derecha y queda registrado con tu nombre en «Últimas ejecuciones».'},
   e_pais:{t:'País',q:'dom.',p:'Filtra el tablero.'},
