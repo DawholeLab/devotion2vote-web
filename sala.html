@@ -423,7 +423,11 @@ async function enviar(){
 async function marcar(id,marca){
   const nota=prompt(marca==='error'?'¿Qué está mal y por qué? (esto queda registrado como corrección)':marca==='regla'?'Escribe la regla en una frase (se crea como borrador en el Cuaderno)':marca==='paso'?'Título del paso (se crea como borrador en el Cuaderno)':'Nota (opcional): por qué es tu referencia'); if(nota===null) return;
   const r=await api('/dv/mensajes/'+id+'/marcar','POST',{marca,nota});
-  await abrirSesion(SES.id); if(r.creado){cargarCuaderno(); const k=Object.keys(r.creado)[0]; alert('Hecho: se ha creado el borrador de '+k+' «'+r.creado[k]+'». Lo encontrarás en la mesa 3 · Cuaderno para revisarlo, completarlo y aprobarlo.')}
+  await abrirSesion(SES.id); if(r.creado){cargarCuaderno(); cargarBases();
+    if(r.creado.paso){alert(r.creado.con_codigo
+      ?'Tu paso «'+r.creado.paso+'» quedó guardado y LISTO PARA EJECUTAR.\n\nVe a la mesa 4 · Laboratorio, elígelo en «Paso del cuaderno», elige una ola y pulsa Ejecutar.'
+      :'Tu paso «'+r.creado.paso+'» quedó guardado, pero el sistema no pudo prepararlo para ejecutar (¿DANTE sin saldo?). Vuelve a marcarlo en un rato o avisa a Matías.')}
+    else{const k=Object.keys(r.creado)[0]; alert('Hecho: se ha creado «'+r.creado[k]+'». Lo encontrarás en la mesa 3 · Cuaderno.')}}
 }
 
 /* ---------- 2 · bases ---------- */
