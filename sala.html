@@ -142,12 +142,12 @@ code{padding:1px 5px} pre{padding:10px;overflow:auto;max-height:420px;line-heigh
 <!-- 2 · BASES -->
 <section id="bases">
   <h2>2 · Bases</h2>
-  <div class="intro"><b>Qué es.</b> El archivo de cada ola de encuesta (SPSS .sav o CSV). <b>Qué haces aquí.</b> Subir bases nuevas y confirmar, ola a ola, qué pregunta es cada variable: en esta serie el voto viaja de P4 a P12, P19 o P22 según el mes, así que el sistema propone la correspondencia y tú la confirmas, como cuando etiquetas variables en SPSS. <b>Para qué.</b> Sin esa correspondencia («diccionario»), el cuaderno no sabe dónde está la intención o el recuerdo en cada ola.</div>
+  <div class="intro"><b>Qué es.</b> El archivo de cada ola de encuesta o base de datos: SPSS (.sav), Excel (.xlsx), CSV o SQLite (.db). <b>Qué haces aquí.</b> Subir bases nuevas y confirmar, ola a ola, qué pregunta es cada variable: en esta serie el voto viaja de P4 a P12, P19 o P22 según el mes, así que el sistema propone la correspondencia y tú la confirmas, como cuando etiquetas variables en SPSS. <b>Para qué.</b> Sin esa correspondencia («diccionario»), el cuaderno no sabe dónde está la intención o el recuerdo en cada ola.</div>
   <div class="dos">
     <div class="caja">
       <h3 style="margin-top:0">Subir una base nueva</h3>
       <p class="aviso" style="margin-bottom:8px">Las 65 olas dominicanas ya están cargadas. Usa esto solo cuando llegue una ola nueva.</p>
-      <input type="file" id="arch" accept=".sav,.csv,.txt,.tsv">
+      <input type="file" id="arch" accept=".sav,.csv,.txt,.tsv,.xlsx,.xlsm,.db,.sqlite,.sqlite3">
       <div class="fila"><button class="mini" id="btn_prev" onclick="previsualizar()">1 · Leer el archivo</button><span class="aviso" id="prev_msg"></span></div>
       <div id="prev" style="display:none">
         <p class="aviso">Revisa la ficha de abajo y completa estos datos. Luego pulsa «Guardar».</p>
@@ -479,7 +479,7 @@ const AYUDA={
   ses_base:{t:'Ola abierta en la sesión',q:'Elige la ola sobre la que vas a trabajar antes de crear la sesión. Muy recomendable.',p:'DANTE tendrá delante su libro de códigos completo (cada código con su etiqueta), su diccionario y su cuestionario, y podrá calcular tablas y cruces sobre ella sin que le pegues nada.'},
   btn_nueva:{t:'Nueva sesión',q:'Pulsa y ponle un título (por ejemplo «Matriz de transferencia 2020-2024»).',p:'Cada sesión guarda la conversación completa; puedes volver a ella y seguir donde lo dejaste.'},
   txt:{t:'Tu mensaje a DANTE',q:'Escribe con naturalidad: describe cómo haces tú un análisis, pide un cálculo, corrige un resultado.',p:'Lo que expliques aquí es la materia prima del cuaderno. Cuanto más concreto (qué variables, qué denominador, qué umbral), mejor lo escribe DANTE como paso o regla.'},
-  arch:{t:'Archivo de la ola',q:'Elige el .sav de SPSS (o un CSV) de la ola nueva.',p:'El sistema lee variables, etiquetas y categorías y propone qué pregunta del método es cada variable. No guarda nada hasta que pulses «Guardar».'},
+  arch:{t:'Archivo de la ola',q:'Vale el .sav de SPSS, un Excel (.xlsx), un CSV o una base SQLite (.db). Si es Numbers o .xls, guárdalo antes como .xlsx.',p:'El sistema lee variables, etiquetas y categorías y propone qué pregunta del método es cada variable. No guarda nada hasta que pulses «Guardar».'},
   btn_prev:{t:'Leer el archivo',q:'Primer paso: lee el archivo y muestra su ficha (n, variables, avisos).',p:'Para comprobar que se lee bien antes de guardarlo.'},
   b_codigo:{t:'Código de la ola',q:'País, año y mes: dom_2026-07. Si hay dos olas el mismo mes, añade _b a la segunda.',p:'Es el nombre con el que la ola aparecerá en todas las mesas y en los resultados.'},
   b_pais:{t:'País',q:'Tres letras: dom (República Dominicana), esp, chl, mex…',p:'Los parámetros del método y el diccionario se organizan por país.'},
