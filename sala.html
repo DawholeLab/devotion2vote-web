@@ -56,6 +56,13 @@ code{padding:1px 5px} pre{padding:10px;overflow:auto;max-height:420px;line-heigh
 #sesiones{max-height:60vh;overflow:auto}
 #sesiones div{padding:8px 10px;border-radius:8px;cursor:pointer;color:var(--mut);font-size:12px}
 #sesiones div.on{background:var(--bg2);color:var(--ink)}
+#alarmas{position:fixed;top:16px;right:16px;z-index:9999;display:flex;flex-direction:column;gap:10px;max-width:420px}
+.alarma{background:#FDF3F1;border:1.5px solid #B3261E;border-left:6px solid #B3261E;border-radius:12px;padding:12px 40px 12px 14px;box-shadow:0 8px 28px rgba(40,40,39,.18);position:relative;animation:alarma-in .25s ease}
+@keyframes alarma-in{from{transform:translateX(30px);opacity:0}to{transform:none;opacity:1}}
+.alarma b{color:#B3261E;display:block;font-size:13px;margin-bottom:3px}
+.alarma .expl{font-size:13px;line-height:1.5;color:var(--ink)}
+.alarma .tec{font-size:11px;color:var(--mut);margin-top:6px;font-family:Menlo,Consolas,monospace;word-break:break-word;max-height:60px;overflow:auto}
+.alarma .cerrar{position:absolute;top:8px;right:10px;border:0;background:none;font-size:16px;cursor:pointer;color:#B3261E}
 .rastro{font-size:11px;color:var(--mut);margin-top:8px}.rastro code{background:var(--bg2);padding:1px 6px;border-radius:6px;margin-right:2px}.rastro code.mal{color:#b3261e}
 #bd_codigos td:nth-child(3){font-size:12px}#bd_codigos small{display:block;color:var(--mut)}
 #hilo{max-height:56vh;overflow:auto;display:flex;flex-direction:column;gap:12px;padding:6px 2px}
@@ -87,6 +94,7 @@ code{padding:1px 5px} pre{padding:10px;overflow:auto;max-height:420px;line-heigh
 <header><span class="marca"><img src="assets/monograma.png" alt="devotion2vote"><b>Devotion<span>2</span>Vote</b><small>sala de método</small></span>
 <span><a href="index.html">← devotion2vote.com</a> &nbsp; <span class="aviso" id="quien"></span> <button class="mini ghost" id="btn_guia" style="display:none" onclick="abrirGuia()">¿Cómo funciona?</button> <button class="mini ghost" id="salir" style="display:none" onclick="salir()">salir</button></span></header>
 <div id="pop"></div>
+<div id="alarmas"></div>
 <div id="guia"><div class="caja">
   <h3>Cómo funciona la Sala de Método</h3>
   <p class="aviso" style="margin-bottom:10px">Seis mesas, en el orden natural del trabajo. Cada casilla tiene un botón <span class="ayuda inline" style="cursor:default">?</span> que explica qué poner y para qué.</p>
@@ -306,14 +314,41 @@ const API=(document.querySelector('meta[name=d2v-api]')||{}).content||'http://lo
 let TOK=null, YO=null, SES=null, BASE_SEL=null, BASES=[];
 try{TOK=sessionStorage.getItem('d2v_tok');YO=JSON.parse(sessionStorage.getItem('d2v_yo')||'null')}catch(e){}
 const $=id=>document.getElementById(id);
+/* ---------- alarmas: errores explicados en cristiano ---------- */
+const TRADUCCIONES=[
+ [/credit balance is too low/i,'Se acabó el saldo de la cuenta de Anthropic (el motor de DANTE).','Hay que añadir fondos en la consola de Anthropic; en cuanto haya saldo, DANTE vuelve solo.'],
+ [/no tiene la pregunta can[oó]nica '([^']+)'/i,'Esta ola no tiene la pregunta «$1» en su diccionario.','No es un fallo: esa pregunta no se hizo en esta ola (o falta confirmarla en la mesa Bases). Prueba con una ola que sí la tenga.'],
+ [/Faltan los anclajes|Falta params\.urna/i,'Al paso le faltan los votos oficiales de la urna.','Los anclajes se toman de los parámetros del país (P.URNA.…). Si aparece este aviso, avisa a Matías.'],
+ [/Ya existe una base con el c[oó]digo/i,'Ya hay una ola guardada con ese código.','Cambia el código (por ejemplo añade _b al final) y vuelve a guardar.'],
+ [/misma contenido|mismo contenido|ya est[aá] cargada/i,'Este archivo ya está cargado en el sistema.','No hace falta subirlo otra vez: búscalo en «Bases cargadas».'],
+ [/Formato no admitido/i,'El sistema no puede leer este tipo de archivo.','Se aceptan SPSS (.sav), Excel (.xlsx), CSV y SQLite (.db). Si es Numbers o .xls antiguo, guárdalo como .xlsx.'],
+ [/JSON inv[aá]lido/i,'El texto de la casilla no tiene el formato esperado.','Debe ir entre llaves y con comillas, por ejemplo: {"validos_estimados": 4881394}. Revisa comas y comillas.'],
+ [/Sesi[oó]n caducada/i,'Tu sesión caducó.','Vuelve a entrar con tu usuario y tu código.'],
+ [/tiempo agotado/i,'El paso tardó demasiado y se detuvo.','Vuelve a intentarlo; si se repite, avisa a Matías.'],
+ [/HTTP 50\d|Bad Gateway|Failed to fetch|NetworkError|sin conexi[oó]n/i,'El motor no responde en este momento.','Suele ser un reinicio del servidor (1-2 minutos). Espera un momento y vuelve a intentarlo.'],
+ [/credenciales|contrase|password|401/i,'Usuario o código de acceso incorrectos.','Revisa el usuario y el código; distinguen mayúsculas de minúsculas.'],
+];
+function alarma(msg,contexto){
+  msg=String(msg||'Error desconocido');
+  let titulo='Algo no salió como se esperaba', expl='';
+  for(const [pat,t,e] of TRADUCCIONES){const m=msg.match(pat); if(m){titulo=t.replace('$1',m[1]||''); expl=e; break}}
+  const c=$('alarmas'); if(!c) return;
+  const d=document.createElement('div'); d.className='alarma';
+  d.innerHTML='<button class="cerrar" onclick="this.parentNode.remove()">×</button><b>⚠ '+esc(contexto||'Aviso')+': '+esc(titulo)+'</b>'
+    +(expl?'<div class="expl">'+esc(expl)+'</div>':'')
+    +'<div class="tec">'+esc(msg.slice(0,300))+'</div>';
+  c.appendChild(d);
+  while(c.children.length>3) c.removeChild(c.firstChild);
+  setTimeout(()=>{if(d.parentNode)d.remove()},15000);
+}
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 async function api(ruta,met='GET',cuerpo=null,form=null){
   const h={...(TOK?{'Authorization':'Bearer '+TOK}:{})};
   let body; if(form){body=form}else if(cuerpo){h['Content-Type']='application/json';body=JSON.stringify(cuerpo)}
   const r=await fetch(API+ruta,{method:met,headers:h,body});
   let j=null; try{j=await r.json()}catch(e){}
-  if(r.status===401){salir();throw new Error('Sesión caducada: vuelve a entrar.')}
-  if(!r.ok) throw new Error((j&&(j.detail||JSON.stringify(j)))||('HTTP '+r.status));
+  if(r.status===401){salir();alarma('Sesión caducada','Acceso');throw new Error('Sesión caducada: vuelve a entrar.')}
+  if(!r.ok){const m=(j&&(j.detail||JSON.stringify(j)))||('HTTP '+r.status); alarma(m,'Error del sistema'); throw new Error(m)}
   return j;
 }
 async function entrar(){
@@ -380,7 +415,7 @@ async function enviar(){
   $('btn_enviar').disabled=true; $('txt').value='';
   SES.mensajes.push({rol:'usuario',contenido:t}); pintarHilo();
   try{const r=await api('/dv/dante','POST',{sesion_id:SES.id,mensaje:t}); await abrirSesion(SES.id);}
-  catch(e){alert(e.message)} finally{$('btn_enviar').disabled=false}
+  catch(e){} finally{$('btn_enviar').disabled=false}
 }
 async function marcar(id,marca){
   const nota=prompt(marca==='error'?'¿Qué está mal y por qué? (esto queda registrado como corrección)':marca==='regla'?'Escribe la regla en una frase (se crea como borrador en el Cuaderno)':marca==='paso'?'Título del paso (se crea como borrador en el Cuaderno)':'Nota (opcional): por qué es tu referencia'); if(nota===null) return;
@@ -479,12 +514,15 @@ async function guardarRegla(){
 /* ---------- 4 · laboratorio ---------- */
 async function correr(){
   let params=null,ref=null;
-  try{params=$('l_params').value.trim()?JSON.parse($('l_params').value):null; ref=$('l_ref').value.trim()?JSON.parse($('l_ref').value):null}catch(e){$('l_msg').innerHTML='<span class=mal>JSON inválido</span>';return}
+  try{params=$('l_params').value.trim()?JSON.parse($('l_params').value):null; ref=$('l_ref').value.trim()?JSON.parse($('l_ref').value):null}catch(e){$('l_msg').innerHTML='<span class=mal>JSON inválido</span>';alarma('JSON inválido: '+e.message,'Ajustes o referencia');return}
   $('l_msg').textContent='corriendo…';
   try{const r=await api('/dv/corridas','POST',{paso_clave:$('l_paso').value,base_id:Number($('l_base').value),parametros:params,referencia:ref});
     $('l_msg').innerHTML=r.ok?'<span class=ok>ejecutado en '+r.ms+' ms</span>':'<span class=mal>'+esc(r.error)+'</span>';
     $('l_kpi').innerHTML='<div><b>'+(r.ok?'✓':'✗')+'</b><small>corrida #'+r.id+'</small></div><div><b>v'+r.version+'</b><small>versión</small></div><div><b>'+(r.desvio==null?'—':r.desvio)+'</b><small>desvío frente a tu referencia</small></div><div><b>'+r.ms+'</b><small>ms</small></div>';
-    $('l_res').textContent=JSON.stringify(r.resultado??{error:r.error},null,1); cargarCorridas(); cargarEval();
+    $('l_res').textContent=JSON.stringify(r.resultado??{error:r.error},null,1);
+    if(!r.ok&&r.error) alarma(r.error,'El paso no pudo ejecutarse');
+    else if(r.resultado&&r.resultado.error) alarma(r.resultado.error,'El paso avisa');
+    cargarCorridas(); cargarEval();
   }catch(e){$('l_msg').innerHTML='<span class=mal>'+esc(e.message)+'</span>'}
 }
 async function abrirCorrida(id){
@@ -494,7 +532,7 @@ async function abrirCorrida(id){
     $('l_res').textContent='— corrida #'+c.id+' · '+c.paso_clave+' v'+c.version+' · ola '+ola+' · '+new Date(c.creado).toLocaleString()+' —\n\n'+JSON.stringify(c.resultado??{error:c.error},null,1);
     const caja=$('l_res'); caja.style.transition='background .15s'; caja.style.background='#F3E2DC'; setTimeout(()=>{caja.style.background=''},400);
     caja.scrollIntoView({behavior:'smooth',block:'nearest'});
-  }catch(e){alert(e.message)}
+  }catch(e){}
 }
 async function cargarCorridas(){
   const cs=await api('/dv/corridas');
