@@ -236,6 +236,28 @@
   .pais-card .entrarb{margin-top:6px;font-size:12.5px;color:var(--marca);font-weight:600}
   .pais-card.prox{opacity:.65}
   .pais-card.prox .entrarb{color:var(--tinta3)}
+  /* mapa del proceso: las 9 etapas del caso */
+  .proceso{display:flex;flex-wrap:wrap;align-items:stretch;gap:10px;margin-top:8px}
+  .etapa-n{position:relative;flex:1 1 150px;min-width:150px;max-width:220px;text-align:left;background:var(--panel);
+           border:1px solid var(--borde-suave);border-radius:8px;padding:12px 14px;color:inherit;
+           display:flex;flex-direction:column;gap:3px}
+  .etapa-n:hover{border-color:var(--tinta3);background:var(--panel2)}
+  .etapa-n .num-e{font-family:"Barlow Condensed";font-weight:700;font-size:13px;color:var(--tinta3);letter-spacing:.06em}
+  .etapa-n b{font-family:"Barlow Condensed";font-size:18px;font-weight:600;letter-spacing:.03em;line-height:1.15}
+  .etapa-n small{font-size:11px;color:var(--tinta3)}
+  .etapa-n .estado-e{font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-top:4px}
+  .etapa-n.viva{border-color:var(--marca)}
+  .etapa-n.viva .estado-e{color:var(--marca)}
+  .etapa-n:not(.viva) .estado-e{color:var(--tinta3)}
+  .etapa-n.sel{background:var(--panel2);border-color:var(--tinta2)}
+  .etapa-n::after{content:"→";position:absolute;right:-11px;top:50%;transform:translateY(-50%);color:var(--tinta3);font-size:13px;z-index:1}
+  .etapa-n:last-child::after{content:"↺";color:var(--marca)}
+  .etapa-det{margin-top:12px}
+  .etapa-det h3{margin:0 0 4px}
+  .etapa-det p{margin:4px 0;font-size:13px;color:var(--tinta2);max-width:80ch}
+  .etapa-det .abrir-e{margin-top:10px;background:var(--tinta);color:var(--fondo);border:none;border-radius:6px;
+                      padding:8px 20px;font-family:"Barlow Condensed";font-weight:700;font-size:15px;letter-spacing:.05em;text-transform:uppercase}
+
   .demarcas{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-top:6px}
   .dem-card{text-align:left;color:inherit;background:var(--panel);border:1px solid var(--borde-suave);border-radius:8px;
             padding:16px;display:flex;flex-direction:column;gap:4px}
@@ -372,8 +394,13 @@
 <section id="demarcaciones">
   <div class="miga"><a onclick="ver('portada')">Países</a> › <span id="dem-pais"></span></div>
   <h2 class="portada-titulo" id="dem-titulo"></h2>
-  <p class="portada-sub">Entra por el país entero o por la capa territorial que quieras mirar.</p>
-  <div class="demarcas" id="dem-cards"></div>
+  <p class="portada-sub">El proceso completo del caso — entra a la etapa que quieras, o baja al territorio.</p>
+
+  <div class="proceso" id="proceso"></div>
+  <div class="panel etapa-det" id="etapa-det" style="display:none">
+    <div id="etapa-det-txt"></div>
+    <div class="demarcas" id="dem-cards" style="display:none;margin-top:12px"></div>
+  </div>
 </section>
 
 <section id="territorio">
@@ -587,35 +614,40 @@
 </section>
 
 <section id="ruta">
-  <div class="cabecera-zona"><h2>Ruta del sistema</h2><span>dónde estamos y a dónde empuja cada etapa — cada sala hereda los segmentos de la anterior</span></div>
+  <div class="cabecera-zona"><h2>Ruta del sistema</h2><span>las 9 etapas del proceso — conectadas por dentro, independientes en la navegación</span></div>
   <div class="ruta">
     <div class="etapa activa"><div class="num">1</div><div>
-      <h3>Sala de Investigación <span class="tag">estás aquí</span></h3>
-      <p>Bases, análisis automático, transferencia, tracking, territorial por municipio, informes y láminas.
-      Entrega: segmentos, micro y nanosegmentos definidos y verificados por territorio.</p></div></div>
+      <h3>Investigación · Research <span class="tag">en operación</span></h3>
+      <p>Cuanti, cuali y escucha digital. Bases, análisis automático, transferencia, tracking, territorial por
+      municipio, informes, PPT y láminas. Es esta sala.</p>
+      <div class="chips"><span class="chip">encuestas</span><span class="chip">cualitativo</span><span class="chip">monitoreo de lenguaje y contenidos</span><span class="chip">sentiment</span><span class="chip">mapas de palabras</span><span class="chip">geolocalización y movilidad</span></div></div></div>
     <div class="etapa"><div class="num">2</div><div>
-      <h3>Sala de Datos Digitales <span class="tag">siguiente</span></h3>
-      <p>Fuentes digitales de cada territorio, bien segmentadas: monitoreo de lenguaje y contenidos, usos, likes,
-      comentarios, sentiment. Se cruza con la investigación y entrega la <b>definición final de segmentos
-      correspondida con perfiles rastreables en redes</b>, con su propio nivel de reporte.</p>
-      <div class="chips"><span class="chip">mapas de palabras</span><span class="chip">sentiment</span><span class="chip">temas emergentes</span><span class="chip">comunidades</span><span class="chip">voces influyentes</span><span class="chip">volumen por plataforma</span><span class="chip">geolocalización y movilidad</span></div></div></div>
+      <h3>Segmentación · Segmentation <span class="tag">próxima</span></h3>
+      <p>Los grupos reales del electorado en tres horizontes — segmento, micro, nano — con Vote-Transfer, Locus y el
+      Mix por cada demarcación, correspondidos con perfiles rastreables en redes.</p></div></div>
     <div class="etapa"><div class="num">3</div><div>
-      <h3>Sala de Estrategia y Táctica <span class="tag">futura</span></h3>
-      <p>Estrategia y tácticas por cada segmento, microsegmento o nanosegmento: objetivo, mensaje madre, palancas,
-      riesgos, prioridad territorial.</p></div></div>
+      <h3>Conclusiones Estratégicas · Strategic Insights <span class="tag">futura</span></h3>
+      <p>El puente entre los datos y la decisión: lecturas generales y por segmento, redactadas y accionables.</p></div></div>
     <div class="etapa"><div class="num">4</div><div>
-      <h3>Sala de Comunicación <span class="tag">futura</span></h3>
-      <p>La estrategia comunicacional por segmento: relato, guiones, definiciones creativas, piezas.</p></div></div>
+      <h3>Estrategia · Strategy <span class="tag">futura</span></h3>
+      <p>Objetivo, mensaje madre, palancas, riesgos y prioridad territorial — por cada segmento, micro o nano.</p></div></div>
     <div class="etapa"><div class="num">5</div><div>
-      <h3>Sala de Pauta <span class="tag">futura</span></h3>
-      <p>El diseño de pauta por segmento combina todo lo que el sistema sabe de cada uno:</p>
-      <div class="chips"><span class="chip">plataformas y formatos que usa</span><span class="chip">tiempo de móvil al día</span><span class="chip">franjas horarias de atención</span><span class="chip">días y momentos de la semana</span><span class="chip">recorridos y rutinas de vida</span><span class="chip">intereses y comunidades</span><span class="chip">creadores y medios de confianza</span><span class="chip">palancas emocionales (Locus)</span><span class="chip">contenidos de enganche</span><span class="chip">temas que activan y temas que queman</span><span class="chip">frecuencia óptima y saturación</span><span class="chip">respuesta histórica</span><span class="chip">costo por alcance por plaza</span><span class="chip">presencia de la competencia</span><span class="chip">dispositivo e idioma/registro</span></div></div></div>
+      <h3>Comunicación · Communications <span class="tag">futura</span></h3>
+      <p>El desarrollo táctico comunicacional por segmento: relato, guiones, ideas, definiciones creativas.</p></div></div>
     <div class="etapa"><div class="num">6</div><div>
-      <h3>Pauta en vuelo <span class="tag">futura</span></h3>
-      <p>La pauta corre monitoreada en tiempo real: entrega, respuesta y sentiment por segmento y pieza.</p></div></div>
+      <h3>Producción · Production <span class="tag">futura</span></h3>
+      <p>Las piezas: audiovisual, vallas, gráficas — desarrolladas con IA sobre la creatividad aprobada.</p></div></div>
     <div class="etapa"><div class="num">7</div><div>
-      <h3>Eficiencia <span class="tag">futura</span></h3>
-      <p>Qué funcionó, con quién y por qué. Lo aprendido realimenta la investigación: el círculo se cierra.</p></div></div>
+      <h3>Planificación de Medios · Media Planning <span class="tag">futura</span></h3>
+      <p>La estrategia de pauta por segmento, con todo lo que el sistema sabe de cada grupo:</p>
+      <div class="chips"><span class="chip">plataformas y formatos que usa</span><span class="chip">tiempo de móvil al día</span><span class="chip">franjas horarias de atención</span><span class="chip">días y momentos de la semana</span><span class="chip">recorridos y rutinas de vida</span><span class="chip">intereses y comunidades</span><span class="chip">creadores y medios de confianza</span><span class="chip">palancas emocionales (Locus)</span><span class="chip">contenidos de enganche</span><span class="chip">temas que activan y temas que queman</span><span class="chip">frecuencia óptima y saturación</span><span class="chip">respuesta histórica</span><span class="chip">costo por alcance por plaza</span><span class="chip">presencia de la competencia</span><span class="chip">dispositivo e idioma/registro</span></div></div></div>
+    <div class="etapa"><div class="num">8</div><div>
+      <h3>Activación · Activation <span class="tag">futura</span></h3>
+      <p>La pauta corriendo, monitoreada y optimizada en vuelo: entrega, respuesta y sentiment por segmento y pieza.</p></div></div>
+    <div class="etapa"><div class="num">9</div><div>
+      <h3>Resultados · Performance <span class="tag">futura</span></h3>
+      <p>Monitoreo y evaluación de piezas y pautas — qué funcionó, con quién y por qué. Lo aprendido vuelve a la
+      Investigación: el círculo se cierra.</p></div></div>
   </div>
 </section>
 
@@ -1297,6 +1329,34 @@ function pintarPaises(){
       +'<span>'+esc(p.nota||'')+'</span><span class="entrarb">próximamente</span></div></button>';
   }).join('');
 }
+/* las 9 etapas canon del proceso (es · en) */
+const ETAPAS=[
+ {n:1,es:'Investigación',en:'Research',d:'Cuanti, cuali y escucha digital: bases, análisis automático, monitor, biblioteca, salidas. Todo lo que ya está vivo en esta sala.',viva:true},
+ {n:2,es:'Segmentación',en:'Segmentation',d:'Los grupos reales del electorado en tres horizontes — segmento, micro y nano — con Vote-Transfer, Locus y el Mix, por cada demarcación.'},
+ {n:3,es:'Conclusiones Estratégicas',en:'Strategic Insights',d:'El puente entre los datos y la decisión: lecturas generales y por segmento, redactadas y accionables.'},
+ {n:4,es:'Estrategia',en:'Strategy',d:'Objetivo, mensaje madre, palancas, riesgos y prioridad territorial — por cada segmento.'},
+ {n:5,es:'Comunicación',en:'Communications',d:'El relato, los guiones, las ideas y el diseño creativo de cada segmento.'},
+ {n:6,es:'Producción',en:'Production',d:'Las piezas: audiovisual, vallas, gráficas — desarrolladas con IA sobre la creatividad aprobada.'},
+ {n:7,es:'Planificación de Medios',en:'Media Planning',d:'La estrategia de pauta por segmento: plataformas, horarios, frecuencia, presupuesto — con todo lo que el sistema sabe de cada grupo.'},
+ {n:8,es:'Activación',en:'Activation',d:'La pauta corriendo, monitoreada y optimizada en vuelo.'},
+ {n:9,es:'Resultados',en:'Performance',d:'Monitoreo y evaluación de piezas y pautas. Lo aprendido vuelve a la Investigación: el círculo se cierra.'},
+];
+function pintarProceso(){
+  $('proceso').innerHTML=ETAPAS.map((e,i)=>'<button class="etapa-n'+(e.viva?' viva':'')+'" id="et-'+i+'" onclick="elegirEtapa('+i+')">'
+    +'<span class="num-e">ETAPA '+e.n+'</span><b>'+esc(e.es)+'</b><small>'+esc(e.en)+'</small>'
+    +'<span class="estado-e">'+(e.viva?'● en operación':'próximamente')+'</span></button>').join('');
+}
+function elegirEtapa(i){
+  const e=ETAPAS[i];
+  document.querySelectorAll('.etapa-n').forEach((x,j)=>x.classList.toggle('sel',j===i));
+  const det=$('etapa-det'); det.style.display='block';
+  $('etapa-det-txt').innerHTML='<h3 style="font-size:19px">'+e.n+' · '+esc(e.es)+' <span style="color:var(--tinta3);font-weight:400;font-size:13px">'+esc(e.en)+'</span></h3>'
+    +'<p>'+esc(e.d)+'</p>'
+    +(e.viva?'<button class="abrir-e" onclick="ver(\'muro\')">Entrar a Investigación</button>'
+            +'<p style="margin-top:14px;color:var(--tinta3)">…o entra directo por el territorio:</p>':'');
+  $('dem-cards').style.display=e.viva?'grid':'none';
+  det.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
 function entrarPais(cod){
   PAIS=cod;
   const p=PAISES.find(x=>x.codigo===cod);
@@ -1311,6 +1371,9 @@ function entrarPais(cod){
       +'<span class="gran">'+(URNAS.length||'—')+'</span><span>la urna real de cada municipio — el ancla del método</span></button>'
     +'<button class="dem-card" onclick="toast(\'Los 18.495 colegios son la celda del nanosegmento: se navegan desde su municipio.\')"><b>Colegios</b>'
       +'<span class="gran">18.495</span><span>la unidad mínima del voto (nanosegmento)</span></button>';
+  pintarProceso();
+  $('etapa-det').style.display='none';
+  document.querySelectorAll('.etapa-n').forEach(x=>x.classList.remove('sel'));
   ver('demarcaciones');
 }
 let TERR_NIVEL='municipio',TERR_DATOS=[];
