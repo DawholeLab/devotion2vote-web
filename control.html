@@ -878,7 +878,7 @@ function filtrar(btn,q){
 
 /* ── bandeja ── */
 function pintarBandeja(){
-  const tipoCfg={revisar_pregunta:['rev','Revisar pregunta'],sin_fecha:['dato','Falta un dato'],corrida_error:['error','Corrida con error']};
+  const tipoCfg={revisar_pregunta:['rev','Revisar pregunta'],sin_fecha:['dato','Falta un dato'],corrida_error:['error','Corrida con error'],verificacion:['error','Verificación del método']};
   let h=BANDEJA.asuntos.map((a,i)=>{
     const [cl,rot]=tipoCfg[a.tipo]||['dato','Aviso'];
     let acciones;
@@ -894,8 +894,10 @@ function pintarBandeja(){
             +'<br><small style="color:var(--tinta3)">«'+esc(c.etiqueta||'sin etiqueta')+'» · '+c.respuestas+' respuestas'
             +(es?' · pulsa para confirmarla':' · pulsa para corregir el mapeo a esta')+'</small></button>';
         }).join('')+'</div>';
-    }else{
+    }else if(a.base_id){
       acciones='<button class="primaria" onclick="reanalizar('+a.base_id+',this)">Ya lo revisé: reanalizar la ola</button>';
+    }else{
+      acciones='';
     }
     return '<div class="asunto"><div class="a-linea"><span class="a-tipo '+cl+'">'+rot+'</span><b>'+esc(a.ola)+'</b>'
       +'<span class="donde">'+esc(a.generado||'')+'</span></div>'
