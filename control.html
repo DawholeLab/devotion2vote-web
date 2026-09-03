@@ -1,0 +1,913 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="d2v-api" content="https://devotion2vote-api.onrender.com">
+<title>Sala de Control · Devotion2Vote</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* Sala de Control — tema único deliberado: torre de control nocturna. */
+  :root{
+    --fondo:#12151A; --panel:#1A1F26; --panel2:#222933; --borde:#2E3742; --borde-suave:#242C36;
+    --tinta:#ECEEF1; --tinta2:#A6AEB9; --tinta3:#6E7783;
+    --marca:#C9614F;
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70;
+    --ok:#0ca30c; --alerta:#fab219; --critico:#d03b3b;
+    --radio:6px;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:var(--fondo);color:var(--tinta);font:14px/1.55 "IBM Plex Sans",system-ui,sans-serif;
+       font-variant-numeric:tabular-nums;min-height:100vh}
+  h1,h2,h3{font-family:"Barlow Condensed","IBM Plex Sans",sans-serif;letter-spacing:.02em}
+  code,.cod{font-family:"IBM Plex Mono",ui-monospace,monospace}
+  button{font:inherit;cursor:pointer}
+  input,select{font:inherit}
+  :focus-visible{outline:2px solid var(--s1);outline-offset:2px}
+  a{color:var(--tinta2)}
+
+  header{display:flex;align-items:center;flex-wrap:wrap;gap:10px 20px;padding:10px 22px;background:var(--panel);
+         border-bottom:1px solid var(--borde);position:sticky;top:0;z-index:5}
+  .logo{display:flex;align-items:baseline;gap:9px}
+  .logo b{font-family:"Barlow Condensed";font-weight:700;font-size:19px;letter-spacing:.06em}
+  .logo b i{color:var(--marca);font-style:normal}
+  .logo span{font-family:"Barlow Condensed";font-weight:500;font-size:15px;color:var(--tinta2);
+             text-transform:uppercase;letter-spacing:.14em}
+  nav{display:flex;flex-wrap:wrap;gap:4px;margin-left:8px}
+  nav button{background:none;border:1px solid transparent;color:var(--tinta2);padding:7px 16px;border-radius:var(--radio);
+             font-family:"Barlow Condensed";font-weight:600;font-size:16px;text-transform:uppercase;letter-spacing:.08em}
+  nav button.on{background:var(--panel2);border-color:var(--borde);color:var(--tinta)}
+  nav button:hover{color:var(--tinta)}
+  .quien{margin-left:auto;display:flex;align-items:center;gap:10px;color:var(--tinta2);font-size:13px}
+  .quien .punto{width:8px;height:8px;border-radius:50%;background:var(--ok)}
+  .dante-btn{display:flex;align-items:center;gap:6px;border:1px solid var(--borde);background:var(--panel2);
+             color:var(--tinta);border-radius:99px;padding:5px 14px;font-size:13px;font-weight:500}
+  .dante-btn i{color:var(--marca);font-style:normal;font-size:11px}
+  .dante-btn:hover{border-color:var(--marca)}
+  .salirb{background:none;border:none;color:var(--tinta3);font-size:12px;text-decoration:underline}
+
+  main{max-width:1180px;margin:0 auto;padding:22px}
+  section{display:none} section.on{display:block}
+
+  /* login */
+  #login{max-width:340px;margin:90px auto;background:var(--panel);border:1px solid var(--borde);border-radius:10px;padding:28px}
+  #login h1{margin:0 0 4px;font-size:24px} #login p{color:var(--tinta2);font-size:13px;margin:0 0 16px}
+  #login input{width:100%;background:var(--fondo);border:1px solid var(--borde);border-radius:6px;color:var(--tinta);
+               padding:10px 12px;margin-bottom:10px}
+  #login button{width:100%;background:var(--tinta);color:var(--fondo);border:none;border-radius:6px;padding:11px;
+                font-family:"Barlow Condensed";font-weight:700;font-size:17px;letter-spacing:.06em;text-transform:uppercase}
+  #lmsg{color:var(--critico);font-size:13px;min-height:18px;display:block;margin-top:8px}
+
+  .cifras{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:18px}
+  .cifra{background:var(--panel);border:1px solid var(--borde-suave);border-radius:var(--radio);padding:12px 16px}
+  .cifra b{display:block;font-family:"Barlow Condensed";font-size:26px;font-weight:600;line-height:1.1}
+  .cifra span{font-size:12px;color:var(--tinta2)}
+  .cifra.atencion b{color:var(--alerta)}
+
+  .cabecera-zona{display:flex;align-items:baseline;flex-wrap:wrap;gap:8px 14px;margin:6px 0 12px}
+  .cabecera-zona h2{margin:0;font-size:21px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+  .cabecera-zona span{color:var(--tinta3);font-size:13px}
+  .filtros{display:flex;gap:6px;margin-left:auto}
+  .filtros button{background:var(--panel);border:1px solid var(--borde);color:var(--tinta2);border-radius:99px;
+                  padding:4px 13px;font-size:12.5px}
+  .filtros button.on{color:var(--tinta);border-color:var(--tinta3)}
+
+  .muro{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:12px}
+  .tarjeta{position:relative;background:var(--panel);border:1px solid var(--borde-suave);border-radius:var(--radio);
+           padding:13px 15px 12px 19px;text-align:left;color:inherit;display:flex;flex-direction:column;gap:8px}
+  .tarjeta::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:var(--radio) 0 0 var(--radio);background:var(--borde)}
+  .tarjeta.v::before{background:var(--ok)} .tarjeta.a::before{background:var(--alerta)} .tarjeta.r::before{background:var(--critico)}
+  .tarjeta:hover{border-color:var(--borde);background:var(--panel2)}
+  .t-arriba{display:flex;align-items:baseline;gap:8px}
+  .t-arriba b{font-family:"Barlow Condensed";font-size:17px;font-weight:600;letter-spacing:.03em;flex:1}
+  .t-arriba .cod{font-size:11.5px;color:var(--tinta3);white-space:nowrap}
+  .t-estado{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--tinta2)}
+  .t-datos{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap}
+  .t-dato span{display:block;font-size:10.5px;color:var(--tinta3);text-transform:uppercase;letter-spacing:.07em}
+  .t-dato b{font-size:15px;font-weight:600}
+  .t-dato small{color:var(--tinta3);font-weight:400;font-size:11px}
+
+  .bandeja{display:flex;flex-direction:column;gap:10px;max-width:840px}
+  .asunto{background:var(--panel);border:1px solid var(--borde-suave);border-radius:var(--radio);padding:14px 16px}
+  .asunto.resuelto{opacity:.55}
+  .a-linea{display:flex;align-items:center;flex-wrap:wrap;gap:10px}
+  .a-tipo{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;border-radius:3px;padding:2px 8px}
+  .a-tipo.rev{background:rgba(250,178,25,.15);color:var(--alerta)}
+  .a-tipo.error{background:rgba(208,59,59,.16);color:#ef8f8f}
+  .a-tipo.dato{background:rgba(57,135,229,.15);color:#7fb3ef}
+  .a-linea b{font-weight:600}
+  .a-linea .donde{margin-left:auto;color:var(--tinta3);font-size:12px}
+  .a-cuerpo{color:var(--tinta2);font-size:13px;margin:7px 0 10px;max-width:70ch}
+  .a-acciones{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .a-acciones button{border-radius:var(--radio);border:1px solid var(--borde);background:var(--panel2);
+                     color:var(--tinta);padding:6px 14px;font-size:13px}
+  .a-acciones button.primaria{background:var(--tinta);color:var(--fondo);border-color:var(--tinta);font-weight:600}
+  .a-acciones button:hover{border-color:var(--tinta3)}
+  .a-acciones input[type=date]{background:var(--fondo);border:1px solid var(--borde);color:var(--tinta);border-radius:5px;padding:5px 9px}
+
+  .miga{color:var(--tinta3);font-size:13px;margin-bottom:10px}
+  .miga a{color:var(--tinta2);text-decoration:none;cursor:pointer}
+  .miga a:hover{color:var(--tinta)}
+  .mon-cab{display:flex;align-items:baseline;flex-wrap:wrap;gap:10px 14px;margin-bottom:16px}
+  .mon-cab h2{margin:0;font-size:28px;font-weight:600;letter-spacing:.03em}
+  .mon-cab .cod{color:var(--tinta3)}
+  .mon-cab .estado-chip{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--tinta2);
+                        border:1px solid var(--borde);border-radius:99px;padding:4px 13px}
+  .salidas{margin-left:auto;display:flex;flex-wrap:wrap;gap:8px}
+  .salidas button{border:1px solid var(--borde);background:var(--panel);color:var(--tinta);border-radius:var(--radio);
+                  padding:7px 14px;font-size:13px}
+  .salidas button:hover{border-color:var(--tinta3)}
+  .mon-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:12px}
+  @media(max-width:900px){.mon-grid{grid-template-columns:1fr}}
+  .panel{background:var(--panel);border:1px solid var(--borde-suave);border-radius:var(--radio);padding:16px 18px}
+  .panel h3{margin:0 0 4px;font-size:15px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:var(--tinta2)}
+  .panel .nota{font-size:11.5px;color:var(--tinta3);margin:0 0 12px}
+  .estim{display:flex;gap:26px;flex-wrap:wrap}
+  .estim .cand span{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--tinta2)}
+  .estim .cand i{width:9px;height:9px;border-radius:50%;display:inline-block}
+  .estim .cand b{display:block;font-family:"Barlow Condensed";font-size:38px;font-weight:600;line-height:1.05}
+  .estim .cand small{color:var(--tinta3);font-size:12px}
+  .grafico{margin-top:6px}
+  .grafico svg{display:block;width:100%;height:auto}
+  .leyenda{display:flex;flex-wrap:wrap;gap:14px;margin-top:6px;font-size:12px;color:var(--tinta2)}
+  .leyenda i{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:-1px}
+  .urna .fila-b{display:grid;grid-template-columns:110px 1fr 128px;align-items:center;gap:10px;margin:7px 0}
+  .urna .fila-b span{font-size:12.5px;color:var(--tinta2)}
+  .urna .fila-b .valor{text-align:right;font-size:12.5px}
+  .urna .barra{height:14px;background:var(--fondo);border-radius:4px;overflow:hidden;display:flex}
+  .urna .barra i{display:block;height:100%;border-radius:0 4px 4px 0}
+  .urna select,.urna input{width:100%;background:var(--fondo);border:1px solid var(--borde);color:var(--tinta);
+                           border-radius:5px;padding:6px 9px;margin-bottom:8px}
+  .checks{list-style:none;margin:0;padding:0}
+  .checks li{display:flex;gap:9px;align-items:baseline;padding:6px 0;border-bottom:1px solid var(--borde-suave);font-size:13px}
+  .checks li:last-child{border:none}
+  .checks .sig{font-size:12px;width:15px;text-align:center}
+  .checks li span{color:var(--tinta2)}
+  .checks li b{font-weight:500;color:var(--tinta)}
+  .avisos-mon p{margin:6px 0;font-size:13px;color:var(--tinta2)}
+  .exped{font-size:13px;color:var(--tinta2)}
+  .exped table{border-collapse:collapse;width:100%;font-size:12.5px}
+  .exped th{color:var(--tinta3);text-transform:uppercase;font-size:10.5px;letter-spacing:.07em;text-align:left;padding:5px 8px;border-bottom:1px solid var(--borde)}
+  .exped td{padding:6px 8px;border-bottom:1px solid var(--borde-suave);vertical-align:top}
+  .mal{color:#ef8f8f}
+  .okt{color:var(--ok)}
+
+  .cargar-grid{display:grid;grid-template-columns:.85fr 1.15fr;gap:12px;align-items:start}
+  @media(max-width:900px){.cargar-grid{grid-template-columns:1fr}}
+  .zona-carga{border:1.5px dashed var(--borde);border-radius:var(--radio);background:var(--panel);
+              padding:26px 20px;text-align:center;color:var(--tinta2)}
+  .zona-carga b{display:block;font-family:"Barlow Condensed";font-size:19px;color:var(--tinta);letter-spacing:.03em;margin-bottom:4px}
+  .zona-carga small{font-size:12px;color:var(--tinta3)}
+  .zona-carga input[type=file]{margin:12px auto 0;color:var(--tinta2);max-width:100%}
+  .campos{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;text-align:left}
+  .campos input,.campos select{background:var(--fondo);border:1px solid var(--borde);color:var(--tinta);border-radius:5px;padding:8px 10px;width:100%}
+  .instr h4{margin:14px 0 8px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:var(--tinta3)}
+  .instr h4:first-child{margin-top:0}
+  .botonera{display:flex;flex-wrap:wrap;gap:8px}
+  .instrb{border:1px solid var(--borde);background:var(--fondo);color:var(--tinta2);border-radius:var(--radio);
+          padding:9px 14px;font-size:13px;text-align:left;line-height:1.35}
+  .instrb b{display:block;color:var(--tinta);font-weight:600;font-size:13.5px}
+  .instrb small{color:var(--tinta3);font-size:11.5px}
+  .instrb.on{border-color:var(--marca);background:rgba(201,97,79,.09)}
+  .instrb.on b::before{content:"✓ ";color:var(--marca)}
+  .instrb.prox{opacity:.65}
+  .lanzar{margin-top:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .lanzar button{background:var(--tinta);color:var(--fondo);border:none;border-radius:var(--radio);
+                 padding:11px 26px;font-family:"Barlow Condensed";font-weight:700;font-size:17px;letter-spacing:.06em;text-transform:uppercase}
+  .lanzar button:disabled{opacity:.5}
+  .lanzar span{font-size:12.5px;color:var(--tinta3);max-width:44ch}
+  #progreso{display:none;margin-top:14px;background:var(--fondo);border:1px solid var(--borde-suave);border-radius:5px;
+            padding:12px 15px;font-size:13px;color:var(--tinta2)}
+  #progreso p{margin:4px 0}
+
+  .biblio-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+  .apartado h3{margin:0 0 2px;font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:.09em}
+  .apartado .cuenta{font-size:11.5px;color:var(--tinta3);margin-bottom:10px;display:block}
+  .doc-fila{display:flex;gap:8px;align-items:baseline;padding:7px 0;border-bottom:1px solid var(--borde-suave);font-size:13px}
+  .doc-fila:last-child{border:none}
+  .doc-fila b{font-weight:500}
+  .doc-fila .cod{margin-left:auto;font-size:11px;color:var(--tinta3);white-space:nowrap}
+  .doc-fila button{background:none;border:none;color:var(--tinta3);font-size:12px;text-decoration:underline;padding:0}
+  .carpeta{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:var(--fondo);
+           border:1px solid var(--borde-suave);border-radius:5px;padding:9px 12px;margin-bottom:6px;color:var(--tinta);font-size:13px}
+  .carpeta:hover{border-color:var(--tinta3)}
+  .carpeta small{margin-left:auto;color:var(--tinta3)}
+  .lista-scroll{max-height:340px;overflow:auto}
+  .subir-bib{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:8px}
+  .subir-bib select,.subir-bib input[type=file]{background:var(--fondo);border:1px solid var(--borde);color:var(--tinta2);border-radius:5px;padding:6px}
+  .subir-bib button{border:1px solid var(--borde);background:var(--panel2);color:var(--tinta);border-radius:5px;padding:6px 12px;font-size:12.5px}
+
+  .ruta{max-width:860px}
+  .etapa{display:grid;grid-template-columns:44px 1fr;gap:0 16px;position:relative;padding-bottom:22px}
+  .etapa::before{content:"";position:absolute;left:21px;top:38px;bottom:0;width:2px;background:var(--borde-suave)}
+  .etapa:last-child::before{display:none}
+  .etapa .num{width:44px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+              font-family:"Barlow Condensed";font-weight:700;font-size:18px;background:var(--panel2);
+              border:1px solid var(--borde);color:var(--tinta2)}
+  .etapa.activa .num{background:var(--marca);border-color:var(--marca);color:#fff}
+  .etapa h3{margin:6px 0 3px;font-size:17px;font-weight:600;letter-spacing:.03em}
+  .etapa h3 .tag{font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;border-radius:3px;
+                 padding:2px 8px;margin-left:8px;vertical-align:2px}
+  .etapa.activa h3 .tag{background:rgba(201,97,79,.18);color:var(--marca)}
+  .etapa:not(.activa) h3 .tag{background:var(--panel2);color:var(--tinta3)}
+  .etapa p{margin:0;font-size:13px;color:var(--tinta2);max-width:70ch}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .chip{border:1px solid var(--borde);border-radius:99px;background:var(--fondo);color:var(--tinta2);padding:3px 12px;font-size:12px}
+
+  .pie{margin:26px 0 6px;color:var(--tinta3);font-size:12px;border-top:1px solid var(--borde-suave);padding-top:12px;max-width:86ch}
+
+  #dante{position:fixed;top:0;right:-390px;width:370px;max-width:92vw;bottom:0;background:var(--panel);
+         border-left:1px solid var(--borde);z-index:8;display:flex;flex-direction:column;transition:right .25s}
+  #dante.abierto{right:0}
+  #dante .d-cab{display:flex;align-items:center;gap:9px;padding:13px 16px;border-bottom:1px solid var(--borde)}
+  #dante .d-cab b{font-family:"Barlow Condensed";font-size:17px;letter-spacing:.05em}
+  #dante .d-cab i{color:var(--marca);font-style:normal}
+  #dante .d-cab span{font-size:11.5px;color:var(--tinta3)}
+  #dante .d-cab button{margin-left:auto;background:none;border:none;color:var(--tinta3);font-size:17px}
+  .d-hilo{flex:1;overflow:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+  .d-msg{border-radius:8px;padding:9px 13px;font-size:13px;line-height:1.5;max-width:92%;white-space:pre-wrap;overflow-wrap:break-word}
+  .d-msg.yo{background:var(--panel2);align-self:flex-end}
+  .d-msg.el{background:var(--fondo);border:1px solid var(--borde-suave)}
+  .d-msg .consulto{display:block;margin-top:6px;font-size:11px;color:var(--tinta3);white-space:normal}
+  .d-pie{padding:12px 16px;border-top:1px solid var(--borde);display:flex;gap:8px}
+  .d-pie input{flex:1;background:var(--fondo);border:1px solid var(--borde);border-radius:6px;color:var(--tinta);
+               padding:9px 12px;font-size:13px}
+  .d-pie button{background:var(--marca);border:none;color:#fff;border-radius:6px;padding:0 16px;font-weight:600}
+  .d-pie button:disabled{opacity:.5}
+
+  #tip{position:fixed;pointer-events:none;background:var(--panel2);border:1px solid var(--borde);border-radius:5px;
+       padding:7px 10px;font-size:12px;display:none;z-index:9;box-shadow:0 4px 14px rgba(0,0,0,.4)}
+  #toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--panel2);border:1px solid var(--borde);
+         color:var(--tinta);border-radius:6px;padding:10px 18px;font-size:13px;display:none;z-index:9;max-width:80vw}
+  #alarmas{position:fixed;top:64px;right:18px;z-index:9;display:flex;flex-direction:column;gap:8px;max-width:380px}
+  .alarma{background:#2a1517;border:1px solid var(--critico);border-radius:8px;padding:11px 14px;font-size:13px;color:#f2d7d5}
+  .alarma b{display:block;color:#fff}
+  .alarma small{color:#d9a7a2}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <h1>Sala de <i style="color:var(--marca);font-style:normal">Control</i></h1>
+  <p>Devotion2Vote · entra con tu usuario y tu clave</p>
+  <input id="lu" placeholder="usuario" autocomplete="username">
+  <input id="lp" type="password" placeholder="clave de acceso" autocomplete="current-password" onkeydown="if(event.key==='Enter')entrar()">
+  <button onclick="entrar()">Entrar</button>
+  <span id="lmsg"></span>
+</div>
+
+<div id="app" style="display:none">
+<header>
+  <div class="logo"><b>DEV<i>O</i>TION<i>2</i>VOTE</b><span>Sala de Control</span></div>
+  <nav>
+    <button id="nav-muro" class="on" onclick="ver('muro')">Muro</button>
+    <button id="nav-cargar" onclick="ver('cargar')">Cargar</button>
+    <button id="nav-bandeja" onclick="ver('bandeja')">Bandeja <span id="n-bandeja" style="color:var(--alerta)"></span></button>
+    <button id="nav-monitor" onclick="ver('monitor')">Monitor</button>
+    <button id="nav-biblio" onclick="ver('biblio')">Biblioteca</button>
+    <button id="nav-ruta" onclick="ver('ruta')">Ruta</button>
+  </nav>
+  <div class="quien">
+    <button class="dante-btn" onclick="dante()"><i>◆</i> DANTE</button>
+    <span class="punto"></span><span id="quien"></span>
+    <button class="salirb" onclick="salir()">salir</button>
+  </div>
+</header>
+
+<main>
+
+<section id="muro" class="on">
+  <div class="cifras" id="cifras"></div>
+  <div class="cabecera-zona">
+    <h2>República Dominicana</h2><span id="muro-sub">cartera completa</span>
+    <div class="filtros">
+      <button class="on" onclick="filtrar(this,'todos')">Todas</button>
+      <button onclick="filtrar(this,'aten')">Con avisos</button>
+      <button onclick="filtrar(this,'v')">En orden</button>
+      <button onclick="filtrar(this,'sin')">Sin analizar</button>
+    </div>
+  </div>
+  <div class="muro" id="tarjetas"><p style="color:var(--tinta3)">cargando…</p></div>
+</section>
+
+<section id="cargar">
+  <div class="cabecera-zona"><h2>Cargar y ordenar el análisis</h2><span>subir la base es todo el trabajo — aquí le dices al sistema qué quieres saber</span></div>
+  <div class="cargar-grid">
+    <div>
+      <div class="zona-carga">
+        <b>Elige la base de datos</b>
+        SPSS (.sav) · Excel · CSV · SQLite<br>
+        <small>el sistema la lee, reconoce sus preguntas y corre el método completo</small>
+        <input type="file" id="arch" accept=".sav,.csv,.txt,.tsv,.xlsx,.xlsm,.db,.sqlite,.sqlite3" onchange="previsualizar()">
+        <div class="campos" id="campos" style="display:none">
+          <input id="b_codigo" placeholder="código de la ola (dom_2026-09)">
+          <input id="b_fecha" type="date" title="fecha de inicio del campo">
+          <input id="b_titulo" placeholder="título" style="grid-column:1/-1">
+          <input id="b_pais" value="dom" title="país" style="display:none">
+        </div>
+        <div id="prev_res" style="font-size:12.5px;color:var(--tinta2);margin-top:10px;text-align:left"></div>
+      </div>
+      <div class="panel" style="margin-top:12px">
+        <h3>Reparto automático</h3>
+        <p class="nota" style="margin-bottom:0">Al analizar, los resultados quedan repartidos por las demarcaciones del
+        país (RD: región → provincia → municipio → distrito municipal → circunscripción → colegio) y por los
+        compartimentos de cada cliente. Una carga, mil destinos.</p>
+      </div>
+    </div>
+    <div class="panel instr">
+      <h4>Instrucciones de análisis — marca lo que quieres saber</h4>
+      <div class="botonera">
+        <button class="instrb on" onclick="marca(this)"><b>Transferencia de votos</b><small>de dónde viene y a dónde va cada voto · anclada a la urna real</small></button>
+        <button class="instrb on" onclick="marca(this)"><b>Estimación y tracking</b><small>foto de intención de la ola + serie de evolución</small></button>
+        <button class="instrb on" onclick="marca(this)"><b>Indecisos</b><small>quiénes son y hacia dónde se inclinan</small></button>
+        <button class="instrb on" onclick="marca(this)"><b>Eje gobierno / oposición</b><small>el voto contra la identidad política</small></button>
+        <button class="instrb on" onclick="marca(this)"><b>Techos de potencial</b><small>hasta dónde puede crecer cada candidato</small></button>
+      </div>
+      <h4>Segmentación — tres horizontes</h4>
+      <div class="botonera">
+        <button class="instrb prox" onclick="toast('Segmentación · micro · nano: se habilita en la siguiente etapa del desarrollo. El botón ya reserva su sitio.')"><b>Segmentación</b><small>lo grande · próximamente</small></button>
+        <button class="instrb prox" onclick="toast('Microsegmentación: se habilita en la siguiente etapa del desarrollo.')"><b>Micro</b><small>municipio, barrio · próximamente</small></button>
+        <button class="instrb prox" onclick="toast('Nanosegmentación por colegio electoral: la urna territorial ya está cargada; el análisis se habilita en la siguiente etapa.')"><b>Nano</b><small>la celda del colegio · próximamente</small></button>
+        <button class="instrb prox" onclick="toast('Geolocalización y movilidad: herramienta futura — su cruce con las segmentaciones es la etapa de oro.')"><b>Geolocalización</b><small>movilidad · próximamente</small></button>
+      </div>
+      <h4>Salida</h4>
+      <div class="botonera">
+        <button class="instrb on" onclick="marca(this)"><b>Expediente completo</b><small>cada decisión del sistema, declarada</small></button>
+        <button class="instrb prox" onclick="toast('Informe con conclusiones y PPT: es el tramo que está en construcción ahora mismo.')"><b>Informe + PPT</b><small>en construcción</small></button>
+      </div>
+      <div class="lanzar">
+        <button id="btn_analizar" onclick="lanzar()">Analizar</button>
+        <span>El sistema corre todos los análisis del cuaderno que la ola permita y deja el expediente de cada decisión.
+        Lo que hoy sale «próximamente» se irá encendiendo aquí mismo.</span>
+      </div>
+      <div id="progreso"></div>
+    </div>
+  </div>
+</section>
+
+<section id="bandeja">
+  <div class="cabecera-zona"><h2>Bandeja de trabajo</h2><span>la sala te trae lo que requiere decisión humana — nada más</span></div>
+  <div class="bandeja" id="asuntos"><p style="color:var(--tinta3)">cargando…</p></div>
+</section>
+
+<section id="monitor">
+  <div class="miga"><a onclick="ver('muro')">República Dominicana</a> › <span id="m-miga"></span></div>
+  <div class="mon-cab">
+    <h2 id="m-nombre"></h2><span class="cod" id="m-cod"></span>
+    <span class="estado-chip" id="m-estado"></span>
+    <div class="salidas">
+      <button onclick="toast('El informe con conclusiones es el tramo en construcción — llegará aquí.')">Informe</button>
+      <button onclick="toast('La presentación PPT es el tramo en construcción — llegará aquí.')">PPT</button>
+      <button onclick="window.open('sala.html','_blank')">Láminas</button>
+      <button onclick="toggleExped()">Expediente</button>
+    </div>
+  </div>
+  <div class="panel exped" id="m-exped" style="display:none;margin-bottom:12px"></div>
+  <div class="mon-grid">
+    <div class="panel">
+      <h3>Estimación vigente</h3>
+      <p class="nota" id="m-nota-est"></p>
+      <div class="estim" id="m-estim"></div>
+      <div class="grafico" id="m-tendencia"></div>
+      <div class="leyenda" id="m-leyenda"></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="panel urna">
+        <h3>Urna real · presidencial 2024</h3>
+        <p class="nota">resultados oficiales JCE por municipio — el ancla del método</p>
+        <input id="u-buscar" placeholder="busca un municipio (p. ej. Santiago)" oninput="urnaBuscar()">
+        <div id="m-urna"><p class="nota">cargando la urna territorial…</p></div>
+      </div>
+      <div class="panel">
+        <h3>Verificaciones</h3>
+        <p class="nota">el sistema se revisa a sí mismo en cada corrida</p>
+        <ul class="checks" id="m-checks"></ul>
+      </div>
+      <div class="panel avisos-mon">
+        <h3>Avisos abiertos</h3>
+        <div id="m-avisos"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="biblio">
+  <div class="cabecera-zona"><h2>Biblioteca</h2><span>todo lo que el proyecto sabe, ordenado por lo que es</span></div>
+  <div class="biblio-grid">
+    <div class="panel apartado">
+      <h3>Bases de datos</h3><span class="cuenta" id="bib-bases-n"></span>
+      <div class="lista-scroll" id="bib-bases"></div>
+    </div>
+    <div class="panel apartado">
+      <h3>Reportes</h3><span class="cuenta">por categoría de análisis</span>
+      <div id="bib-reportes"></div>
+      <div class="lista-scroll" id="bib-rep-lista"></div>
+    </div>
+    <div class="panel apartado">
+      <h3>Recursos digitales</h3><span class="cuenta">antesala de la Sala de Datos Digitales</span>
+      <div class="doc-fila">📡 <b>Monitoreo de conversación</b> <span class="cod">próximamente</span></div>
+      <div class="doc-fila">💬 <b>Sentiment por territorio</b> <span class="cod">próximamente</span></div>
+      <div class="doc-fila">📈 <b>Tendencias y temas</b> <span class="cod">próximamente</span></div>
+    </div>
+    <div class="panel apartado">
+      <h3>Recursos y archivos</h3><span class="cuenta">lo que DANTE estudia para cada análisis</span>
+      <div class="lista-scroll" id="bib-docs"></div>
+      <div class="subir-bib">
+        <input type="file" id="bib_arch" accept=".pdf,.docx,.txt,.md,.xlsx">
+        <select id="bib_tipo"><option value="cualitativo">cualitativo</option><option value="documental">documental</option><option value="documento_clave">documento clave</option><option value="noticia">noticia</option><option value="contexto">contexto</option><option value="otro">otro</option></select>
+        <button id="btn_bib" onclick="subirBiblioteca()">Subir</button><span style="font-size:12px;color:var(--tinta3)" id="bib_msg"></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="ruta">
+  <div class="cabecera-zona"><h2>Ruta del sistema</h2><span>dónde estamos y a dónde empuja cada etapa — cada sala hereda los segmentos de la anterior</span></div>
+  <div class="ruta">
+    <div class="etapa activa"><div class="num">1</div><div>
+      <h3>Sala de Investigación <span class="tag">estás aquí</span></h3>
+      <p>Bases, análisis automático, transferencia, tracking, territorial por municipio, informes y láminas.
+      Entrega: segmentos, micro y nanosegmentos definidos y verificados por territorio.</p></div></div>
+    <div class="etapa"><div class="num">2</div><div>
+      <h3>Sala de Datos Digitales <span class="tag">siguiente</span></h3>
+      <p>Fuentes digitales de cada territorio, bien segmentadas: monitoreo de lenguaje y contenidos, usos, likes,
+      comentarios, sentiment. Se cruza con la investigación y entrega la <b>definición final de segmentos
+      correspondida con perfiles rastreables en redes</b>, con su propio nivel de reporte.</p>
+      <div class="chips"><span class="chip">mapas de palabras</span><span class="chip">sentiment</span><span class="chip">temas emergentes</span><span class="chip">comunidades</span><span class="chip">voces influyentes</span><span class="chip">volumen por plataforma</span><span class="chip">geolocalización y movilidad</span></div></div></div>
+    <div class="etapa"><div class="num">3</div><div>
+      <h3>Sala de Estrategia y Táctica <span class="tag">futura</span></h3>
+      <p>Estrategia y tácticas por cada segmento, microsegmento o nanosegmento: objetivo, mensaje madre, palancas,
+      riesgos, prioridad territorial.</p></div></div>
+    <div class="etapa"><div class="num">4</div><div>
+      <h3>Sala de Comunicación <span class="tag">futura</span></h3>
+      <p>La estrategia comunicacional por segmento: relato, guiones, definiciones creativas, piezas.</p></div></div>
+    <div class="etapa"><div class="num">5</div><div>
+      <h3>Sala de Pauta <span class="tag">futura</span></h3>
+      <p>El diseño de pauta por segmento combina todo lo que el sistema sabe de cada uno:</p>
+      <div class="chips"><span class="chip">plataformas y formatos que usa</span><span class="chip">tiempo de móvil al día</span><span class="chip">franjas horarias de atención</span><span class="chip">días y momentos de la semana</span><span class="chip">recorridos y rutinas de vida</span><span class="chip">intereses y comunidades</span><span class="chip">creadores y medios de confianza</span><span class="chip">palancas emocionales (Locus)</span><span class="chip">contenidos de enganche</span><span class="chip">temas que activan y temas que queman</span><span class="chip">frecuencia óptima y saturación</span><span class="chip">respuesta histórica</span><span class="chip">costo por alcance por plaza</span><span class="chip">presencia de la competencia</span><span class="chip">dispositivo e idioma/registro</span></div></div></div>
+    <div class="etapa"><div class="num">6</div><div>
+      <h3>Pauta en vuelo <span class="tag">futura</span></h3>
+      <p>La pauta corre monitoreada en tiempo real: entrega, respuesta y sentiment por segmento y pieza.</p></div></div>
+    <div class="etapa"><div class="num">7</div><div>
+      <h3>Eficiencia <span class="tag">futura</span></h3>
+      <p>Qué funcionó, con quién y por qué. Lo aprendido realimenta la investigación: el círculo se cierra.</p></div></div>
+  </div>
+</section>
+
+<p class="pie">Sala de Control · Devotion2Vote. Cada análisis deja su expediente y cada decisión queda firmada.
+La <a href="sala.html">sala técnica</a> sigue disponible para el trabajo fino (diccionarios, cuaderno, laboratorio, láminas).</p>
+</main>
+</div>
+
+<div id="tip"></div>
+<div id="toast"></div>
+<div id="alarmas"></div>
+
+<aside id="dante">
+  <div class="d-cab"><i>◆</i><b>DANTE</b><span>ve las olas, la urna de cada municipio y la biblioteca del caso</span>
+    <button onclick="dante()" aria-label="Cerrar">×</button></div>
+  <div class="d-hilo" id="d-hilo"><div class="d-msg el">Pregúntame por cualquier ola, cruce, territorio o documento del caso — te enseño qué consulté antes de responder.</div></div>
+  <div class="d-pie">
+    <input id="d-in" placeholder="Pregúntale a DANTE…" onkeydown="if(event.key==='Enter')dantePregunta()">
+    <button id="d-btn" onclick="dantePregunta()">→</button>
+  </div>
+</aside>
+
+<script>
+const API=(document.querySelector('meta[name=d2v-api]')||{}).content||'http://localhost:8000';
+let TOK=null,YO=null;
+try{TOK=sessionStorage.getItem('d2v_tok');YO=JSON.parse(sessionStorage.getItem('d2v_yo')||'null')}catch(e){}
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=n=>String(n??'').replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+
+/* ── alarmas en cristiano ── */
+const TRADUCCIONES=[
+ [/credit balance is too low/i,'Se acabó el saldo del motor de DANTE.','Hay que añadir fondos en la consola de Anthropic; en cuanto haya saldo, vuelve solo.'],
+ [/no tiene la pregunta can[oó]nica '([^']+)'/i,'Esta ola no tiene la pregunta «$1».','No es un fallo: esa pregunta no se hizo en esta ola, o falta confirmarla.'],
+ [/Ya existe una base con el c[oó]digo/i,'Ya hay una ola con ese código.','Cambia el código (añade _b al final, por ejemplo) y vuelve a cargar.'],
+ [/mismo contenido|ya est[aá] cargada/i,'Este archivo ya está cargado.','Búscalo en la Biblioteca → Bases de datos.'],
+ [/Formato no admitido/i,'No puedo leer este tipo de archivo.','Valen SPSS (.sav), Excel (.xlsx), CSV y SQLite. Si es Numbers, guárdalo como Excel.'],
+ [/Sesi[oó]n caducada|401/i,'Tu sesión caducó o la clave no es correcta.','Vuelve a entrar con tu usuario y tu clave.'],
+ [/tiempo agotado/i,'El análisis tardó demasiado y se detuvo.','Vuelve a intentarlo; si se repite, avisa a Matías.'],
+ [/HTTP 50\d|Bad Gateway|Failed to fetch|NetworkError|sin conexi[oó]n/i,'El motor no responde en este momento.','Suele ser un reinicio del servidor (1-2 minutos). Espera y reintenta.'],
+];
+function alarma(msg,contexto){
+  let titulo='Algo no salió como debía', pista='';
+  for(const [re,t,p] of TRADUCCIONES){const m=String(msg).match(re); if(m){titulo=t.replace('$1',m[1]||'');pista=p;break}}
+  const d=document.createElement('div'); d.className='alarma';
+  d.innerHTML='<b>⚠ '+esc(titulo)+'</b>'+(pista?esc(pista)+'<br>':'')+'<small>'+esc(contexto||'')+' · detalle: '+esc(String(msg).slice(0,140))+'</small>';
+  $('alarmas').appendChild(d); while($('alarmas').children.length>3)$('alarmas').firstChild.remove();
+  setTimeout(()=>{if(d.parentNode)d.remove()},15000);
+}
+async function api(ruta,met='GET',cuerpo=null,form=null){
+  const h={...(TOK?{'Authorization':'Bearer '+TOK}:{})};
+  let body; if(form){body=form}else if(cuerpo){h['Content-Type']='application/json';body=JSON.stringify(cuerpo)}
+  const r=await fetch(API+ruta,{method:met,headers:h,body});
+  let j=null; try{j=await r.json()}catch(e){}
+  if(r.status===401){salir();alarma('Sesión caducada','Acceso');throw new Error('sesión caducada')}
+  if(!r.ok){const m=(j&&(j.detail||JSON.stringify(j)))||('HTTP '+r.status);alarma(m,'Error del sistema');throw new Error(m)}
+  return j;
+}
+
+/* ── acceso ── */
+async function entrar(){
+  $('lmsg').textContent='…';
+  try{
+    const f=new URLSearchParams({username:$('lu').value.trim(),password:$('lp').value});
+    const r=await fetch(API+'/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:f});
+    const j=await r.json(); if(!r.ok) throw new Error(j.detail||'acceso denegado');
+    TOK=j.access_token; YO={usuario:$('lu').value.trim().toLowerCase(),rol:j.rol,nombre:j.nombre};
+    try{sessionStorage.setItem('d2v_tok',TOK);sessionStorage.setItem('d2v_yo',JSON.stringify(YO))}catch(e){}
+    arrancar();
+  }catch(e){$('lmsg').textContent=e.message}
+}
+function salir(){TOK=null;YO=null;try{sessionStorage.removeItem('d2v_tok');sessionStorage.removeItem('d2v_yo')}catch(e){}
+  $('app').style.display='none';$('login').style.display='block'}
+function arrancar(){
+  if(!TOK||!YO)return;
+  if(YO.rol==='cliente'){alarma('La Sala de Control es del equipo.','Acceso');salir();return}
+  $('login').style.display='none';$('app').style.display='block';
+  $('quien').textContent=(YO.nombre||YO.usuario)+' · '+(YO.rol==='director'?'dirección':YO.rol);
+  cargarTodo();
+}
+
+/* ── estado global ── */
+let BASES=[],P05=[],P07=[],BANDEJA={asuntos:[],olas_sin_analizar:[]},URNAS=[],BIB=[],MON=null;
+const porBase=(lista,bid)=>lista.filter(c=>c.base_id===bid&&c.ok).sort((a,b)=>b.id-a.id)[0]||null;
+
+async function cargarTodo(){
+  try{
+    const [bases,p05,p07,bandeja]=await Promise.all([
+      api('/dv/bases?pais=dom'),
+      api('/dv/corridas?paso_clave=p05_matriz_electores_salom&con_resultado=true'),
+      api('/dv/corridas?paso_clave=p07_fila_tracking&con_resultado=true'),
+      api('/dv/bandeja?pais=dom'),
+    ]);
+    BASES=bases;P05=p05;P07=p07;BANDEJA=bandeja;
+    pintarMuro();pintarBandeja();pintarBiblio();
+    api('/dv/urnas/territorio?nivel=municipio').then(u=>{URNAS=u;if(MON)pintarUrna()}).catch(()=>{
+      $('m-urna').innerHTML='<p class="nota">La urna territorial aún no está cargada en este motor (comando de carga pendiente).</p>'});
+    api('/dv/biblioteca?pais=dom').then(d=>{BIB=d;pintarDocs()}).catch(()=>{});
+    const ultima=[...BASES].filter(b=>b.n_registros).sort((a,b)=>String(b.fecha_campo_ini||'').localeCompare(String(a.fecha_campo_ini||'')))[0];
+    if(ultima)abrirMonitor(ultima.id,true);
+  }catch(e){}
+}
+
+/* ── semáforo y estimación reales ── */
+function estadoBase(b){
+  const exp=b.expediente;
+  if(!exp)return['sin','·','sin analizar','var(--tinta3)'];
+  const av=(exp.avisos||[]);
+  if(av.some(a=>a.tipo==='corrida_error'))return['r','●','con errores ('+av.length+')','var(--critico)'];
+  if(av.length)return['a','⚠','avisos por revisar ('+av.length+')','var(--alerta)'];
+  return['v','✓','en orden','var(--ok)'];
+}
+function estimacionBase(bid){
+  const c5=porBase(P05,bid);
+  if(c5&&c5.resultado&&c5.resultado.estimacion){
+    const es=Object.entries(c5.resultado.estimacion).filter(([k,v])=>v&&v.pct_validos!=null).sort((a,b)=>b[1].pct_validos-a[1].pct_validos);
+    if(es.length)return{fuente:'anclada a urna (p05)',tp:c5.resultado.participacion_estimada_pct,urna:c5.resultado.urna,lista:es.map(([k,v])=>({n:k,p:v.pct_validos}))};
+  }
+  const c7=porBase(P07,bid);
+  if(c7&&c7.resultado&&c7.resultado.candidatos){
+    const es=Object.entries(c7.resultado.candidatos).filter(([k,v])=>v&&v.pct_validos!=null).sort((a,b)=>b[1].pct_validos-a[1].pct_validos);
+    if(es.length)return{fuente:'foto de intención (p07)',lista:es.map(([k,v])=>({n:k,p:v.pct_validos}))};
+  }
+  return null;
+}
+const nombreCorto=n=>String(n).replace(/ por el .*| por La .*| por la .*/,'').trim();
+
+/* ── muro ── */
+function pintarMuro(){
+  const asuntos=BANDEJA.asuntos.length+ (BANDEJA.olas_sin_analizar.length?1:0);
+  $('n-bandeja').textContent=asuntos?'·'+asuntos:'';
+  const ok=P05.filter(c=>c.ok).length+P07.filter(c=>c.ok).length;
+  $('cifras').innerHTML=
+    '<div class="cifra"><b>'+BASES.length+'</b><span>olas de encuesta cargadas</span></div>'
+    +'<div class="cifra"><b>'+(URNAS.length||182)+'</b><span>municipios con urna oficial</span></div>'
+    +'<div class="cifra"><b>'+ok+'</b><span>análisis corridos y en orden</span></div>'
+    +'<div class="cifra'+(asuntos?' atencion':'')+'"><b>'+asuntos+'</b><span>asuntos esperan una mirada</span></div>';
+  const olas=[...BASES].sort((a,b)=>String(b.fecha_campo_ini||'').localeCompare(String(a.fecha_campo_ini||'')));
+  $('muro-sub').textContent='cartera completa · '+olas.length+' olas · las más recientes primero';
+  $('tarjetas').innerHTML=olas.slice(0,24).map(b=>{
+    const [cl,sig,txt,color]=estadoBase(b);
+    const e=estimacionBase(b.id);
+    return '<button class="tarjeta '+cl+'" data-est="'+cl+'" onclick="abrirMonitor('+b.id+')">'
+      +'<div class="t-arriba"><b>'+esc(b.codigo)+'</b><span class="cod">'+esc(String(b.fecha_campo_ini||'sin fecha'))+'</span></div>'
+      +'<div class="t-estado"><span style="color:'+color+'">'+sig+'</span>'+txt+'</div>'
+      +'<div class="t-datos">'+(e
+        ?'<div class="t-dato"><span>estimación</span><b>'+e.lista[0].p+'%</b> <small>'+esc(nombreCorto(e.lista[0].n))+'</small></div>'
+         +(e.lista[1]?'<div class="t-dato"><span>segundo</span><b>'+e.lista[1].p+'%</b> <small>'+esc(nombreCorto(e.lista[1].n))+'</small></div>':'')
+        :'<div class="t-dato"><span>estimación</span><b>—</b> <small>'+(b.expediente?'sin corrida válida':'analízala desde la bandeja')+'</small></div>')
+      +'<div class="t-dato"><span>casos</span><b>'+fmt(b.n_registros)+'</b></div></div></button>';
+  }).join('')||'<p style="color:var(--tinta3)">No hay olas todavía: carga la primera en la pestaña Cargar.</p>';
+}
+function filtrar(btn,q){
+  document.querySelectorAll('.filtros button').forEach(b=>b.classList.toggle('on',b===btn));
+  document.querySelectorAll('#tarjetas .tarjeta').forEach(t=>{
+    const e=t.dataset.est;
+    t.style.display=(q==='todos'||(q==='aten'&&(e==='a'||e==='r'))||(q==='v'&&e==='v')||(q==='sin'&&e==='sin'))?'':'none';
+  });
+}
+
+/* ── bandeja ── */
+function pintarBandeja(){
+  const tipoCfg={revisar_pregunta:['rev','Revisar pregunta'],sin_fecha:['dato','Falta un dato'],corrida_error:['error','Corrida con error']};
+  let h=BANDEJA.asuntos.map((a,i)=>{
+    const [cl,rot]=tipoCfg[a.tipo]||['dato','Aviso'];
+    const acciones=a.tipo==='sin_fecha'
+      ?'<input type="date" id="af-'+i+'"><button class="primaria" onclick="ponerFecha('+a.base_id+','+i+')">Guardar la fecha y reanalizar</button>'
+      :'<button class="primaria" onclick="reanalizar('+a.base_id+',this)">Ya lo revisé: reanalizar la ola</button>'
+       +'<button onclick="window.open(\'sala.html\',\'_blank\')">Abrir la ficha técnica</button>';
+    return '<div class="asunto"><div class="a-linea"><span class="a-tipo '+cl+'">'+rot+'</span><b>'+esc(a.ola)+'</b>'
+      +'<span class="donde">'+esc(a.generado||'')+'</span></div>'
+      +'<p class="a-cuerpo">'+esc(a.texto)+'</p><div class="a-acciones">'+acciones+'</div></div>';
+  }).join('');
+  if(BANDEJA.olas_sin_analizar.length){
+    h+='<div class="asunto"><div class="a-linea"><span class="a-tipo dato">Sin analizar</span>'
+      +'<b>'+BANDEJA.olas_sin_analizar.length+' olas aún no pasaron por el análisis automático</b></div>'
+      +'<p class="a-cuerpo">Cada botón corre el circuito completo sobre esa ola y deja su expediente.</p>'
+      +'<div class="a-acciones">'+BANDEJA.olas_sin_analizar.slice(0,8).map(o=>
+        '<button onclick="reanalizar('+o.id+',this)">'+esc(o.codigo)+'</button>').join('')
+      +(BANDEJA.olas_sin_analizar.length>8?'<span style="color:var(--tinta3);font-size:12px">y '+(BANDEJA.olas_sin_analizar.length-8)+' más…</span>':'')+'</div></div>';
+  }
+  $('asuntos').innerHTML=h||'<div class="asunto"><div class="a-linea"><span style="color:var(--ok)">✓</span><b>Nada pendiente.</b></div><p class="a-cuerpo">Todo lo cargado está analizado y sin avisos. La sala vigila por ti.</p></div>';
+}
+async function reanalizar(bid,btn){
+  if(btn){btn.disabled=true;btn.textContent='analizando…'}
+  try{await api('/dv/bases/'+bid+'/analizar','POST',{});toast('Listo: expediente actualizado.');await refrescar()}
+  catch(e){if(btn){btn.disabled=false;btn.textContent='reintentar'}}
+}
+async function ponerFecha(bid,i){
+  const v=$('af-'+i).value; if(!v){toast('Elige primero la fecha de campo.');return}
+  try{await api('/dv/bases/'+bid,'PATCH',{fecha_campo_ini:v});await api('/dv/bases/'+bid+'/analizar','POST',{});
+    toast('Fecha guardada y ola reanalizada.');await refrescar()}catch(e){}
+}
+async function refrescar(){
+  const [bases,p05,p07,bandeja]=await Promise.all([
+    api('/dv/bases?pais=dom'),api('/dv/corridas?paso_clave=p05_matriz_electores_salom&con_resultado=true'),
+    api('/dv/corridas?paso_clave=p07_fila_tracking&con_resultado=true'),api('/dv/bandeja?pais=dom')]);
+  BASES=bases;P05=p05;P07=p07;BANDEJA=bandeja;
+  pintarMuro();pintarBandeja();pintarBiblio();if(MON)abrirMonitor(MON.id,true);
+}
+
+/* ── monitor ── */
+function abrirMonitor(bid,quieto){
+  const b=BASES.find(x=>x.id===bid); if(!b)return;
+  MON=b;
+  const [cl,sig,txt,color]=estadoBase(b);
+  $('m-nombre').textContent=b.codigo; $('m-miga').textContent=b.codigo;
+  $('m-cod').textContent=(b.fecha_campo_ini||'sin fecha')+' · '+fmt(b.n_registros)+' casos';
+  $('m-estado').innerHTML='<span style="color:'+color+'">'+sig+'</span> '+txt;
+  const e=estimacionBase(bid);
+  const cols=['var(--s1)','var(--s2)','var(--s3)'];
+  if(e){
+    $('m-nota-est').textContent=e.fuente+(e.tp!=null?' · participación estimada '+e.tp+'%':'')+(e.urna?' · ancla '+e.urna:'')+' · % sobre válidos';
+    $('m-estim').innerHTML=e.lista.slice(0,3).map((x,k)=>'<div class="cand"><span><i style="background:'+cols[k]+'"></i>'+esc(nombreCorto(x.n))+'</span><b>'+x.p+'%</b></div>').join('');
+  }else{
+    $('m-nota-est').textContent='esta ola aún no tiene una corrida válida — analízala desde la Bandeja';
+    $('m-estim').innerHTML='<div class="cand"><b style="font-size:22px;color:var(--tinta3)">sin estimación</b></div>';
+  }
+  pintarTendencia(bid,e);
+  pintarUrna();
+  const exp=b.expediente||{};
+  const av=(exp.avisos||[]);
+  const checks=[];
+  const c5=porBase(P05,bid);
+  checks.push(c5?['✓','var(--ok)','El método corrió y cuadró','estimación anclada a la urna oficial, al elector']
+                :['·','var(--tinta3)','Método sin correr en esta ola','falta el recuerdo de voto o el análisis']);
+  checks.push(av.some(a=>a.tipo==='corrida_error')?['●','var(--critico)','Hay corridas con error','revísalas en la Bandeja']
+                :['✓','var(--ok)','Ninguna corrida falló','todo lo aplicable corrió bien']);
+  checks.push(av.some(a=>a.tipo==='revisar_pregunta')?['⚠','var(--alerta)','Diccionario con dudas','una pregunta espera confirmación — está en la Bandeja']
+                :['✓','var(--ok)','Diccionario resuelto','las preguntas del método están localizadas']);
+  checks.push(b.fecha_campo_ini?['✓','var(--ok)','Fecha de campo declarada',String(b.fecha_campo_ini)]
+                :['⚠','var(--alerta)','Sin fecha de campo','ponla desde la Bandeja para anclar a la urna correcta']);
+  $('m-checks').innerHTML=checks.map(([s,c,t,d])=>'<li><span class="sig" style="color:'+c+'">'+s+'</span><div><b>'+esc(t)+'</b><br><span>'+esc(d)+'</span></div></li>').join('');
+  $('m-avisos').innerHTML=av.length?av.map(a=>'<p>⚠ '+esc(a.texto)+'</p>').join(''):'<p style="color:var(--tinta3)">Ninguno. Todo lo de esta ola está en orden.</p>';
+  $('m-exped').style.display='none'; $('m-exped').innerHTML='';
+  if(!quieto)ver('monitor');
+}
+function toggleExped(){
+  const el=$('m-exped');
+  if(el.style.display==='none'&&MON){el.innerHTML=expedienteHTML(MON.expediente);el.style.display='block'}
+  else el.style.display='none';
+}
+function expedienteHTML(x){
+  if(!x)return '<p>Esta ola todavía no tiene expediente: analízala desde la Bandeja.</p>';
+  if(x.error)return '<p class="mal">⚠ '+esc(x.error)+'</p>';
+  let h='<h3 style="margin-top:0">Expediente del análisis automático</h3>';
+  h+='<p><b style="color:var(--tinta)">'+esc(x.lectura||'')+'</b> <span style="color:var(--tinta3)">('+esc(x.generado||'')+(x.ms?' · '+(x.ms/1000).toFixed(1)+' s':'')+' · por '+esc(x.por||'')+')</span></p>';
+  for(const a of(x.avisos||[]))h+='<p class="mal">⚠ '+esc(a.texto)+'</p>';
+  if((x.corridas||[]).length)h+='<div style="max-height:260px;overflow:auto"><table><tr><th>paso del método</th><th>resultado</th></tr>'
+    +x.corridas.map(c=>'<tr><td><b style="color:var(--tinta)">'+esc(c.paso)+'</b><br><small style="color:var(--tinta3)">'+esc(c.titulo||'')+'</small></td><td>'
+    +(c.ok?esc(c.resumen||'corrió bien'):'<span class="mal">'+esc(c.error||'error')+'</span>')+'</td></tr>').join('')+'</table></div>';
+  if((x.reconocimiento||[]).length)h+='<p><b style="color:var(--tinta)">Preguntas reconocidas:</b> '
+    +x.reconocimiento.map(r=>'<code>'+esc(r.pregunta)+'</code> → '+esc(r.variable)+(r.confianza>=1?' ✓':(r.confianza<0.9?' ⚠':''))).join(' · ')+'</p>';
+  if((x.decisiones||[]).length)h+='<p><b style="color:var(--tinta)">Decisiones que tomó:</b><br>'+x.decisiones.map(d=>'· '+esc(d)).join('<br>')+'</p>';
+  if((x.no_corridos||[]).length)h+='<p>'+x.no_corridos.map(d=>esc(d.texto)).join('<br>')+'</p>';
+  return h;
+}
+
+/* tendencia real: p07 a lo largo de las olas */
+function pintarTendencia(bid,e){
+  const cont=$('m-tendencia'),ley=$('m-leyenda');
+  if(!e){cont.innerHTML='';ley.innerHTML='';return}
+  const noms=e.lista.slice(0,3).map(x=>x.n);
+  const fechas={}; BASES.forEach(b=>fechas[b.id]=String(b.fecha_campo_ini||''));
+  const puntos={}; // fecha → {nombre: pct}
+  P07.filter(c=>c.ok&&c.resultado&&c.resultado.candidatos).forEach(c=>{
+    const f=fechas[c.base_id]; if(!f)return;
+    if(!puntos[f]||c.id>puntos[f]._id){puntos[f]={_id:c.id};
+      for(const n of noms){const v=c.resultado.candidatos[n];puntos[f][n]=v?v.pct_validos:null}}
+  });
+  const fechasOrd=Object.keys(puntos).sort().slice(-10);
+  if(fechasOrd.length<2){cont.innerHTML='<p class="nota">La serie se dibuja cuando hay al menos dos olas con este análisis.</p>';ley.innerHTML='';return}
+  const series=noms.map(n=>fechasOrd.map(f=>puntos[f][n]));
+  const etiquetasX=fechasOrd.map(f=>f.slice(2,7));
+  const cols=['var(--s1)','var(--s2)','var(--s3)'];
+  const W=560,H=210,M={t:14,r:118,b:26,l:34};
+  const todos=series.flat().filter(v=>v!=null);
+  const lo=Math.max(0,Math.floor(Math.min(...todos)/5)*5),hi=Math.ceil(Math.max(...todos)/5)*5||5;
+  const X=i=>M.l+(W-M.l-M.r)*i/Math.max(1,fechasOrd.length-1),Y=v=>M.t+(H-M.t-M.b)*(1-(v-lo)/Math.max(1,hi-lo));
+  let g='';
+  for(let v=lo;v<=hi;v+=5){g+='<line x1="'+M.l+'" y1="'+Y(v)+'" x2="'+(W-M.r)+'" y2="'+Y(v)+'" stroke="var(--borde-suave)" stroke-width="1"/>'
+    +'<text x="'+(M.l-7)+'" y="'+(Y(v)+3.5)+'" text-anchor="end" font-size="10" fill="var(--tinta3)">'+v+'</text>'}
+  etiquetasX.forEach((o,i)=>{if(etiquetasX.length<=6||i%2===0||i===etiquetasX.length-1)
+    g+='<text x="'+X(i)+'" y="'+(H-8)+'" text-anchor="middle" font-size="10" fill="var(--tinta3)">'+esc(o)+'</text>'});
+  series.forEach((s,k)=>{
+    let d='',prev=false;
+    s.forEach((v,i)=>{if(v==null){prev=false;return} d+=(prev?'L':'M')+X(i).toFixed(1)+','+Y(v).toFixed(1);prev=true});
+    g+='<path d="'+d+'" fill="none" stroke="'+cols[k]+'" stroke-width="2" stroke-linejoin="round"/>';
+    for(let i=s.length-1;i>=0;i--)if(s[i]!=null){
+      g+='<circle cx="'+X(i)+'" cy="'+Y(s[i])+'" r="3.5" fill="'+cols[k]+'" stroke="var(--panel)" stroke-width="2"/>'
+        +'<text x="'+(X(i)+9)+'" y="'+(Y(s[i])+3.5)+'" font-size="11" fill="var(--tinta2)">'+s[i]+'%</text>';break}
+  });
+  cont.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Evolución real de la estimación por ola">'+g
+    +'<rect id="zona" x="'+M.l+'" y="'+M.t+'" width="'+(W-M.l-M.r)+'" height="'+(H-M.t-M.b)+'" fill="transparent"/></svg>';
+  ley.innerHTML=noms.map((n,k)=>'<span><i style="background:'+cols[k]+'"></i>'+esc(nombreCorto(n))+'</span>').join('');
+  const zona=cont.querySelector('#zona'),tip=$('tip');
+  zona.addEventListener('mousemove',ev=>{
+    const bb=cont.querySelector('svg').getBoundingClientRect(),escx=bb.width/W;
+    const i=Math.max(0,Math.min(fechasOrd.length-1,Math.round(((ev.clientX-bb.left)/escx-M.l)/((W-M.l-M.r)/Math.max(1,fechasOrd.length-1)))));
+    tip.style.display='block';tip.style.left=(ev.clientX+14)+'px';tip.style.top=(ev.clientY-10)+'px';
+    tip.innerHTML='<b>'+esc(fechasOrd[i])+'</b><br>'+noms.map((n,k)=>'<span style="color:'+cols[k]+'">●</span> '+esc(nombreCorto(n))+' '+(series[k][i]!=null?series[k][i]+'%':'—')).join('<br>');
+  });
+  zona.addEventListener('mouseleave',()=>tip.style.display='none');
+}
+
+/* urna territorial real */
+let URNA_SEL=null;
+function pintarUrna(){
+  if(!URNAS.length)return;
+  if(!URNA_SEL)URNA_SEL=[...URNAS].sort((a,b)=>(b.votos.EMITIDOS||0)-(a.votos.EMITIDOS||0))[0];
+  const m=URNA_SEL,v=m.votos;
+  const cand=Object.entries(v).filter(([k])=>!['NULOS','VALIDOS','EMITIDOS','OT+BL'].includes(k)).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  const max=Math.max(...cand.map(x=>x[1]),1);
+  const cols=['var(--s1)','var(--s2)','var(--s3)'];
+  $('m-urna').innerHTML='<p style="margin:0 0 6px;font-size:13px"><b>'+esc(m.nombre)+'</b> <span class="cod" style="color:var(--tinta3)">'+esc(m.codigo)+'</span></p>'
+    +cand.map(([n,x],k)=>'<div class="fila-b"><span>'+esc(nombreCorto(n))+'</span>'
+      +'<div class="barra"><i style="width:'+(100*x/max).toFixed(1)+'%;background:'+cols[k]+'"></i></div>'
+      +'<span class="valor">'+fmt(x)+' · '+(100*x/(v.VALIDOS||1)).toFixed(1)+'%</span></div>').join('')
+    +'<div class="fila-b"><span style="color:var(--tinta3)">válidos</span><div></div><span class="valor" style="color:var(--tinta3)">'+fmt(v.VALIDOS)+'</span></div>';
+}
+function urnaBuscar(){
+  const q=$('u-buscar').value.trim().toLowerCase(); if(!q||!URNAS.length)return;
+  const m=URNAS.filter(x=>x.nombre.toLowerCase().includes(q))
+               .sort((a,b)=>(b.votos.EMITIDOS||0)-(a.votos.EMITIDOS||0))[0];  // el mayor gana: «santiago» = Santiago de los Caballeros
+  if(m){URNA_SEL=m;pintarUrna()}
+}
+
+/* ── cargar ── */
+let PREV=null;
+async function previsualizar(){
+  const f=$('arch').files[0]; if(!f)return;
+  $('prev_res').textContent='leyendo el archivo…';
+  const fd=new FormData();fd.append('archivo',f);
+  try{PREV=await api('/dv/bases/previsualizar','POST',null,fd)}catch(e){$('prev_res').textContent='';return}
+  $('campos').style.display='grid';
+  $('b_titulo').value=f.name.replace(/\.[^.]+$/,'');
+  const m=f.name.toLowerCase().match(/(20\d\d)[-_ ]?(0[1-9]|1[0-2])?/);
+  if(m){$('b_codigo').value='dom_'+m[1]+(m[2]?'-'+m[2]:'');if(m[2])$('b_fecha').value=m[1]+'-'+m[2]+'-01'}
+  const props=PREV.variables.filter(v=>v.canon_propuesta).length;
+  $('prev_res').innerHTML='<b style="color:var(--tinta)">'+fmt(PREV.n_registros)+'</b> casos · <b style="color:var(--tinta)">'+PREV.n_variables+'</b> variables · '
+    +props+' preguntas del método reconocidas de entrada'+(PREV.avisos.length?'<br>'+PREV.avisos.map(a=>'⚠ '+esc(a)).join('<br>'):'');
+}
+function marca(b){b.classList.toggle('on')}
+async function lanzar(){
+  const f=$('arch').files[0]; if(!f){toast('Elige primero el archivo de la base.');return}
+  if(!$('b_codigo').value.trim()){toast('Ponle un código a la ola (p. ej. dom_2026-09).');return}
+  const p=$('progreso');p.style.display='block';
+  p.innerHTML='<p>· Cargando la base y reconociendo las preguntas…</p><p>· Corriendo el método completo…</p>';
+  $('btn_analizar').disabled=true;
+  const fd=new FormData();fd.append('archivo',f);
+  fd.append('codigo',$('b_codigo').value.trim());fd.append('pais',$('b_pais').value||'dom');
+  fd.append('titulo',$('b_titulo').value.trim()||$('b_codigo').value.trim());
+  if($('b_fecha').value)fd.append('fecha_campo_ini',$('b_fecha').value);
+  fd.append('ponderacion','autoponderada');
+  try{
+    const r=await api('/dv/bases','POST',null,fd);
+    const ex=r.expediente||{};
+    p.innerHTML='<p class="okt">✓ '+esc(ex.lectura||('Cargada la ola #'+r.id))+'</p>'+(ex.error?'<p class="mal">'+esc(ex.error)+'</p>':'');
+    toast('Análisis terminado: abre el Monitor para verlo.');
+    await refrescar(); abrirMonitor(r.id);
+  }catch(e){p.innerHTML='<p class="mal">No se cargó: '+esc(e.message)+'</p>'}
+  finally{$('btn_analizar').disabled=false}
+}
+
+/* ── biblioteca ── */
+const CATS=[['General','tramo en construcción',null],
+  ['Transfer-Vote','transferencia, matriz de electores, indecisos',['p01','p02','p05','p06']],
+  ['Estimación y tracking','foto por ola y serie',['p07']],
+  ['Eje gobierno/oposición','identidad contra voto',['p03']],
+  ['Techos de potencial','crecimiento posible',['p04']]];
+function pintarBiblio(){
+  $('bib-bases-n').textContent=BASES.length+' olas · 1 urna territorial (18.495 colegios)';
+  const olas=[...BASES].sort((a,b)=>String(b.fecha_campo_ini||'').localeCompare(String(a.fecha_campo_ini||'')));
+  $('bib-bases').innerHTML=olas.map(b=>'<div class="doc-fila">📊 <b>'+esc(b.codigo)+'</b>'
+    +'<span class="cod">'+fmt(b.n_registros)+' casos · <a style="cursor:pointer" onclick="abrirMonitor('+b.id+')">abrir</a></span></div>').join('');
+  const todas=[...P05,...P07];
+  $('bib-reportes').innerHTML=CATS.map(([n,d,pasos],i)=>{
+    const cnt=pasos?todas.filter(c=>c.ok&&pasos.some(p=>c.paso_clave.startsWith(p))).length:0;
+    return '<button class="carpeta" onclick="verCategoria('+i+')">📗 '+esc(n)+'<small>'+(pasos?cnt+' corridas':'próximamente')+'</small></button>';
+  }).join('');
+  $('bib-rep-lista').innerHTML='';
+}
+function verCategoria(i){
+  const [n,d,pasos]=CATS[i];
+  if(!pasos){toast('El reporte general (conclusiones + PPT) es el tramo en construcción.');return}
+  const todas=[...P05,...P07].filter(c=>c.ok&&pasos.some(p=>c.paso_clave.startsWith(p))).sort((a,b)=>b.id-a.id).slice(0,30);
+  const nomBase=id=>{const b=BASES.find(x=>x.id===id);return b?b.codigo:('ola #'+id)};
+  $('bib-rep-lista').innerHTML='<p style="font-size:12px;color:var(--tinta3);margin:8px 0 4px">'+esc(n)+' · '+esc(d)+'</p>'
+    +todas.map(c=>'<div class="doc-fila">📄 <b>'+esc(c.paso_clave)+'</b> '+esc(nomBase(c.base_id))
+    +'<span class="cod"><a style="cursor:pointer" onclick="abrirMonitor('+c.base_id+')">abrir</a></span></div>').join('');
+}
+function pintarDocs(){
+  const nombres={cualitativo:'cualitativo',documental:'documental',documento_clave:'documento clave',noticia:'noticia',contexto:'contexto',otro:'otro'};
+  $('bib-docs').innerHTML=BIB.length?BIB.map(d=>'<div class="doc-fila">📚 <b>'+esc(d.titulo)+'</b> '+esc(nombres[d.tipo]||d.tipo)
+    +'<span class="cod">'+d.caracteres+' car. <button onclick="borrarDoc('+d.id+')">quitar</button></span></div>').join('')
+    :'<div class="doc-fila">El archivo del caso está vacío: sube el primer documento.</div>';
+}
+async function subirBiblioteca(){
+  const f=$('bib_arch').files[0]; if(!f){toast('Elige primero el archivo.');return}
+  const fd=new FormData();fd.append('archivo',f);fd.append('tipo',$('bib_tipo').value);fd.append('pais','dom');
+  fd.append('titulo',f.name.replace(/\.[^.]+$/,''));
+  $('bib_msg').textContent='subiendo…';$('btn_bib').disabled=true;
+  try{const r=await api('/dv/biblioteca','POST',null,fd);$('bib_msg').textContent='✓ leído: '+r.caracteres+' caracteres';
+    $('bib_arch').value='';BIB=await api('/dv/biblioteca?pais=dom');pintarDocs()}
+  catch(e){$('bib_msg').textContent=''}finally{$('btn_bib').disabled=false}
+}
+async function borrarDoc(id){
+  if(!confirm('¿Quitar este documento del archivo del caso?'))return;
+  try{await api('/dv/documentos/'+id,'DELETE');BIB=await api('/dv/biblioteca?pais=dom');pintarDocs()}catch(e){}
+}
+
+/* ── DANTE ── */
+let DSES=null,DOCUPADO=false;
+function dante(){
+  $('dante').classList.toggle('abierto');
+  if($('dante').classList.contains('abierto')&&!DSES)danteSesion();
+}
+async function danteSesion(){
+  try{
+    const ss=await api('/dv/sesiones');
+    let s=(ss||[]).find(x=>x.titulo==='Sala de Control');
+    if(!s)s=await api('/dv/sesiones','POST',{titulo:'Sala de Control'});
+    DSES=await api('/dv/sesiones/'+s.id);
+    pintarDante();
+  }catch(e){}
+}
+function pintarDante(){
+  const h=$('d-hilo'); if(!DSES)return;
+  h.innerHTML=(DSES.mensajes||[]).map(m=>{
+    if(m.rol==='usuario')return '<div class="d-msg yo">'+esc(m.contenido)+'</div>';
+    const hs=(m.meta&&m.meta.herramientas)||[];
+    const rastro=hs.length?'<span class="consulto">consultó: '+hs.map(x=>esc(x.nombre)).join(' · ')+'</span>':'';
+    return '<div class="d-msg el">'+esc(m.contenido)+rastro+'</div>';
+  }).join('')||'<div class="d-msg el">Pregúntame por cualquier ola, cruce, territorio o documento del caso.</div>';
+  h.scrollTop=h.scrollHeight;
+}
+async function dantePregunta(){
+  const inp=$('d-in'),t=inp.value.trim(); if(!t||DOCUPADO)return;
+  if(!DSES){await danteSesion(); if(!DSES)return}
+  DOCUPADO=true;$('d-btn').disabled=true;inp.value='';
+  DSES.mensajes.push({rol:'usuario',contenido:t});pintarDante();
+  $('d-hilo').innerHTML+='<div class="d-msg el" style="color:var(--tinta3)">pensando…</div>';$('d-hilo').scrollTop=1e9;
+  try{await api('/dv/dante','POST',{sesion_id:DSES.id,mensaje:t});DSES=await api('/dv/sesiones/'+DSES.id);pintarDante()}
+  catch(e){pintarDante()}
+  finally{DOCUPADO=false;$('d-btn').disabled=false}
+}
+
+/* ── navegación y toast ── */
+function ver(id){
+  document.querySelectorAll('main section').forEach(s=>s.classList.toggle('on',s.id===id));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.id==='nav-'+id));
+}
+let toastT;
+function toast(t){const el=$('toast');el.textContent=t;el.style.display='block';
+  clearTimeout(toastT);toastT=setTimeout(()=>el.style.display='none',3600)}
+
+arrancar();
+</script>
+</body>
+</html>
