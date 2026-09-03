@@ -236,22 +236,38 @@
   .pais-card .entrarb{margin-top:6px;font-size:12.5px;color:var(--marca);font-weight:600}
   .pais-card.prox{opacity:.65}
   .pais-card.prox .entrarb{color:var(--tinta3)}
-  /* mapa del proceso: las 9 etapas del caso */
-  .proceso{display:flex;flex-wrap:wrap;align-items:stretch;gap:10px;margin-top:8px}
-  .etapa-n{position:relative;flex:1 1 150px;min-width:150px;max-width:220px;text-align:left;background:var(--panel);
-           border:1px solid var(--borde-suave);border-radius:8px;padding:12px 14px;color:inherit;
-           display:flex;flex-direction:column;gap:3px}
-  .etapa-n:hover{border-color:var(--tinta3);background:var(--panel2)}
-  .etapa-n .num-e{font-family:"Barlow Condensed";font-weight:700;font-size:13px;color:var(--tinta3);letter-spacing:.06em}
-  .etapa-n b{font-family:"Barlow Condensed";font-size:18px;font-weight:600;letter-spacing:.03em;line-height:1.15}
-  .etapa-n small{font-size:11px;color:var(--tinta3)}
-  .etapa-n .estado-e{font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-top:4px}
-  .etapa-n.viva{border-color:var(--marca)}
+  /* mapa del proceso: recorrido de 9 etapas sobre un riel — la etapa viva manda */
+  .proceso{display:flex;align-items:stretch;gap:10px;margin-top:18px;overflow-x:auto;padding:2px 26px 14px 2px;scrollbar-width:thin}
+  .etapa-n{position:relative;flex:1 1 104px;min-width:102px;text-align:left;background:none;border:none;padding:0;
+           color:inherit;display:flex;flex-direction:column;cursor:pointer}
+  .etapa-n.viva{flex:0 0 238px;min-width:238px}
+  .etapa-n::before{content:"";position:absolute;top:13px;left:44px;right:-12px;height:1px;background:var(--borde)}
+  .etapa-n:last-child::before{display:none}
+  .etapa-n .nodo{position:relative;z-index:2;width:26px;height:26px;border-radius:50%;border:1.5px solid var(--borde);
+                 color:var(--tinta3);display:flex;align-items:center;justify-content:center;background:var(--fondo);
+                 font-family:"Barlow Condensed";font-weight:700;font-size:13px;margin:0 0 -13px 14px}
+  .etapa-n.viva .nodo{background:var(--marca);border-color:var(--marca);color:#fff;box-shadow:0 0 0 5px rgba(201,97,79,.16)}
+  .etapa-n:last-child .nodo::after{content:"↺";position:absolute;right:-20px;top:3px;color:var(--marca);font-size:13px}
+  .etapa-n .tarj{border:1px solid transparent;background:transparent;border-radius:10px;padding:22px 13px 12px;flex:1;
+                 display:flex;flex-direction:column;gap:3px;transition:border-color .15s,background .15s,transform .15s}
+  .etapa-n:not(.viva):hover .tarj{border-color:var(--borde-suave);background:var(--panel);transform:translateY(-2px)}
+  .etapa-n.viva .tarj{border-color:rgba(201,97,79,.5);background:linear-gradient(165deg,rgba(201,97,79,.14),var(--panel) 58%);
+                      box-shadow:0 10px 26px rgba(0,0,0,.28)}
+  .etapa-n.viva:hover .tarj{border-color:var(--marca);transform:translateY(-2px)}
+  .etapa-n b{font-family:"Barlow Condensed";font-size:15.5px;font-weight:600;letter-spacing:.03em;line-height:1.15;color:var(--tinta2)}
+  .etapa-n.viva b{font-size:23px;color:var(--tinta)}
+  .etapa-n small{font-size:10.5px;color:var(--tinta3);letter-spacing:.02em}
+  .etapa-n .estado-e{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;margin-top:5px;color:var(--tinta3)}
+  .etapa-n:not(.viva) .estado-e{font-size:9px;letter-spacing:.05em}
   .etapa-n.viva .estado-e{color:var(--marca)}
-  .etapa-n:not(.viva) .estado-e{color:var(--tinta3)}
-  .etapa-n.sel{background:var(--panel2);border-color:var(--tinta2)}
-  .etapa-n::after{content:"→";position:absolute;right:-11px;top:50%;transform:translateY(-50%);color:var(--tinta3);font-size:13px;z-index:1}
-  .etapa-n:last-child::after{content:"↺";color:var(--marca)}
+  .etapa-n.viva .estado-e i{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--marca);
+                            margin-right:5px;font-style:normal;animation:latido 1.8s ease-in-out infinite}
+  @keyframes latido{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.8)}}
+  .etapa-n .vivo-dato{margin-top:8px;padding-top:8px;border-top:1px solid rgba(201,97,79,.22);font-size:11.5px;
+                      color:var(--tinta2);line-height:1.5}
+  .etapa-n .vivo-dato b{font-size:12px;color:var(--tinta);font-family:"IBM Plex Sans",sans-serif}
+  .etapa-n .entrar-e{margin-top:7px;font-size:12px;font-weight:700;color:var(--marca);letter-spacing:.04em}
+  .etapa-n.sel .tarj{border-color:var(--tinta2);background:var(--panel2)}
   .etapa-det{margin-top:12px}
   .etapa-det h3{margin:0 0 4px}
   .etapa-det p{margin:4px 0;font-size:13px;color:var(--tinta2);max-width:80ch}
@@ -260,14 +276,32 @@
   .eje-t{margin:20px 0 8px;font-size:15px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--tinta2)}
   .eje-t span{font-weight:400;text-transform:none;letter-spacing:0;color:var(--tinta3);font-size:13px;font-family:"IBM Plex Sans",sans-serif}
 
-  .demarcas{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-top:6px}
-  .dem-card{text-align:left;color:inherit;background:var(--panel);border:1px solid var(--borde-suave);border-radius:8px;
-            padding:16px;display:flex;flex-direction:column;gap:4px}
-  .dem-card:hover{border-color:var(--tinta3);background:var(--panel2)}
-  .dem-card b{font-family:"Barlow Condensed";font-size:19px;font-weight:600;letter-spacing:.03em}
-  .dem-card span{font-size:12px;color:var(--tinta2)}
-  .dem-card .gran{font-family:"Barlow Condensed";font-size:26px;color:var(--tinta);font-weight:600}
-  .dem-card.pais-entero{border-color:var(--marca)}
+  /* el territorio: escalera de niveles — cada peldaño baja un nivel de demarcación */
+  .demarcas{display:flex;flex-direction:column;margin-top:14px;max-width:840px}
+  .dem-card{position:relative;display:flex;align-items:center;gap:18px;text-align:left;color:inherit;background:var(--panel);
+            border:1px solid var(--borde-suave);border-radius:10px;padding:14px 20px;margin-bottom:10px;
+            transition:border-color .15s,transform .15s}
+  .dem-card:hover{border-color:var(--tinta3);transform:translateX(5px)}
+  .dem-card.hijo::before{content:"";position:absolute;left:-17px;top:-11px;bottom:50%;width:15px;
+                         border-left:1px solid var(--borde);border-bottom:1px solid var(--borde);border-bottom-left-radius:9px}
+  .dem-card .cab-d{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+  .dem-card .niv{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--tinta3);font-weight:600}
+  .dem-card b{font-family:"Barlow Condensed";font-size:21px;font-weight:600;letter-spacing:.03em;line-height:1.1}
+  .dem-card .desc{font-size:12px;color:var(--tinta2)}
+  .dem-card .gran{font-family:"Barlow Condensed";font-size:31px;color:var(--tinta);font-weight:600;text-align:right;
+                  min-width:96px;line-height:1;flex:none}
+  .dem-card .gran small{display:block;font-size:10px;color:var(--tinta3);letter-spacing:.08em;text-transform:uppercase;font-family:"IBM Plex Sans",sans-serif;margin-top:3px}
+  .dem-card .flecha-d{color:var(--tinta3);font-size:17px;flex:none}
+  .dem-card:hover .flecha-d{color:var(--tinta)}
+  .dem-card.pais-entero{border-color:rgba(201,97,79,.5);background:linear-gradient(120deg,rgba(201,97,79,.12),var(--panel) 62%)}
+  .dem-card.pais-entero .niv,.dem-card.pais-entero .flecha-d{color:var(--marca)}
+  /* cabecera del país con su imagen */
+  .pais-hero{position:relative;margin:14px 0 6px;border-radius:12px;overflow:hidden;border:1px solid var(--borde-suave);
+             min-height:150px;display:flex;align-items:flex-end;background-size:cover;background-position:center 35%}
+  .pais-hero .velo{position:absolute;inset:0;background:linear-gradient(180deg,rgba(13,16,21,.25),rgba(13,16,21,.88) 78%)}
+  .pais-hero .ph-cont{position:relative;padding:26px 24px 18px}
+  .pais-hero h2{margin:0;font-size:32px;font-weight:600;letter-spacing:.03em;text-shadow:0 2px 12px rgba(0,0,0,.5)}
+  .pais-hero p{margin:4px 0 0;color:var(--tinta2);font-size:13.5px;text-shadow:0 1px 8px rgba(0,0,0,.6)}
   .terr-lista{max-width:860px}
   .terr-lista input{width:100%;background:var(--panel);border:1px solid var(--borde);color:var(--tinta);
                     border-radius:6px;padding:9px 12px;margin-bottom:10px}
@@ -337,6 +371,21 @@
   .d-msg.yo{background:var(--panel2);align-self:flex-end}
   .d-msg.el{background:var(--fondo);border:1px solid var(--borde-suave)}
   .d-msg .consulto{display:block;margin-top:6px;font-size:11px;color:var(--tinta3);white-space:normal}
+  .d-marcas{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
+  .d-marcas button{border:1px solid var(--borde);background:var(--panel2);color:var(--tinta3);border-radius:999px;
+    padding:2px 10px;font-size:10.5px;letter-spacing:.04em;cursor:pointer}
+  .d-marcas button:hover{border-color:var(--marca);color:var(--tinta)}
+  .d-sello{display:inline-block;margin-top:7px;font-size:10.5px;color:var(--marca);border:1px solid var(--marca);
+    border-radius:999px;padding:1px 9px;letter-spacing:.05em}
+  .d-nota{margin-top:8px;border:1px solid var(--borde);border-radius:8px;padding:9px;background:var(--panel2);white-space:normal}
+  .d-nota b{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--marca);margin-bottom:6px}
+  .d-nota small{display:block;font-size:11px;color:var(--tinta3);margin-bottom:6px;line-height:1.45}
+  .d-nota input{width:100%;border:1px solid var(--borde);background:var(--fondo);color:var(--tinta);border-radius:6px;
+    padding:7px 9px;font-size:12.5px;margin-bottom:7px}
+  .d-nota .fila-n{display:flex;gap:6px}
+  .d-nota .fila-n button{border-radius:6px;padding:5px 12px;font-size:11.5px;cursor:pointer}
+  .d-nota .si{background:var(--marca);border:1px solid var(--marca);color:#fff}
+  .d-nota .no{background:none;border:1px solid var(--borde);color:var(--tinta3)}
   .d-pie{padding:12px 16px;border-top:1px solid var(--borde);display:flex;gap:8px}
   .d-pie input{flex:1;background:var(--fondo);border:1px solid var(--borde);border-radius:6px;color:var(--tinta);
                padding:9px 12px;font-size:13px}
@@ -395,10 +444,12 @@
 
 <section id="demarcaciones">
   <div class="miga"><a onclick="ver('portada')">Países</a> › <span id="dem-pais"></span></div>
-  <h2 class="portada-titulo" id="dem-titulo"></h2>
-  <p class="portada-sub">El proceso completo del caso — entra a la etapa que quieras, o baja al territorio.</p>
+  <div class="pais-hero" id="dem-hero"><div class="velo"></div>
+    <div class="ph-cont"><h2 id="dem-titulo"></h2>
+    <p>El proceso completo del caso — entra a la etapa que quieras, o baja al territorio.</p></div>
+  </div>
 
-  <h3 class="eje-t">El proceso <span>— entra a la etapa que quieras, a nivel país</span></h3>
+  <h3 class="eje-t" style="margin-top:26px">El proceso <span>— las 9 etapas del caso, a nivel país · un solo circuito</span></h3>
   <div class="proceso" id="proceso"></div>
   <p style="font-size:12px;color:var(--tinta3);margin:10px 0 0">¿Quieres leer cada etapa en detalle? <a style="cursor:pointer;text-decoration:underline" onclick="ver('ruta')">Abrir la ruta completa</a></p>
   <div class="panel etapa-det" id="etapa-det" style="display:none"><div id="etapa-det-txt"></div></div>
@@ -794,7 +845,7 @@ const nombreCorto=n=>String(n).replace(/ por el .*| por La .*| por la .*/,'').tr
 
 /* ── muro ── */
 function pintarMuro(){
-  const asuntos=BANDEJA.asuntos.length+ (BANDEJA.olas_sin_analizar.length?1:0);
+  const asuntos=BANDEJA.asuntos.length+(BANDEJA.olas_sin_analizar.length?1:0)+((BANDEJA.pasos_por_aprobar||[]).length);
   $('n-bandeja').textContent=asuntos?'·'+asuntos:'';
   const ok=P05.filter(c=>c.ok).length+P07.filter(c=>c.ok).length;
   $('cifras').innerHTML=
@@ -830,10 +881,22 @@ function pintarBandeja(){
   const tipoCfg={revisar_pregunta:['rev','Revisar pregunta'],sin_fecha:['dato','Falta un dato'],corrida_error:['error','Corrida con error']};
   let h=BANDEJA.asuntos.map((a,i)=>{
     const [cl,rot]=tipoCfg[a.tipo]||['dato','Aviso'];
-    const acciones=a.tipo==='sin_fecha'
-      ?'<input type="date" id="af-'+i+'"><button class="primaria" onclick="ponerFecha('+a.base_id+','+i+')">Guardar la fecha y reanalizar</button>'
-      :'<button class="primaria" onclick="reanalizar('+a.base_id+',this)">Ya lo revisé: reanalizar la ola</button>'
-       +'<button onclick="window.open(\'sala.html\',\'_blank\')">Abrir la ficha técnica</button>';
+    let acciones;
+    if(a.tipo==='sin_fecha'){
+      acciones='<input type="date" id="af-'+i+'"><button class="primaria" onclick="ponerFecha('+a.base_id+','+i+')">Guardar la fecha y reanalizar</button>';
+    }else if(a.tipo==='revisar_pregunta'&&a.clave&&(a.candidatas||[]).length){
+      acciones='<div style="width:100%;display:flex;flex-direction:column;gap:6px">'
+        +a.candidatas.map(c=>{
+          const es=c.variable===a.elegida;
+          return '<button style="text-align:left;line-height:1.4'+(es?';border-color:var(--marca)':'')+'" '
+            +'onclick="confirmarPregunta('+a.base_id+',\''+esc(a.clave)+'\',\''+esc(c.variable)+'\',this)">'
+            +(es?'✓ ':'')+'<b>'+esc(c.variable)+'</b>'+(es?' — la elegida por el sistema':'')
+            +'<br><small style="color:var(--tinta3)">«'+esc(c.etiqueta||'sin etiqueta')+'» · '+c.respuestas+' respuestas'
+            +(es?' · pulsa para confirmarla':' · pulsa para corregir el mapeo a esta')+'</small></button>';
+        }).join('')+'</div>';
+    }else{
+      acciones='<button class="primaria" onclick="reanalizar('+a.base_id+',this)">Ya lo revisé: reanalizar la ola</button>';
+    }
     return '<div class="asunto"><div class="a-linea"><span class="a-tipo '+cl+'">'+rot+'</span><b>'+esc(a.ola)+'</b>'
       +'<span class="donde">'+esc(a.generado||'')+'</span></div>'
       +'<p class="a-cuerpo">'+esc(a.texto)+'</p><div class="a-acciones">'+acciones+'</div></div>';
@@ -846,7 +909,34 @@ function pintarBandeja(){
         '<button onclick="reanalizar('+o.id+',this)">'+esc(o.codigo)+'</button>').join('')
       +(BANDEJA.olas_sin_analizar.length>8?'<span style="color:var(--tinta3);font-size:12px">y '+(BANDEJA.olas_sin_analizar.length-8)+' más…</span>':'')+'</div></div>';
   }
+  const pasos=BANDEJA.pasos_por_aprobar||[];
+  if(pasos.length&&YO&&YO.rol==='director'){
+    h+=pasos.map(p=>'<div class="asunto"><div class="a-linea"><span class="a-tipo rev">Paso por aprobar</span>'
+      +'<b>'+esc(p.titulo||p.clave)+'</b><span class="donde">'+esc(p.clave)+'</span></div>'
+      +'<p class="a-cuerpo">'+(p.con_codigo
+        ?'El sistema ya lo dejó listo para ejecutarse. Con tu aprobación entra al método y corre en las próximas olas.'
+        :'Aún no tiene receta ejecutable: el sistema la preparará; puedes aprobar el enunciado desde ya.')
+      +'</p><div class="a-acciones"><button class="primaria" onclick="aprobarPaso(\''+esc(p.clave)+'\',this)">Aprobar y sumarlo al método</button></div></div>').join('');
+  }else if(pasos.length){
+    h+='<div class="asunto"><div class="a-linea"><span class="a-tipo dato">En espera</span>'
+      +'<b>'+pasos.length+' paso'+(pasos.length>1?'s':'')+' del cuaderno esperan la aprobación de la dirección</b></div></div>';
+  }
   $('asuntos').innerHTML=h||'<div class="asunto"><div class="a-linea"><span style="color:var(--ok)">✓</span><b>Nada pendiente.</b></div><p class="a-cuerpo">Todo lo cargado está analizado y sin avisos. La sala vigila por ti.</p></div>';
+}
+async function aprobarPaso(clave,btn){
+  if(btn){btn.disabled=true;btn.textContent='aprobando…'}
+  try{await api('/dv/cuaderno/'+clave+'/aprobar','POST',{});toast('Paso «'+clave+'» aprobado: ya es parte del método.');await refrescar()}
+  catch(e){toast('No se pudo aprobar: '+e.message);if(btn){btn.disabled=false;btn.textContent='Aprobar y sumarlo al método'}}
+}
+async function confirmarPregunta(bid,clave,variable,btn){
+  if(btn){btn.disabled=true;btn.style.opacity=.6}
+  try{
+    await api('/dv/bases/'+bid+'/diccionario','POST',{clave,variable,estado:'confirmado'});
+    toast('Confirmado: «'+clave+'» → '+variable+'. Reanalizando la ola…');
+    await api('/dv/bases/'+bid+'/analizar','POST',{});
+    toast('Listo: diccionario confirmado y expediente actualizado.');
+    await refrescar();
+  }catch(e){toast('No se pudo confirmar: '+e.message);if(btn){btn.disabled=false;btn.style.opacity=1}}
 }
 async function reanalizar(bid,btn){
   if(btn){btn.disabled=true;btn.textContent='analizando…'}
@@ -1213,7 +1303,11 @@ function pintarDante(){
     if(m.rol==='usuario')return '<div class="d-msg yo">'+esc(m.contenido)+'</div>';
     const hs=(m.meta&&m.meta.herramientas)||[];
     const rastro=hs.length?'<span class="consulto">consultó: '+hs.map(x=>esc(x.nombre)).join(' · ')+'</span>':'';
-    return '<div class="d-msg el">'+esc(m.contenido)+rastro+'</div>';
+    const sello=m.marca?'<span class="d-sello">✓ marcado: '+esc(m.marca)+'</span>':'';
+    const puedo=YO&&(YO.rol==='director'||YO.rol==='admin');
+    const botones=(m.id&&puedo&&!m.marca)?'<span class="d-marcas">'+
+      ['paso','regla','referencia','error'].map(k=>'<button onclick="marcaAbrir('+m.id+',\''+k+'\',this)">'+k+'</button>').join('')+'</span>':'';
+    return '<div class="d-msg el">'+esc(m.contenido)+rastro+sello+botones+'</div>';
   }).join('')||'<div class="d-msg el">Pregúntame por cualquier ola, cruce, territorio o documento del caso.</div>';
   h.scrollTop=h.scrollHeight;
 }
@@ -1226,6 +1320,37 @@ async function dantePregunta(){
   try{await api('/dv/dante','POST',{sesion_id:DSES.id,mensaje:t});DSES=await api('/dv/sesiones/'+DSES.id);pintarDante()}
   catch(e){pintarDante()}
   finally{DOCUPADO=false;$('d-btn').disabled=false}
+}
+/* Marcar una respuesta de DANTE: así se entrena el método (paso · regla · referencia · error). */
+const MARCA_TXT={
+  paso:{t:'Marcar como paso',g:'Título del paso',p:'Se guarda en el Cuaderno y el sistema lo convierte solo en receta ejecutable.',ob:true},
+  regla:{t:'Marcar como regla',g:'La regla en una frase',p:'Queda vigente en el Cuaderno y DANTE la respeta desde ahora.',ob:true},
+  referencia:{t:'Marcar como referencia',g:'Nota (opcional)',p:'Declara que este cálculo es el correcto: el patrón contra el que se compara.',ob:false},
+  error:{t:'Marcar como error',g:'Qué está mal y por qué',p:'Queda registrado como corrección; es lo que más entrena al sistema.',ob:true}};
+function marcaAbrir(id,marca,btn){
+  const msg=btn.closest('.d-msg'); const previo=msg.querySelector('.d-nota'); if(previo)previo.remove();
+  const c=MARCA_TXT[marca]; const f=document.createElement('div'); f.className='d-nota';
+  f.innerHTML='<b>'+c.t+'</b><small>'+c.p+'</small><input placeholder="'+c.g+'">'+
+    '<div class="fila-n"><button class="si">Guardar</button><button class="no">Cancelar</button></div>';
+  f.querySelector('.si').onclick=e=>marcaGuardar(id,marca,e.target);
+  f.querySelector('.no').onclick=()=>f.remove();
+  f.querySelector('input').onkeydown=e=>{if(e.key==='Enter')marcaGuardar(id,marca,f.querySelector('.si'))};
+  msg.appendChild(f); f.querySelector('input').focus();
+}
+async function marcaGuardar(id,marca,btn){
+  const caja=btn.closest('.d-nota'); const inp=caja.querySelector('input'); const nota=inp.value.trim();
+  if(!nota&&MARCA_TXT[marca].ob){inp.placeholder='escribe la nota — sin ella la marca no enseña nada';inp.focus();return}
+  btn.disabled=true;btn.textContent='guardando…';
+  try{
+    const r=await api('/dv/mensajes/'+id+'/marcar','POST',{marca,nota:nota||null});
+    let aviso='Marcado como '+marca+'.';
+    if(r.creado&&r.creado.regla)aviso='Regla «'+r.creado.regla+'» guardada en el Cuaderno.';
+    if(r.creado&&r.creado.paso)aviso=r.creado.con_codigo
+      ?'Paso «'+r.creado.paso+'» guardado y preparado para ejecutarse.'
+      :'Paso «'+r.creado.paso+'» guardado; el sistema no pudo prepararlo ahora — vuelve a marcarlo en un rato.';
+    toast(aviso);
+    DSES=await api('/dv/sesiones/'+DSES.id);pintarDante();
+  }catch(e){toast('No se pudo marcar: '+e.message);btn.disabled=false;btn.textContent='Guardar'}
 }
 
 /* ── visualización de datos ── */
@@ -1353,10 +1478,18 @@ const ETAPAS=[
  {n:8,es:'Activación',en:'Activation',d:'La pauta corriendo, monitoreada y optimizada en vuelo.'},
  {n:9,es:'Resultados',en:'Performance',d:'Monitoreo y evaluación de piezas y pautas. Lo aprendido vuelve a la Investigación: el círculo se cierra.'},
 ];
+/* el recorrido de 9 etapas — la viva manda: más grande, con su dato en vivo y su puerta */
+function procesoHTML(fn,vivoDato){
+  return ETAPAS.map((e,i)=>'<button class="etapa-n'+(e.viva?' viva':'')+'" onclick="'+fn+'('+i+')">'
+    +'<span class="nodo">'+e.n+'</span><span class="tarj">'
+    +'<b>'+esc(e.es)+'</b><small>'+esc(e.en)+'</small>'
+    +'<span class="estado-e">'+(e.viva?'<i></i>en operación':'próximamente')+'</span>'
+    +(e.viva&&vivoDato?'<span class="vivo-dato">'+vivoDato+'</span><span class="entrar-e">Entrar →</span>':'')
+    +'</span></button>').join('');
+}
 function pintarProceso(){
-  $('proceso').innerHTML=ETAPAS.map((e,i)=>'<button class="etapa-n'+(e.viva?' viva':'')+'" id="et-'+i+'" onclick="elegirEtapa('+i+')">'
-    +'<span class="num-e">ETAPA '+e.n+'</span><b>'+esc(e.es)+'</b><small>'+esc(e.en)+'</small>'
-    +'<span class="estado-e">'+(e.viva?'● en operación':'próximamente')+'</span></button>').join('');
+  const dato='<b>'+BASES.length+' olas</b> en el muro · urna territorial cargada · monitor y bandeja activos';
+  $('proceso').innerHTML=procesoHTML('elegirEtapa',dato);
 }
 function elegirEtapa(i){
   const e=ETAPAS[i];
@@ -1377,9 +1510,8 @@ function abrirDemarcacion(t,nivel){
   $('dh-miga').textContent=t.nombre;
   $('dh-nombre').textContent=t.nombre;
   $('dh-sub').textContent=(DEM_SEL.nivel==='provincia'?'Provincia':'Municipio')+' '+t.codigo+' · '+fmt(t.votos.VALIDOS)+' votos válidos en 2024 · el proceso completo de esta demarcación';
-  $('proceso-dem').innerHTML=ETAPAS.map((e,i)=>'<button class="etapa-n'+(e.viva?' viva':'')+'" onclick="elegirEtapaDem('+i+')">'
-    +'<span class="num-e">ETAPA '+e.n+'</span><b>'+esc(e.es)+'</b><small>'+esc(e.en)+'</small>'
-    +'<span class="estado-e">'+(e.viva?'● en operación':'próximamente')+'</span></button>').join('');
+  $('proceso-dem').innerHTML=procesoHTML('elegirEtapaDem',
+    '<b>'+fmt(t.votos.VALIDOS)+' votos válidos</b> en la urna 2024 — el ancla del método aquí');
   $('etapa-det-dem').style.display='none';
   ver('demhome');
 }
@@ -1412,16 +1544,21 @@ function entrarPais(cod){
   const p=PAISES.find(x=>x.codigo===cod);
   $('dem-pais').textContent=p.nombre; $('dem-titulo').textContent=p.bandera+' '+p.nombre; $('terr-pais').textContent=p.nombre;
   $('nav-pais').textContent=p.bandera+' '+(p.codigo==='dom'?'Rep. Dominicana':p.nombre);
+  if(p.imagen)$('dem-hero').style.backgroundImage='url(\''+p.imagen+'\')';
   const nProv=new Set(URNAS.map(u=>u.padre)).size||32;
+  const peldano=(i,cl,click,niv,nom,gran,unidad,desc)=>
+    '<button class="dem-card '+cl+(i?' hijo':'')+'" style="margin-left:'+(i*30)+'px" onclick="'+click+'">'
+    +'<span class="cab-d"><span class="niv">'+niv+'</span><b>'+nom+'</b><span class="desc">'+desc+'</span></span>'
+    +'<span class="gran">'+gran+'<small>'+unidad+'</small></span><span class="flecha-d">›</span></button>';
   $('dem-cards').innerHTML=
-    '<button class="dem-card pais-entero" onclick="ver(\'muro\')"><b>Todo el país</b>'
-      +'<span class="gran">'+BASES.length+' olas</span><span>el muro completo: encuestas nacionales, estimaciones y avisos</span></button>'
-    +'<button class="dem-card" onclick="abrirTerritorios(\'provincia\')"><b>Provincias</b>'
-      +'<span class="gran">'+(nProv||'—')+'</span><span>resultados oficiales por provincia</span></button>'
-    +'<button class="dem-card" onclick="abrirTerritorios(\'municipio\')"><b>Municipios</b>'
-      +'<span class="gran">'+(URNAS.length||'—')+'</span><span>la urna real de cada municipio — el ancla del método</span></button>'
-    +'<button class="dem-card" onclick="toast(\'Los 18.495 colegios son la celda del nanosegmento: se navegan desde su municipio.\')"><b>Colegios</b>'
-      +'<span class="gran">18.495</span><span>la unidad mínima del voto (nanosegmento)</span></button>';
+     peldano(0,'pais-entero',"ver('muro')",'Nivel 0 · país entero','Todo el país',BASES.length,'olas de encuesta',
+             'el muro completo: encuestas nacionales, estimaciones y avisos')
+    +peldano(1,'',"abrirTerritorios('provincia')",'Nivel 1','Provincias',(nProv||'—'),'demarcaciones',
+             'resultados oficiales por provincia')
+    +peldano(2,'',"abrirTerritorios('municipio')",'Nivel 2','Municipios',(URNAS.length||'—'),'urnas oficiales',
+             'la urna real de cada municipio — el ancla del método')
+    +peldano(3,'',"toast('Los 18.495 colegios son la celda del nanosegmento: se navegan desde su municipio.')",
+             'Nivel 3 · nanosegmento','Colegios','18.495','celdas de voto','la unidad mínima del voto');
   pintarProceso();
   $('etapa-det').style.display='none';
   document.querySelectorAll('.etapa-n').forEach(x=>x.classList.remove('sel'));
