@@ -616,7 +616,12 @@ async function entrar(){
     TOK=j.access_token; YO={usuario:$('lu').value.trim().toLowerCase(),rol:j.rol,nombre:j.nombre};
     try{sessionStorage.setItem('d2v_tok',TOK);sessionStorage.setItem('d2v_yo',JSON.stringify(YO))}catch(e){}
     arrancar();
-  }catch(e){$('lmsg').textContent=e.message}
+  }catch(e){
+    let m=e.message||'';
+    if(/Failed to fetch|NetworkError|Load failed/i.test(m))m='El motor se está reiniciando (pasa tras cada actualización, 1-3 minutos). Espera un momento y pulsa Entrar otra vez.';
+    else if(/401|credencial|Incorrect/i.test(m))m='Usuario o clave incorrectos. Revisa mayúsculas y minúsculas.';
+    $('lmsg').textContent=m;
+  }
 }
 function salir(){TOK=null;YO=null;try{sessionStorage.removeItem('d2v_tok');sessionStorage.removeItem('d2v_yo')}catch(e){}
   $('app').style.display='none';$('login').style.display='block'}
