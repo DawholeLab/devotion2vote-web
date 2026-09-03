@@ -40,6 +40,9 @@
   nav button:hover{color:var(--tinta)}
   .quien{margin-left:auto;display:flex;align-items:center;gap:10px;color:var(--tinta2);font-size:13px}
   .quien .punto{width:8px;height:8px;border-radius:50%;background:var(--ok)}
+  .atras{border:1px solid var(--borde);background:var(--panel2);color:var(--tinta);border-radius:6px;
+         padding:5px 13px;font-size:16px;line-height:1}
+  .atras:hover{border-color:var(--marca);color:var(--marca)}
   .dante-btn{display:flex;align-items:center;gap:6px;border:1px solid var(--borde);background:var(--panel2);
              color:var(--tinta);border-radius:99px;padding:5px 14px;font-size:13px;font-weight:500}
   .dante-btn i{color:var(--marca);font-style:normal;font-size:11px}
@@ -340,6 +343,7 @@
 <div id="app" style="display:none">
 <header>
   <div class="logo"><b>DEV<i>O</i>TION<i>2</i>VOTE</b><span>Sala de Control</span></div>
+  <button class="atras" onclick="atras()" title="volver un paso" aria-label="volver un paso">←</button>
   <nav>
     <button id="nav-portada" class="on" onclick="ver('portada')">Países</button>
     <button id="nav-muro" onclick="ver('muro')">Muro</button>
@@ -1342,13 +1346,20 @@ function verTerritorio(codigo){
   pintarUrna(); ver('monitor'); toast('La urna de '+t.nombre+' quedó en el Monitor, junto a la estimación vigente.');
 }
 
-/* ── navegación y toast ── */
-function ver(id){
+/* ── navegación por capas: cada vista deja huella y la flecha ← (o el atrás del navegador) retrocede un paso ── */
+function ver(id,desdeHistorial){
   document.querySelectorAll('main section').forEach(s=>s.classList.toggle('on',s.id===id));
-  const mapa={portada:'portada',demarcaciones:'portada',territorio:'portada'};
+  const mapa={portada:'portada',demarcaciones:'portada',territorio:'portada',vt:'monitor'};
   const navId=mapa[id]||id;
   document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.id==='nav-'+navId));
+  if(id==='visual'&&!$('vis-ola').options.length)pintarVisOlas();
+  if(!desdeHistorial&&location.hash!=='#'+id)history.pushState(null,'','#'+id);
 }
+function atras(){history.back()}
+window.addEventListener('popstate',()=>{
+  const id=(location.hash||'#portada').slice(1);
+  if(document.getElementById(id)&&document.getElementById(id).closest('main'))ver(id,true);
+});
 let toastT;
 function toast(t){const el=$('toast');el.textContent=t;el.style.display='block';
   clearTimeout(toastT);toastT=setTimeout(()=>el.style.display='none',3600)}
