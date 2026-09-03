@@ -251,6 +251,8 @@
   .terr-fila .mini-barra{flex:1;height:10px;background:var(--fondo);border-radius:3px;overflow:hidden;display:flex;gap:2px}
   .terr-fila .mini-barra i{display:block;height:100%}
   .terr-fila .cifra-t{font-size:12px;color:var(--tinta2);white-space:nowrap}
+  .mini-vis{border:1px solid var(--borde);background:var(--panel2);color:var(--tinta);border-radius:5px;padding:7px 14px;font-size:13px}
+  .mini-vis:hover{border-color:var(--tinta3)}
 
   #dante{position:fixed;top:0;right:-390px;width:370px;max-width:92vw;bottom:0;background:var(--panel);
          border-left:1px solid var(--borde);z-index:8;display:flex;flex-direction:column;transition:right .25s}
@@ -302,6 +304,7 @@
     <button id="nav-bandeja" onclick="ver('bandeja')">Bandeja <span id="n-bandeja" style="color:var(--alerta)"></span></button>
     <button id="nav-monitor" onclick="ver('monitor')">Monitor</button>
     <button id="nav-biblio" onclick="ver('biblio')">Biblioteca</button>
+    <button id="nav-visual" onclick="pintarVisOlas();ver('visual');visLamina('estim')">Visualización</button>
     <button id="nav-ruta" onclick="ver('ruta')">Ruta</button>
   </nav>
   <div class="quien">
@@ -415,9 +418,9 @@
     <h2 id="m-nombre"></h2><span class="cod" id="m-cod"></span>
     <span class="estado-chip" id="m-estado"></span>
     <div class="salidas">
-      <button onclick="toast('El informe con conclusiones es el tramo en construcción — llegará aquí.')">Informe</button>
-      <button onclick="toast('La presentación PPT es el tramo en construcción — llegará aquí.')">PPT</button>
-      <button onclick="window.open('sala.html','_blank')">Láminas</button>
+      <button onclick="irVisual('informe')">Informe</button>
+      <button onclick="irVisual('ppt')">PPT</button>
+      <button onclick="irVisual('laminas')">Láminas</button>
       <button onclick="toggleExped()">Expediente</button>
     </div>
   </div>
@@ -477,6 +480,40 @@
         <button id="btn_bib" onclick="subirBiblioteca()">Subir</button><span style="font-size:12px;color:var(--tinta3)" id="bib_msg"></span>
       </div>
     </div>
+  </div>
+</section>
+
+<section id="visual">
+  <div class="cabecera-zona"><h2>Visualización de datos</h2><span>todas las salidas de una ola, generadas por el sistema con sus cifras reales</span></div>
+  <div class="panel" style="margin-bottom:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+    <span style="font-size:13px;color:var(--tinta2)">Ola:</span>
+    <select id="vis-ola" style="background:var(--fondo);border:1px solid var(--borde);color:var(--tinta);border-radius:5px;padding:8px 10px;min-width:260px" onchange="visLamina('estim')"></select>
+    <span class="cod" id="vis-msg" style="font-size:12px;color:var(--tinta3)"></span>
+  </div>
+  <div class="demarcas">
+    <button class="dem-card" onclick="descargarSalida('informe','_informe.docx',this)"><b>📕 Informe Word</b>
+      <span>documento ejecutivo con conclusiones redactadas por DANTE, tablas y verificaciones (.docx)</span>
+      <span class="gran" style="font-size:13px;color:var(--marca)">Generar y descargar</span></button>
+    <button class="dem-card" onclick="descargarSalida('ppt','_presentacion.pptx',this)"><b>📙 Presentación PPT</b>
+      <span>portada, estimación en barras, serie y conclusiones (.pptx)</span>
+      <span class="gran" style="font-size:13px;color:var(--marca)">Generar y descargar</span></button>
+    <button class="dem-card" onclick="descargarSalida('excel','_tabulados.xlsx',this)"><b>📗 Tabulados Excel</b>
+      <span>estimación, serie completa y expediente en hojas de cálculo (.xlsx)</span>
+      <span class="gran" style="font-size:13px;color:var(--marca)">Generar y descargar</span></button>
+    <button class="dem-card" onclick="toast('Para PDF: abre el Word o el PPT descargado y usa Guardar como PDF. La conversión directa llega en la siguiente entrega.')"><b>📄 PDF</b>
+      <span>versión PDF del informe o la presentación</span>
+      <span class="gran" style="font-size:13px;color:var(--tinta3)">vía Word/PPT · directa próximamente</span></button>
+  </div>
+  <div class="panel" style="margin-top:12px">
+    <h3>Láminas y gráficas</h3>
+    <p class="nota">láminas con la identidad de la casa, listas para pegar en cualquier informe o chat — el
+      <a href="sala.html" target="_blank">editor avanzado</a> sigue en la sala técnica para cruces y láminas a medida</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+      <button class="mini-vis" onclick="visLamina('estim')">Estimación (barras)</button>
+      <button class="mini-vis" onclick="visLamina('serie')">Serie (líneas)</button>
+      <button class="mini-vis" id="btn-lam-png" onclick="descargarLaminaPNG()" style="display:none">Descargar PNG</button>
+    </div>
+    <div id="vis-lamina" style="max-width:100%;overflow:auto;border:1px solid var(--borde-suave);border-radius:8px;background:#fff"></div>
   </div>
 </section>
 
@@ -957,10 +994,102 @@ async function dantePregunta(){
   finally{DOCUPADO=false;$('d-btn').disabled=false}
 }
 
+/* ── visualización de datos ── */
+function pintarVisOlas(){
+  const olas=[...BASES].sort((a,b)=>String(b.fecha_campo_ini||'').localeCompare(String(a.fecha_campo_ini||'')));
+  $('vis-ola').innerHTML=olas.map(b=>'<option value="'+b.id+'">'+esc(b.codigo)+' · '+esc(String(b.fecha_campo_ini||'sin fecha'))+'</option>').join('');
+  if(MON)$('vis-ola').value=MON.id;
+}
+function irVisual(que){
+  pintarVisOlas(); if(MON)$('vis-ola').value=MON.id;
+  ver('visual');
+  if(que==='informe')descargarSalida('informe','_informe.docx');
+  else if(que==='ppt')descargarSalida('ppt','_presentacion.pptx');
+  else visLamina('estim');
+}
+async function descargarSalida(tipo,sufijo,btn){
+  const bid=$('vis-ola').value; if(!bid){toast('Elige primero la ola.');return}
+  const b=BASES.find(x=>x.id==bid);
+  $('vis-msg').textContent=tipo==='excel'?'generando los tabulados…':'generando (DANTE redacta las conclusiones; puede tardar medio minuto)…';
+  if(btn)btn.disabled=true;
+  try{
+    const r=await fetch(API+'/dv/salidas/'+bid+'/'+tipo,{headers:{'Authorization':'Bearer '+TOK}});
+    if(!r.ok){let j=null;try{j=await r.json()}catch(e){};throw new Error((j&&j.detail)||('HTTP '+r.status))}
+    const blob=await r.blob();
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=(b?b.codigo:'ola')+sufijo;a.click();
+    URL.revokeObjectURL(a.href);
+    $('vis-msg').textContent='✓ descargado: '+a.download;
+  }catch(e){$('vis-msg').textContent='';alarma(e.message,'al generar la salida')}
+  finally{if(btn)btn.disabled=false}
+}
+/* láminas rápidas con identidad (blancas, para informes) */
+const LAM={W:1280,H:720,coral:'#C9614F',texto:'#28282A',gris:'#9A938C',serie:['#2E6FB0','#C9614F','#1F8A5C','#B8912E']};
+function lamMarco(titulo,sub,cuerpo){
+  return '<svg id="lam-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+LAM.W+' '+LAM.H+'" style="display:block;width:100%;height:auto">'
+   +'<rect width="'+LAM.W+'" height="'+LAM.H+'" fill="#ffffff"/>'
+   +'<rect x="0" y="0" width="14" height="'+LAM.H+'" fill="'+LAM.coral+'"/>'
+   +'<text x="64" y="86" font-family="Georgia,serif" font-size="40" font-weight="bold" fill="'+LAM.texto+'">'+esc(titulo)+'</text>'
+   +'<text x="64" y="122" font-family="Helvetica,Arial,sans-serif" font-size="19" fill="'+LAM.gris+'">'+esc(sub)+'</text>'
+   +cuerpo
+   +'<text x="64" y="'+(LAM.H-34)+'" font-family="Helvetica,Arial,sans-serif" font-size="15" fill="'+LAM.gris+'">Devotion2Vote · método VOTE-TRANSFER · resultados anclados a la urna oficial</text>'
+   +'</svg>';
+}
+function visLamina(tipo){
+  pintarVisOlas();
+  const bid=Number($('vis-ola').value); const b=BASES.find(x=>x.id===bid); if(!b)return;
+  let svg='';
+  if(tipo==='estim'){
+    const e=estimacionBase(bid);
+    if(!e){$('vis-lamina').innerHTML='<p style="color:#666;padding:20px;font-size:14px">Esta ola no tiene una corrida válida todavía: analízala desde la Bandeja.</p>';$('btn-lam-png').style.display='none';return}
+    const top=e.lista.slice(0,5),maxp=Math.max(...top.map(x=>x.p))||1;
+    let g='';top.forEach((x,i)=>{const y=200+i*92;
+      g+='<text x="64" y="'+(y+28)+'" font-family="Helvetica,Arial,sans-serif" font-size="22" font-weight="bold" fill="'+LAM.texto+'">'+esc(nombreCorto(x.n))+'</text>'
+        +'<rect x="360" y="'+y+'" width="'+(720*x.p/maxp)+'" height="40" rx="4" fill="'+LAM.serie[i%4]+'"/>'
+        +'<text x="'+(370+720*x.p/maxp)+'" y="'+(y+28)+'" font-family="Helvetica,Arial,sans-serif" font-size="24" font-weight="bold" fill="'+LAM.texto+'">'+x.p+' %</text>';});
+    svg=lamMarco('Estimación de voto · '+b.codigo,(e.fuente||'')+(e.tp!=null?' · participación estimada '+e.tp+' %':'')+' · % sobre válidos',g);
+  }else{
+    const fechas={};BASES.forEach(x=>fechas[x.id]=String(x.fecha_campo_ini||''));
+    const puntos={};P07.filter(c=>c.ok&&c.resultado&&c.resultado.candidatos).forEach(c=>{const f=fechas[c.base_id];if(!f)return;
+      if(!puntos[f]||c.id>puntos[f]._id)puntos[f]={_id:c.id,c:c.resultado.candidatos}});
+    const fo=Object.keys(puntos).sort().slice(-10);
+    if(fo.length<2){$('vis-lamina').innerHTML='<p style="color:#666;padding:20px;font-size:14px">La serie necesita al menos dos olas analizadas.</p>';$('btn-lam-png').style.display='none';return}
+    const ult=puntos[fo[fo.length-1]].c;
+    const noms=Object.entries(ult).map(([k,v])=>[k,(v||{}).pct_validos||0]).sort((a,b)=>b[1]-a[1]).slice(0,3).map(x=>x[0]);
+    const vals=[];fo.forEach(f=>noms.forEach(n=>{const v=(puntos[f].c[n]||{}).pct_validos;if(v!=null)vals.push(v)}));
+    const lo=Math.floor(Math.min(...vals)/5)*5,hi=Math.ceil(Math.max(...vals)/5)*5||5;
+    const X=i=>140+i*(830/Math.max(1,fo.length-1)),Y=v=>560-(v-lo)/Math.max(1,hi-lo)*370;
+    let g='';for(let v=lo;v<=hi;v+=5)g+='<line x1="140" y1="'+Y(v)+'" x2="1060" y2="'+Y(v)+'" stroke="#eee"/><text x="128" y="'+(Y(v)+6)+'" text-anchor="end" font-size="16" font-family="Helvetica,Arial,sans-serif" fill="'+LAM.gris+'">'+v+'</text>';
+    fo.forEach((f,i)=>{g+='<text x="'+X(i)+'" y="592" text-anchor="middle" font-size="15" font-family="Helvetica,Arial,sans-serif" fill="'+LAM.gris+'">'+f.slice(2,7)+'</text>'});
+    noms.forEach((n,k)=>{let d='',prev=false;
+      fo.forEach((f,i)=>{const v=(puntos[f].c[n]||{}).pct_validos;if(v==null){prev=false;return}d+=(prev?'L':'M')+X(i)+','+Y(v);prev=true});
+      g+='<path d="'+d+'" fill="none" stroke="'+LAM.serie[k]+'" stroke-width="4" stroke-linejoin="round"/>';
+      const vf=(puntos[fo[fo.length-1]].c[n]||{}).pct_validos;
+      if(vf!=null){const nom=nombreCorto(n).length>20?nombreCorto(n).slice(0,19)+'…':nombreCorto(n);
+        g+='<circle cx="'+X(fo.length-1)+'" cy="'+Y(vf)+'" r="7" fill="'+LAM.serie[k]+'"/>'
+        +'<text x="'+(X(fo.length-1)+14)+'" y="'+(Y(vf)+2-k*4)+'" font-size="17" font-weight="bold" font-family="Helvetica,Arial,sans-serif" fill="'+LAM.serie[k]+'">'+esc(nom)+'</text>'
+        +'<text x="'+(X(fo.length-1)+14)+'" y="'+(Y(vf)+22-k*4)+'" font-size="17" font-weight="bold" font-family="Helvetica,Arial,sans-serif" fill="'+LAM.serie[k]+'">'+vf+' %</text>';}});
+    svg=lamMarco('Evolución de la serie · República Dominicana','foto de intención por ola · % sobre válidos · últimas '+fo.length+' olas',g);
+  }
+  $('vis-lamina').innerHTML=svg;$('btn-lam-png').style.display='inline-block';
+}
+function descargarLaminaPNG(){
+  const el=document.getElementById('lam-svg'); if(!el)return;
+  const xml=new XMLSerializer().serializeToString(el);
+  const img=new Image();
+  img.onload=()=>{const cv=document.createElement('canvas');cv.width=2560;cv.height=1440;
+    const cx=cv.getContext('2d');cx.drawImage(img,0,0,2560,1440);
+    const a=document.createElement('a');a.href=cv.toDataURL('image/png');a.download='lamina_devotion2vote.png';a.click()};
+  img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(xml);
+}
+
 /* ── portada de países y demarcaciones ── */
 const PAISES=[
   {codigo:'dom',nombre:'República Dominicana',bandera:'🇩🇴',activo:true,imagen:'assets/paises/pais_republicadominicana.jpg'},
   {codigo:'mex',nombre:'México',bandera:'🇲🇽',activo:false,nota:'estados · municipios · secciones',imagen:'assets/paises/pais_mexico.jpg'},
+  {codigo:'esp',nombre:'España',bandera:'🇪🇸',activo:false,nota:'comunidades autónomas · provincias · municipios',imagen:'assets/paises/pais_espana.jpg'},
+  {codigo:'chl',nombre:'Chile',bandera:'🇨🇱',activo:false,nota:'regiones · provincias · comunas',imagen:'assets/paises/pais_chile.jpg'},
+  {codigo:'col',nombre:'Colombia',bandera:'🇨🇴',activo:false,nota:'departamentos · municipios',imagen:'assets/paises/pais_colombia.jpg'},
+  {codigo:'ecu',nombre:'Ecuador',bandera:'🇪🇨',activo:false,nota:'provincias · cantones · parroquias',imagen:'assets/paises/pais_ecuador.jpg'},
   {codigo:'nuevo',nombre:'Nuevo país',bandera:'🌎',activo:false,nota:'se abre con su protocolo de demarcaciones'},
 ];
 let PAIS='dom';
