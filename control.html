@@ -216,6 +216,42 @@
 
   .pie{margin:26px 0 6px;color:var(--tinta3);font-size:12px;border-top:1px solid var(--borde-suave);padding-top:12px;max-width:86ch}
 
+  /* portada: países y demarcaciones */
+  .portada-titulo{margin:18px 0 4px;font-size:30px;font-weight:600;letter-spacing:.03em}
+  .portada-sub{color:var(--tinta3);font-size:13.5px;margin:0 0 20px}
+  .paises{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}
+  .pais-card{position:relative;text-align:left;color:inherit;background:var(--panel);border:1px solid var(--borde-suave);
+             border-radius:10px;overflow:hidden;padding:0;display:flex;flex-direction:column}
+  .pais-card:hover{border-color:var(--tinta3)}
+  .pais-card .imagen{height:130px;display:flex;align-items:flex-end;justify-content:flex-end;font-size:30px;
+                     padding:8px 12px;background:linear-gradient(135deg,var(--panel2),var(--fondo));
+                     background-size:cover;background-position:center}
+  .pais-card.prox .imagen{filter:grayscale(.5) brightness(.7)}
+  .pais-card .cuerpo{padding:14px 16px 15px;display:flex;flex-direction:column;gap:6px}
+  .pais-card .cuerpo b{font-family:"Barlow Condensed";font-size:21px;font-weight:600;letter-spacing:.03em}
+  .pais-card .cuerpo span{font-size:12.5px;color:var(--tinta2)}
+  .pais-card .entrarb{margin-top:6px;font-size:12.5px;color:var(--marca);font-weight:600}
+  .pais-card.prox{opacity:.65}
+  .pais-card.prox .entrarb{color:var(--tinta3)}
+  .demarcas{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-top:6px}
+  .dem-card{text-align:left;color:inherit;background:var(--panel);border:1px solid var(--borde-suave);border-radius:8px;
+            padding:16px;display:flex;flex-direction:column;gap:4px}
+  .dem-card:hover{border-color:var(--tinta3);background:var(--panel2)}
+  .dem-card b{font-family:"Barlow Condensed";font-size:19px;font-weight:600;letter-spacing:.03em}
+  .dem-card span{font-size:12px;color:var(--tinta2)}
+  .dem-card .gran{font-family:"Barlow Condensed";font-size:26px;color:var(--tinta);font-weight:600}
+  .dem-card.pais-entero{border-color:var(--marca)}
+  .terr-lista{max-width:860px}
+  .terr-lista input{width:100%;background:var(--panel);border:1px solid var(--borde);color:var(--tinta);
+                    border-radius:6px;padding:9px 12px;margin-bottom:10px}
+  .terr-fila{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--borde-suave);
+             border-radius:6px;padding:10px 14px;margin-bottom:6px;text-align:left;color:inherit;width:100%}
+  .terr-fila:hover{border-color:var(--tinta3)}
+  .terr-fila b{font-family:"Barlow Condensed";font-size:16px;font-weight:600;min-width:200px}
+  .terr-fila .mini-barra{flex:1;height:10px;background:var(--fondo);border-radius:3px;overflow:hidden;display:flex;gap:2px}
+  .terr-fila .mini-barra i{display:block;height:100%}
+  .terr-fila .cifra-t{font-size:12px;color:var(--tinta2);white-space:nowrap}
+
   #dante{position:fixed;top:0;right:-390px;width:370px;max-width:92vw;bottom:0;background:var(--panel);
          border-left:1px solid var(--borde);z-index:8;display:flex;flex-direction:column;transition:right .25s}
   #dante.abierto{right:0}
@@ -260,7 +296,8 @@
 <header>
   <div class="logo"><b>DEV<i>O</i>TION<i>2</i>VOTE</b><span>Sala de Control</span></div>
   <nav>
-    <button id="nav-muro" class="on" onclick="ver('muro')">Muro</button>
+    <button id="nav-portada" class="on" onclick="ver('portada')">Países</button>
+    <button id="nav-muro" onclick="ver('muro')">Muro</button>
     <button id="nav-cargar" onclick="ver('cargar')">Cargar</button>
     <button id="nav-bandeja" onclick="ver('bandeja')">Bandeja <span id="n-bandeja" style="color:var(--alerta)"></span></button>
     <button id="nav-monitor" onclick="ver('monitor')">Monitor</button>
@@ -276,7 +313,29 @@
 
 <main>
 
-<section id="muro" class="on">
+<section id="portada" class="on">
+  <h2 class="portada-titulo">¿A qué país entras?</h2>
+  <p class="portada-sub">Cada país tiene su sala, sus demarcaciones y sus protocolos propios. Elige uno para trabajar.</p>
+  <div class="paises" id="paises"></div>
+</section>
+
+<section id="demarcaciones">
+  <div class="miga"><a onclick="ver('portada')">Países</a> › <span id="dem-pais"></span></div>
+  <h2 class="portada-titulo" id="dem-titulo"></h2>
+  <p class="portada-sub">Entra por el país entero o por la capa territorial que quieras mirar.</p>
+  <div class="demarcas" id="dem-cards"></div>
+</section>
+
+<section id="territorio">
+  <div class="miga"><a onclick="ver('portada')">Países</a> › <a onclick="ver('demarcaciones')" id="terr-pais"></a> › <span id="terr-nivel"></span></div>
+  <h2 class="portada-titulo" id="terr-titulo"></h2>
+  <div class="terr-lista">
+    <input id="terr-buscar" placeholder="busca por nombre…" oninput="pintarTerritorios()">
+    <div id="terr-filas"></div>
+  </div>
+</section>
+
+<section id="muro">
   <div class="cifras" id="cifras"></div>
   <div class="cabecera-zona">
     <h2>República Dominicana</h2><span id="muro-sub">cartera completa</span>
@@ -545,8 +604,8 @@ async function cargarTodo(){
       api('/dv/bandeja?pais=dom'),
     ]);
     BASES=bases;P05=p05;P07=p07;BANDEJA=bandeja;
-    pintarMuro();pintarBandeja();pintarBiblio();
-    api('/dv/urnas/territorio?nivel=municipio').then(u=>{URNAS=u;if(MON)pintarUrna()}).catch(()=>{
+    pintarMuro();pintarBandeja();pintarBiblio();pintarPaises();
+    api('/dv/urnas/territorio?nivel=municipio').then(u=>{URNAS=u;pintarPaises();pintarMuro();if(MON)pintarUrna()}).catch(()=>{
       $('m-urna').innerHTML='<p class="nota">La urna territorial aún no está cargada en este motor (comando de carga pendiente).</p>'});
     api('/dv/biblioteca?pais=dom').then(d=>{BIB=d;pintarDocs()}).catch(()=>{});
     const ultima=[...BASES].filter(b=>b.n_registros).sort((a,b)=>String(b.fecha_campo_ini||'').localeCompare(String(a.fecha_campo_ini||'')))[0];
@@ -898,10 +957,82 @@ async function dantePregunta(){
   finally{DOCUPADO=false;$('d-btn').disabled=false}
 }
 
+/* ── portada de países y demarcaciones ── */
+const PAISES=[
+  {codigo:'dom',nombre:'República Dominicana',bandera:'🇩🇴',activo:true,imagen:'assets/paises/pais_republicadominicana.jpg'},
+  {codigo:'mex',nombre:'México',bandera:'🇲🇽',activo:false,nota:'estados · municipios · secciones',imagen:'assets/paises/pais_mexico.jpg'},
+  {codigo:'nuevo',nombre:'Nuevo país',bandera:'🌎',activo:false,nota:'se abre con su protocolo de demarcaciones'},
+];
+let PAIS='dom';
+function pintarPaises(){
+  $('paises').innerHTML=PAISES.map(p=>{
+    const img=p.imagen?' style="background-image:url(\''+p.imagen+'\')"':'';
+    if(p.activo){
+      return '<button class="pais-card activo" onclick="entrarPais(\''+p.codigo+'\')">'
+        +'<div class="imagen"'+img+'>'+(p.imagen?'':p.bandera)+'</div><div class="cuerpo"><b>'+p.bandera+' '+esc(p.nombre)+'</b>'
+        +'<span>'+BASES.length+' olas de encuesta · '+(URNAS.length||182)+' municipios con urna oficial · 18.495 colegios</span>'
+        +'<span class="entrarb">Entrar →</span></div></button>';
+    }
+    return '<button class="pais-card prox" onclick="toast(\'Este país se abre cuando carguemos sus datos y su protocolo de demarcaciones.\')">'
+      +'<div class="imagen"'+img+'>'+(p.imagen?'':p.bandera)+'</div><div class="cuerpo"><b>'+p.bandera+' '+esc(p.nombre)+'</b>'
+      +'<span>'+esc(p.nota||'')+'</span><span class="entrarb">próximamente</span></div></button>';
+  }).join('');
+}
+function entrarPais(cod){
+  PAIS=cod;
+  const p=PAISES.find(x=>x.codigo===cod);
+  $('dem-pais').textContent=p.nombre; $('dem-titulo').textContent=p.bandera+' '+p.nombre; $('terr-pais').textContent=p.nombre;
+  const nProv=new Set(URNAS.map(u=>u.padre)).size||32;
+  $('dem-cards').innerHTML=
+    '<button class="dem-card pais-entero" onclick="ver(\'muro\')"><b>Todo el país</b>'
+      +'<span class="gran">'+BASES.length+' olas</span><span>el muro completo: encuestas nacionales, estimaciones y avisos</span></button>'
+    +'<button class="dem-card" onclick="abrirTerritorios(\'provincia\')"><b>Provincias</b>'
+      +'<span class="gran">'+(nProv||'—')+'</span><span>resultados oficiales por provincia</span></button>'
+    +'<button class="dem-card" onclick="abrirTerritorios(\'municipio\')"><b>Municipios</b>'
+      +'<span class="gran">'+(URNAS.length||'—')+'</span><span>la urna real de cada municipio — el ancla del método</span></button>'
+    +'<button class="dem-card" onclick="toast(\'Los 18.495 colegios son la celda del nanosegmento: se navegan desde su municipio.\')"><b>Colegios</b>'
+      +'<span class="gran">18.495</span><span>la unidad mínima del voto (nanosegmento)</span></button>';
+  ver('demarcaciones');
+}
+let TERR_NIVEL='municipio',TERR_DATOS=[];
+async function abrirTerritorios(nivel){
+  TERR_NIVEL=nivel;
+  $('terr-nivel').textContent=nivel==='provincia'?'Provincias':'Municipios';
+  $('terr-titulo').textContent=(nivel==='provincia'?'Provincias':'Municipios')+' · urna presidencial 2024';
+  $('terr-buscar').value='';
+  $('terr-filas').innerHTML='<p style="color:var(--tinta3)">cargando…</p>';
+  ver('territorio');
+  try{TERR_DATOS=nivel==='municipio'?URNAS:(await api('/dv/urnas/territorio?nivel=provincia'))}catch(e){TERR_DATOS=[]}
+  pintarTerritorios();
+}
+function pintarTerritorios(){
+  const q=($('terr-buscar').value||'').trim().toLowerCase();
+  const datos=[...TERR_DATOS].filter(t=>!q||t.nombre.toLowerCase().includes(q))
+    .sort((a,b)=>(b.votos.EMITIDOS||0)-(a.votos.EMITIDOS||0)).slice(0,60);
+  if(!datos.length){$('terr-filas').innerHTML='<p style="color:var(--tinta3)">'+(TERR_DATOS.length?'sin coincidencias':'la urna territorial aún no está cargada en este motor')+'</p>';return}
+  const cols=['var(--s1)','var(--s2)','var(--s3)'];
+  $('terr-filas').innerHTML=datos.map(t=>{
+    const v=t.votos;
+    const cand=Object.entries(v).filter(([k])=>!['NULOS','VALIDOS','EMITIDOS','OT+BL'].includes(k)).sort((a,b)=>b[1]-a[1]).slice(0,3);
+    const tot=cand.reduce((s,x)=>s+x[1],0)||1;
+    return '<button class="terr-fila" onclick="verTerritorio(\''+t.codigo+'\')"><b>'+esc(t.nombre)+'</b>'
+      +'<div class="mini-barra">'+cand.map(([n,x],k)=>'<i style="width:'+(100*x/tot).toFixed(1)+'%;background:'+cols[k]+'"></i>').join('')+'</div>'
+      +'<span class="cifra-t">'+esc(nombreCorto(cand[0][0]))+' '+(100*cand[0][1]/(v.VALIDOS||1)).toFixed(1)+'% · '+fmt(v.VALIDOS)+' válidos</span></button>';
+  }).join('');
+}
+function verTerritorio(codigo){
+  const t=TERR_DATOS.find(x=>x.codigo===codigo); if(!t)return;
+  URNA_SEL=(TERR_NIVEL==='municipio')?t:null;
+  if(TERR_NIVEL==='provincia'){abrirTerritorios('municipio').then(()=>{$('terr-buscar').value='';TERR_DATOS=URNAS.filter(u=>u.padre===codigo);pintarTerritorios();$('terr-titulo').textContent='Municipios de '+t.nombre});return}
+  pintarUrna(); ver('monitor'); toast('La urna de '+t.nombre+' quedó en el Monitor, junto a la estimación vigente.');
+}
+
 /* ── navegación y toast ── */
 function ver(id){
   document.querySelectorAll('main section').forEach(s=>s.classList.toggle('on',s.id===id));
-  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.id==='nav-'+id));
+  const mapa={portada:'portada',demarcaciones:'portada',territorio:'portada'};
+  const navId=mapa[id]||id;
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.id==='nav-'+navId));
 }
 let toastT;
 function toast(t){const el=$('toast');el.textContent=t;el.style.display='block';
