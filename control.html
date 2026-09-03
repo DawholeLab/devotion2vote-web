@@ -368,13 +368,13 @@
   <button class="atras" onclick="atras()" title="volver un paso" aria-label="volver un paso">←</button>
   <nav>
     <button id="nav-portada" class="on" onclick="ver('portada')">Países</button>
-    <button id="nav-muro" onclick="ver('muro')">Muro</button>
-    <button id="nav-cargar" onclick="ver('cargar')">Cargar</button>
-    <button id="nav-bandeja" onclick="ver('bandeja')">Bandeja <span id="n-bandeja" style="color:var(--alerta)"></span></button>
-    <button id="nav-monitor" onclick="ver('monitor')">Monitor</button>
-    <button id="nav-biblio" onclick="ver('biblio')">Biblioteca</button>
-    <button id="nav-visual" onclick="pintarVisOlas();ver('visual');visLamina('estim')">Visualización</button>
-    <button id="nav-ruta" onclick="ver('ruta')">Ruta</button>
+    <button id="nav-pais" class="nav-ctx" style="display:none" onclick="ver('demarcaciones')"></button>
+    <button id="nav-muro" class="nav-inv" style="display:none" onclick="ver('muro')">Muro</button>
+    <button id="nav-cargar" class="nav-inv" style="display:none" onclick="ver('cargar')">Cargar</button>
+    <button id="nav-bandeja" class="nav-inv" style="display:none" onclick="ver('bandeja')">Bandeja <span id="n-bandeja" style="color:var(--alerta)"></span></button>
+    <button id="nav-monitor" class="nav-inv" style="display:none" onclick="ver('monitor')">Monitor</button>
+    <button id="nav-biblio" class="nav-inv" style="display:none" onclick="ver('biblio')">Biblioteca</button>
+    <button id="nav-visual" class="nav-inv" style="display:none" onclick="pintarVisOlas();ver('visual');visLamina('estim')">Visualización</button>
   </nav>
   <div class="quien">
     <button class="dante-btn" onclick="dante()"><i>◆</i> DANTE</button>
@@ -397,6 +397,7 @@
   <p class="portada-sub">El proceso completo del caso — entra a la etapa que quieras, o baja al territorio.</p>
 
   <div class="proceso" id="proceso"></div>
+  <p style="font-size:12px;color:var(--tinta3);margin:10px 0 0">¿Quieres leer cada etapa en detalle? <a style="cursor:pointer;text-decoration:underline" onclick="ver('ruta')">Abrir la ruta completa</a></p>
   <div class="panel etapa-det" id="etapa-det" style="display:none">
     <div id="etapa-det-txt"></div>
     <div class="demarcas" id="dem-cards" style="display:none;margin-top:12px"></div>
@@ -1361,6 +1362,7 @@ function entrarPais(cod){
   PAIS=cod;
   const p=PAISES.find(x=>x.codigo===cod);
   $('dem-pais').textContent=p.nombre; $('dem-titulo').textContent=p.bandera+' '+p.nombre; $('terr-pais').textContent=p.nombre;
+  $('nav-pais').textContent=p.bandera+' '+(p.codigo==='dom'?'Rep. Dominicana':p.nombre);
   const nProv=new Set(URNAS.map(u=>u.padre)).size||32;
   $('dem-cards').innerHTML=
     '<button class="dem-card pais-entero" onclick="ver(\'muro\')"><b>Todo el país</b>'
@@ -1412,9 +1414,14 @@ function verTerritorio(codigo){
 /* ── navegación por capas: cada vista deja huella y la flecha ← (o el atrás del navegador) retrocede un paso ── */
 function ver(id,desdeHistorial){
   document.querySelectorAll('main section').forEach(s=>s.classList.toggle('on',s.id===id));
-  const mapa={portada:'portada',demarcaciones:'portada',territorio:'portada',vt:'monitor'};
+  const mapa={vt:'monitor',territorio:'muro',ruta:'pais',demarcaciones:'pais'};
   const navId=mapa[id]||id;
   document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.id==='nav-'+navId));
+  // barra CONTEXTUAL: cada capa enseña solo lo suyo — nada de cruces entre capas
+  const enPais=id!=='portada';                                       // dentro de un país: chip del país
+  const enInv=['muro','cargar','bandeja','monitor','biblio','visual','vt','territorio'].includes(id); // dentro de Investigación: sus mesas
+  document.querySelectorAll('.nav-ctx').forEach(b=>b.style.display=enPais?'':'none');
+  document.querySelectorAll('.nav-inv').forEach(b=>b.style.display=enInv?'':'none');
   if(id==='visual'&&!$('vis-ola').options.length)pintarVisOlas();
   if(!desdeHistorial&&location.hash!=='#'+id)history.pushState(null,'','#'+id);
 }
