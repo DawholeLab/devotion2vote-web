@@ -181,6 +181,15 @@ code{padding:1px 5px} pre{padding:10px;overflow:auto;max-height:420px;line-heigh
       <div style="max-height:520px;overflow:auto"><table id="t_bases"></table></div>
     </div>
   </div>
+  <div class="caja">
+    <h3 style="margin-top:0">Biblioteca del caso <span class="aviso">— la investigación cualitativa y el contexto que DANTE estudia</span></h3>
+    <p class="aviso">Aquí se carga lo que no es una encuesta: reportes cualitativos (grupos, entrevistas), investigación documental, documentos clave del territorio, noticias, artículos y libros. DANTE los tiene siempre delante y los consulta al interpretar resultados y escribir conclusiones — es el aprendizaje de cada caso.</p>
+    <div class="fila"><input type="file" id="bib_arch" accept=".pdf,.docx,.txt,.md,.xlsx" style="margin:0">
+      <select id="bib_tipo" style="width:auto;margin:0"><option value="cualitativo">investigación cualitativa</option><option value="documental">investigación documental</option><option value="documento_clave">documento clave del territorio</option><option value="noticia">noticia</option><option value="contexto">artículo / libro / contexto</option><option value="otro">otro</option></select>
+      <input id="bib_pais" value="dom" style="width:70px;margin:0" title="país">
+      <button class="mini" id="btn_bib" onclick="subirBiblioteca()">Subir</button><span class="aviso" id="bib_msg"></span></div>
+    <div id="bib_lista" class="aviso"></div>
+  </div>
   <div class="caja" id="base_det" style="display:none">
     <h3 style="margin-top:0" id="bd_titulo"></h3>
     <div id="bd_meta" class="aviso"></div>
@@ -374,7 +383,7 @@ async function arrancar(){
   montarAyudas();
   let vista=false; try{vista=!!localStorage.getItem('d2v_guia_vista')}catch(e){}
   if(!vista) abrirGuia();
-  await Promise.all([cargarSesiones(),cargarBases(),cargarCuaderno(),cargarEval()]);
+  await Promise.all([cargarSesiones(),cargarBases(),cargarCuaderno(),cargarEval(),cargarBiblioteca()]);
 }
 function ver(id,btn){document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id===id));document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b===btn))}
 
@@ -504,6 +513,24 @@ async function verCodigos(){
     $('lc_msg').textContent=vs.length+' variables';
     $('bd_codigos').innerHTML='<tr><th>variable</th><th>pregunta</th><th>códigos y etiquetas (n)</th></tr>'+vs.slice(0,150).map(v=>'<tr><td><b>'+esc(v.variable)+'</b>'+(v.canon_propuesta?'<small>'+esc(v.canon_propuesta)+'</small>':'')+'</td><td>'+esc(v.etiqueta||'')+'<small>'+esc(v.clasificacion)+' · '+v.n_validos+' válidos</small></td><td>'+(v.categorias.length?v.categorias.map(c=>'<b>'+esc(c.codigo)+'</b>='+esc(c.etiqueta==null?'':c.etiqueta)+' <span class=aviso>('+c.n+')</span>').join(' · '):'<span class=aviso>sin categorías (numérica o texto libre)</span>')+'</td></tr>').join('');
   }catch(e){$('lc_msg').innerHTML='<span class=mal>'+esc(e.message)+'</span>'}
+}
+async function cargarBiblioteca(){
+  try{const ds=await api('/dv/biblioteca?pais='+encodeURIComponent($('bib_pais').value||'dom'));
+    const nombres={cualitativo:'cualitativo',documental:'documental',documento_clave:'documento clave',noticia:'noticia',contexto:'contexto',otro:'otro'};
+    $('bib_lista').innerHTML=ds.length?ds.map(d=>'📚 <b>'+esc(d.titulo)+'</b> · '+esc(nombres[d.tipo]||d.tipo)+' · '+esc(d.formato)+' · '+d.caracteres+' caracteres · subido por '+esc(d.cargado_por)+((YO&&(YO.rol==='director'||YO.rol==='admin'))?' <button class="mini ghost" onclick="borrarBiblioteca('+d.id+')">quitar</button>':'')).join('<br>'):'La biblioteca está vacía: sube el primer documento del caso.';
+  }catch(e){$('bib_lista').textContent=e.message}
+}
+async function subirBiblioteca(){
+  const f=$('bib_arch').files[0]; if(!f){alert('Elige primero el archivo (PDF, Word, texto o Excel).');return}
+  const fd=new FormData(); fd.append('archivo',f); fd.append('tipo',$('bib_tipo').value); fd.append('pais',$('bib_pais').value||'dom'); fd.append('titulo',f.name.replace(/\.[^.]+$/,''));
+  $('bib_msg').textContent='subiendo y leyendo…'; $('btn_bib').disabled=true;
+  try{const r=await api('/dv/biblioteca','POST',null,fd); $('bib_msg').innerHTML='<span class=ok>leído: '+r.caracteres+' caracteres — DANTE ya lo tiene delante</span>'; $('bib_arch').value=''; cargarBiblioteca();}
+  catch(e){$('bib_msg').innerHTML='<span class=mal>'+esc(e.message)+'</span>'; if(typeof alarma==='function') alarma(e.message,'al subir a la biblioteca')}
+  finally{$('btn_bib').disabled=false}
+}
+async function borrarBiblioteca(id){
+  if(!confirm('¿Quitar este documento de la biblioteca del caso?')) return;
+  try{await api('/dv/documentos/'+id,'DELETE'); cargarBiblioteca();}catch(e){alert(e.message)}
 }
 async function verDocumentos(){
   try{const ds=await api('/dv/bases/'+BASE_SEL.id+'/documentos');
