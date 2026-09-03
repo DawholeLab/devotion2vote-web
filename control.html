@@ -254,6 +254,24 @@
   .mini-vis{border:1px solid var(--borde);background:var(--panel2);color:var(--tinta);border-radius:5px;padding:7px 14px;font-size:13px}
   .mini-vis:hover{border-color:var(--tinta3)}
 
+  /* puertas de análisis por demarcación */
+  .puertas{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+  .puerta{border:1px solid var(--borde);background:var(--panel);color:var(--tinta2);border-radius:99px;
+          padding:7px 16px;font-size:13px;display:flex;align-items:center;gap:7px}
+  .puerta b{color:var(--tinta);font-weight:600}
+  .puerta.activa{border-color:var(--marca);background:rgba(201,97,79,.10)}
+  .puerta.activa b{color:var(--marca)}
+  .puerta:hover{border-color:var(--tinta3)}
+
+  /* línea de tiempo de sondeos */
+  .linea-olas{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--borde-suave);
+              border-radius:var(--radio);padding:10px 16px;margin-bottom:12px}
+  .linea-olas .fecha-l{font-size:11.5px;color:var(--tinta3);white-space:nowrap;font-family:"IBM Plex Mono",monospace}
+  .linea-olas input[type=range]{flex:1;accent-color:var(--marca);height:22px;cursor:pointer}
+  .linea-olas .flecha{border:1px solid var(--borde);background:var(--panel2);color:var(--tinta);border-radius:5px;
+                      padding:3px 10px;font-size:14px}
+  .linea-olas .actual{font-size:13px;font-weight:600;font-family:"Barlow Condensed";letter-spacing:.04em;min-width:120px;text-align:center}
+
   #dante{position:fixed;top:0;right:-390px;width:370px;max-width:92vw;bottom:0;background:var(--panel);
          border-left:1px solid var(--borde);z-index:8;display:flex;flex-direction:column;transition:right .25s}
   #dante.abierto{right:0}
@@ -423,6 +441,19 @@
       <button onclick="irVisual('laminas')">Láminas</button>
       <button onclick="toggleExped()">Expediente</button>
     </div>
+  </div>
+  <div class="puertas">
+    <button class="puerta activa" onclick="toast('Vote-Transfer es el análisis que estás viendo: estimación anclada a la urna oficial, con sus segmentaciones derivadas cuando se encienda la segmentación.')"><b>Vote-Transfer</b> activo</button>
+    <button class="puerta" onclick="toast('Locus para esta demarcación: identidad, emociones y creencias con sus segmentaciones. Se enciende cuando las olas traigan la batería Locus — el sitio ya está reservado.')"><b>Locus</b> próximamente</button>
+    <button class="puerta" onclick="toast('El Mix cruza Vote-Transfer con Locus y deriva sus propias segmentaciones. Se enciende junto con la segmentación.')"><b>Mix VT × Locus</b> próximamente</button>
+  </div>
+  <div class="linea-olas">
+    <button class="flecha" onclick="moverOla(-1)" aria-label="anterior">‹</button>
+    <span class="fecha-l" id="lo-ini"></span>
+    <input type="range" id="lo-rango" min="0" max="0" step="1" oninput="olaDesdeLinea(this.value)">
+    <span class="fecha-l" id="lo-fin"></span>
+    <button class="flecha" onclick="moverOla(1)" aria-label="siguiente">›</button>
+    <span class="actual" id="lo-actual"></span>
   </div>
   <div class="panel exped" id="m-exped" style="display:none;margin-bottom:12px"></div>
   <div class="mon-grid">
@@ -753,6 +784,26 @@ async function refrescar(){
   pintarMuro();pintarBandeja();pintarBiblio();if(MON)abrirMonitor(MON.id,true);
 }
 
+/* ── línea de tiempo de sondeos (del primero al último) ── */
+function olasCrono(){return [...BASES].filter(b=>b.fecha_campo_ini).sort((a,b)=>String(a.fecha_campo_ini).localeCompare(String(b.fecha_campo_ini)))}
+function pintarLinea(){
+  const o=olasCrono(); if(!o.length)return;
+  const r=$('lo-rango'); r.max=o.length-1;
+  const i=MON?o.findIndex(x=>x.id===MON.id):o.length-1;
+  r.value=i<0?o.length-1:i;
+  $('lo-ini').textContent=String(o[0].fecha_campo_ini).slice(0,7);
+  $('lo-fin').textContent=String(o[o.length-1].fecha_campo_ini).slice(0,7);
+  $('lo-actual').textContent=MON?MON.codigo:'';
+}
+function olaDesdeLinea(i){
+  const o=olasCrono(); const b=o[Number(i)]; if(!b)return;
+  abrirMonitor(b.id,true); $('lo-actual').textContent=b.codigo; ver('monitor');
+}
+function moverOla(d){
+  const r=$('lo-rango'); const v=Math.max(0,Math.min(Number(r.max),Number(r.value)+d));
+  r.value=v; olaDesdeLinea(v);
+}
+
 /* ── monitor ── */
 function abrirMonitor(bid,quieto){
   const b=BASES.find(x=>x.id===bid); if(!b)return;
@@ -787,6 +838,7 @@ function abrirMonitor(bid,quieto){
   $('m-checks').innerHTML=checks.map(([s,c,t,d])=>'<li><span class="sig" style="color:'+c+'">'+s+'</span><div><b>'+esc(t)+'</b><br><span>'+esc(d)+'</span></div></li>').join('');
   $('m-avisos').innerHTML=av.length?av.map(a=>'<p>⚠ '+esc(a.texto)+'</p>').join(''):'<p style="color:var(--tinta3)">Ninguno. Todo lo de esta ola está en orden.</p>';
   $('m-exped').style.display='none'; $('m-exped').innerHTML='';
+  pintarLinea();
   if(!quieto)ver('monitor');
 }
 function toggleExped(){
@@ -822,7 +874,8 @@ function pintarTendencia(bid,e){
     if(!puntos[f]||c.id>puntos[f]._id){puntos[f]={_id:c.id};
       for(const n of noms){const v=c.resultado.candidatos[n];puntos[f][n]=v?v.pct_validos:null}}
   });
-  const fechasOrd=Object.keys(puntos).sort().slice(-10);
+  const fechaSel=String((BASES.find(x=>x.id===bid)||{}).fecha_campo_ini||'9999');
+  const fechasOrd=Object.keys(puntos).sort().filter(f=>f<=fechaSel).slice(-10);  // la serie termina en la ola elegida
   if(fechasOrd.length<2){cont.innerHTML='<p class="nota">La serie se dibuja cuando hay al menos dos olas con este análisis.</p>';ley.innerHTML='';return}
   const series=noms.map(n=>fechasOrd.map(f=>puntos[f][n]));
   const etiquetasX=fechasOrd.map(f=>f.slice(2,7));
