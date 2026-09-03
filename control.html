@@ -257,6 +257,8 @@
   .etapa-det p{margin:4px 0;font-size:13px;color:var(--tinta2);max-width:80ch}
   .etapa-det .abrir-e{margin-top:10px;background:var(--tinta);color:var(--fondo);border:none;border-radius:6px;
                       padding:8px 20px;font-family:"Barlow Condensed";font-weight:700;font-size:15px;letter-spacing:.05em;text-transform:uppercase}
+  .eje-t{margin:20px 0 8px;font-size:15px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--tinta2)}
+  .eje-t span{font-weight:400;text-transform:none;letter-spacing:0;color:var(--tinta3);font-size:13px;font-family:"IBM Plex Sans",sans-serif}
 
   .demarcas{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-top:6px}
   .dem-card{text-align:left;color:inherit;background:var(--panel);border:1px solid var(--borde-suave);border-radius:8px;
@@ -396,12 +398,21 @@
   <h2 class="portada-titulo" id="dem-titulo"></h2>
   <p class="portada-sub">El proceso completo del caso — entra a la etapa que quieras, o baja al territorio.</p>
 
+  <h3 class="eje-t">El proceso <span>— entra a la etapa que quieras, a nivel país</span></h3>
   <div class="proceso" id="proceso"></div>
   <p style="font-size:12px;color:var(--tinta3);margin:10px 0 0">¿Quieres leer cada etapa en detalle? <a style="cursor:pointer;text-decoration:underline" onclick="ver('ruta')">Abrir la ruta completa</a></p>
-  <div class="panel etapa-det" id="etapa-det" style="display:none">
-    <div id="etapa-det-txt"></div>
-    <div class="demarcas" id="dem-cards" style="display:none;margin-top:12px"></div>
-  </div>
+  <div class="panel etapa-det" id="etapa-det" style="display:none"><div id="etapa-det-txt"></div></div>
+
+  <h3 class="eje-t" style="margin-top:26px">El territorio <span>— o baja a una demarcación: cada una tiene su propio proceso completo</span></h3>
+  <div class="demarcas" id="dem-cards"></div>
+</section>
+
+<section id="demhome">
+  <div class="miga"><a onclick="ver('portada')">Países</a> › <a onclick="ver('demarcaciones')" id="dh-pais"></a> › <a onclick="ver('territorio')" id="dh-nivel"></a> › <span id="dh-miga"></span></div>
+  <h2 class="portada-titulo" id="dh-nombre"></h2>
+  <p class="portada-sub" id="dh-sub"></p>
+  <div class="proceso" id="proceso-dem"></div>
+  <div class="panel etapa-det" id="etapa-det-dem" style="display:none"></div>
 </section>
 
 <section id="territorio">
@@ -1349,13 +1360,51 @@ function pintarProceso(){
 }
 function elegirEtapa(i){
   const e=ETAPAS[i];
-  document.querySelectorAll('.etapa-n').forEach((x,j)=>x.classList.toggle('sel',j===i));
+  document.querySelectorAll('#proceso .etapa-n').forEach((x,j)=>x.classList.toggle('sel',j===i));
   const det=$('etapa-det'); det.style.display='block';
   $('etapa-det-txt').innerHTML='<h3 style="font-size:19px">'+e.n+' · '+esc(e.es)+' <span style="color:var(--tinta3);font-weight:400;font-size:13px">'+esc(e.en)+'</span></h3>'
     +'<p>'+esc(e.d)+'</p>'
-    +(e.viva?'<button class="abrir-e" onclick="ver(\'muro\')">Entrar a Investigación</button>'
-            +'<p style="margin-top:14px;color:var(--tinta3)">…o entra directo por el territorio:</p>':'');
-  $('dem-cards').style.display=e.viva?'grid':'none';
+    +(e.viva?'<button class="abrir-e" onclick="ver(\'muro\')">Entrar a Investigación</button>':'');
+  det.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+/* ── demarcación elegida: su propio proceso completo ── */
+let DEM_SEL=null;
+function abrirDemarcacion(t,nivel){
+  DEM_SEL={...t,nivel:nivel||TERR_NIVEL};
+  const p=PAISES.find(x=>x.codigo===PAIS)||{};
+  $('dh-pais').textContent=p.nombre||''; $('dh-nivel').textContent=DEM_SEL.nivel==='provincia'?'Provincias':'Municipios';
+  $('dh-miga').textContent=t.nombre;
+  $('dh-nombre').textContent=t.nombre;
+  $('dh-sub').textContent=(DEM_SEL.nivel==='provincia'?'Provincia':'Municipio')+' '+t.codigo+' · '+fmt(t.votos.VALIDOS)+' votos válidos en 2024 · el proceso completo de esta demarcación';
+  $('proceso-dem').innerHTML=ETAPAS.map((e,i)=>'<button class="etapa-n'+(e.viva?' viva':'')+'" onclick="elegirEtapaDem('+i+')">'
+    +'<span class="num-e">ETAPA '+e.n+'</span><b>'+esc(e.es)+'</b><small>'+esc(e.en)+'</small>'
+    +'<span class="estado-e">'+(e.viva?'● en operación':'próximamente')+'</span></button>').join('');
+  $('etapa-det-dem').style.display='none';
+  ver('demhome');
+}
+function elegirEtapaDem(i){
+  const e=ETAPAS[i],t=DEM_SEL; if(!t)return;
+  document.querySelectorAll('#proceso-dem .etapa-n').forEach((x,j)=>x.classList.toggle('sel',j===i));
+  const det=$('etapa-det-dem'); det.style.display='block';
+  if(e.viva){
+    const v=t.votos;
+    const cand=Object.entries(v).filter(([k])=>!['NULOS','VALIDOS','EMITIDOS','OT+BL'].includes(k)).sort((a,b)=>b[1]-a[1]).slice(0,3);
+    const max=Math.max(...cand.map(x=>x[1]),1); const cols=['var(--s1)','var(--s2)','var(--s3)'];
+    det.innerHTML='<h3 style="font-size:19px;margin:0 0 4px">1 · Investigación — '+esc(t.nombre)+'</h3>'
+      +'<p style="font-size:12px;color:var(--tinta3);margin:0 0 10px">la urna oficial 2024 de esta demarcación — el ancla del método aquí</p>'
+      +'<div class="urna">'+cand.map(([n,x],k)=>'<div class="fila-b"><span>'+esc(nombreCorto(n))+'</span>'
+        +'<div class="barra"><i style="width:'+(100*x/max).toFixed(1)+'%;background:'+cols[k]+'"></i></div>'
+        +'<span class="valor">'+fmt(x)+' · '+(100*x/(v.VALIDOS||1)).toFixed(1)+'%</span></div>').join('')
+      +'<div class="fila-b"><span style="color:var(--tinta3)">válidos</span><div></div><span class="valor" style="color:var(--tinta3)">'+fmt(v.VALIDOS)+'</span></div></div>'
+      +'<p style="font-size:12px;color:var(--tinta2);margin:10px 0 0">La estimación de encuesta anclada a esta demarcación se enciende al cargar el padrón '
+      +'municipal (en camino). Mientras, la investigación nacional con este territorio como ancla vive en el Monitor.</p>'
+      +'<button class="abrir-e" onclick="URNA_SEL=TERR_DATOS.find(x=>x.codigo===\''+t.codigo+'\')||URNA_SEL;pintarUrna();ver(\'monitor\')">Abrir en el Monitor</button>';
+  }else{
+    det.innerHTML='<h3 style="font-size:19px;margin:0 0 4px">'+e.n+' · '+esc(e.es)+' — '+esc(t.nombre)+'</h3>'
+      +'<p style="font-size:13px;color:var(--tinta2)">'+esc(e.d)+'</p>'
+      +'<p style="font-size:12px;color:var(--tinta3)">Esta etapa se encenderá para cada demarcación — incluida '+esc(t.nombre)+' — cuando entre en operación.</p>';
+  }
   det.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 function entrarPais(cod){
@@ -1406,20 +1455,20 @@ function pintarTerritorios(){
 }
 function verTerritorio(codigo){
   const t=TERR_DATOS.find(x=>x.codigo===codigo); if(!t)return;
-  URNA_SEL=(TERR_NIVEL==='municipio')?t:null;
   if(TERR_NIVEL==='provincia'){abrirTerritorios('municipio').then(()=>{$('terr-buscar').value='';TERR_DATOS=URNAS.filter(u=>u.padre===codigo);pintarTerritorios();$('terr-titulo').textContent='Municipios de '+t.nombre});return}
-  pintarUrna(); ver('monitor'); toast('La urna de '+t.nombre+' quedó en el Monitor, junto a la estimación vigente.');
+  URNA_SEL=t;
+  abrirDemarcacion(t,'municipio');   // la demarcación abre con SU propio proceso de 9 etapas
 }
 
 /* ── navegación por capas: cada vista deja huella y la flecha ← (o el atrás del navegador) retrocede un paso ── */
 function ver(id,desdeHistorial){
   document.querySelectorAll('main section').forEach(s=>s.classList.toggle('on',s.id===id));
-  const mapa={vt:'monitor',territorio:'muro',ruta:'pais',demarcaciones:'pais'};
+  const mapa={vt:'monitor',territorio:'pais',demhome:'pais',ruta:'pais',demarcaciones:'pais'};
   const navId=mapa[id]||id;
   document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.id==='nav-'+navId));
   // barra CONTEXTUAL: cada capa enseña solo lo suyo — nada de cruces entre capas
   const enPais=id!=='portada';                                       // dentro de un país: chip del país
-  const enInv=['muro','cargar','bandeja','monitor','biblio','visual','vt','territorio'].includes(id); // dentro de Investigación: sus mesas
+  const enInv=['muro','cargar','bandeja','monitor','biblio','visual','vt'].includes(id); // dentro de Investigación: sus mesas
   document.querySelectorAll('.nav-ctx').forEach(b=>b.style.display=enPais?'':'none');
   document.querySelectorAll('.nav-inv').forEach(b=>b.style.display=enInv?'':'none');
   if(id==='visual'&&!$('vis-ola').options.length)pintarVisOlas();
