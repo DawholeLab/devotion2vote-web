@@ -889,17 +889,19 @@ function pintarBandeja(){
         +a.candidatas.map(c=>{
           const es=c.variable===a.elegida;
           return '<button style="text-align:left;line-height:1.4'+(es?';border-color:var(--marca)':'')+'" '
-            +'onclick="confirmarPregunta('+a.base_id+',\''+esc(a.clave)+'\',\''+esc(c.variable)+'\',this)">'
+            +'onclick="confirmarPregunta('+i+',\''+esc(c.variable)+'\',this)">'
             +(es?'✓ ':'')+'<b>'+esc(c.variable)+'</b>'+(es?' — la elegida por el sistema':'')
             +'<br><small style="color:var(--tinta3)">«'+esc(c.etiqueta||'sin etiqueta')+'» · '+c.respuestas+' respuestas'
-            +(es?' · pulsa para confirmarla':' · pulsa para corregir el mapeo a esta')+'</small></button>';
+            +(es?' · pulsa para confirmarla':' · pulsa para corregir el mapeo a esta')
+            +((a.veces||1)>1?' · vale para las '+a.veces+' olas de este asunto':'')+'</small></button>';
         }).join('')+'</div>';
     }else if(a.base_id){
       acciones='<button class="primaria" onclick="reanalizar('+a.base_id+',this)">Ya lo revisé: reanalizar la ola</button>';
     }else{
       acciones='';
     }
-    return '<div class="asunto"><div class="a-linea"><span class="a-tipo '+cl+'">'+rot+'</span><b>'+esc(a.ola)+'</b>'
+    return '<div class="asunto"><div class="a-linea"><span class="a-tipo '+cl+'">'+rot+'</span><b>'+esc(a.ola||'toda la serie')+'</b>'
+      +((a.veces||1)>1?'<span style="color:var(--marca);font-size:12px">una sola pregunta · aplica a '+a.veces+' olas</span>':'')
       +'<span class="donde">'+esc(a.generado||'')+'</span></div>'
       +'<p class="a-cuerpo">'+esc(a.texto)+'</p><div class="a-acciones">'+acciones+'</div></div>';
   }).join('');
@@ -930,13 +932,16 @@ async function aprobarPaso(clave,btn){
   try{await api('/dv/cuaderno/'+clave+'/aprobar','POST',{});toast('Paso «'+clave+'» aprobado: ya es parte del método.');await refrescar()}
   catch(e){toast('No se pudo aprobar: '+e.message);if(btn){btn.disabled=false;btn.textContent='Aprobar y sumarlo al método'}}
 }
-async function confirmarPregunta(bid,clave,variable,btn){
+async function confirmarPregunta(idx,variable,btn){
+  const a=BANDEJA.asuntos[idx]; if(!a)return;
+  const bases=(a.bases_aplica&&a.bases_aplica.length?a.bases_aplica:[a.base_id]);
   if(btn){btn.disabled=true;btn.style.opacity=.6}
   try{
-    await api('/dv/bases/'+bid+'/diccionario','POST',{clave,variable,estado:'confirmado'});
-    toast('Confirmado: «'+clave+'» → '+variable+'. Reanalizando la ola…');
-    await api('/dv/bases/'+bid+'/analizar','POST',{});
-    toast('Listo: diccionario confirmado y expediente actualizado.');
+    toast('Confirmando «'+a.clave+'» → '+variable+(bases.length>1?' en '+bases.length+' olas…':'…'));
+    for(const bid of bases){try{await api('/dv/bases/'+bid+'/diccionario','POST',{clave:a.clave,variable,estado:'confirmado'})}catch(e){}}
+    await api('/dv/bases/'+a.base_id+'/analizar','POST',{});
+    toast('Listo: confirmado en '+bases.length+' ola'+(bases.length>1?'s':'')+'. '
+      +(bases.length>1?'Las demás se reanalizan en la próxima tanda.':''));
     await refrescar();
   }catch(e){toast('No se pudo confirmar: '+e.message);if(btn){btn.disabled=false;btn.style.opacity=1}}
 }
