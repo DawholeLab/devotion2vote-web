@@ -93,6 +93,24 @@
   .bandeja{display:flex;flex-direction:column;gap:10px;max-width:840px}
   .asunto{background:var(--panel);border:1px solid var(--borde-suave);border-radius:var(--radio);padding:14px 16px}
   .asunto.resuelto{opacity:.55}
+  /* ── Visor del proceso (solo dirección) ── */
+  #visor{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:90;display:flex;align-items:flex-start;justify-content:center;padding:24px 12px;overflow-y:auto}
+  .visor-caja{background:var(--panel);border:1px solid var(--borde-suave);border-radius:12px;max-width:980px;width:100%;padding:18px 22px;margin:auto 0}
+  .visor-cab{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+  .visor-cab h2{margin:0;font-size:22px}
+  .v-semaforo{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 16px}
+  .v-chip{display:flex;align-items:center;gap:6px;font-size:12.5px;border:1px solid var(--borde-suave);border-radius:20px;padding:4px 12px;color:var(--tinta2)}
+  .v-dot{width:9px;height:9px;border-radius:50%;flex:none}
+  .v-ok{background:#38b26e}.v-aviso{background:#e5a63c}.v-error{background:#e05252}.v-gris{background:#666}
+  .v-etapa{border:1px solid var(--borde-suave);border-radius:10px;padding:12px 14px;margin-bottom:10px}
+  .v-etapa h3{margin:0 0 6px;font-size:15px;display:flex;align-items:center;gap:8px}
+  .v-fila{display:flex;align-items:baseline;gap:8px;padding:5px 0;border-top:1px dashed var(--borde-suave);font-size:13.5px;flex-wrap:wrap}
+  .v-fila:first-of-type{border-top:none}
+  .v-fila b{color:var(--tinta)}
+  .v-fila .mini{color:var(--tinta3);font-size:12px}
+  .v-json{display:none;width:100%;max-height:340px;overflow:auto;background:rgba(127,127,127,.08);border:1px solid var(--borde-suave);border-radius:8px;padding:10px;font-size:11.5px;line-height:1.5;white-space:pre;margin-top:6px}
+  .v-ver{font-size:11.5px;border:1px solid var(--borde-suave);border-radius:6px;background:none;color:var(--tinta2);cursor:pointer;padding:2px 8px}
+  .v-alerta{border:1px solid #e05252;border-radius:10px;padding:10px 14px;margin-bottom:12px;color:#e05252;font-size:13.5px}
   .a-linea{display:flex;align-items:center;flex-wrap:wrap;gap:10px}
   .a-tipo{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;border-radius:3px;padding:2px 8px}
   .a-tipo.rev{background:rgba(250,178,25,.15);color:var(--alerta)}
@@ -559,6 +577,7 @@
       <button onclick="irVisual('ppt')">PPT</button>
       <button onclick="irVisual('laminas')">Láminas</button>
       <button onclick="toggleExped()">Expediente</button>
+      <button class="btn-visor" style="display:none" onclick="visorAbrir()">🔍 Visor del proceso</button>
     </div>
   </div>
   <div class="puertas">
@@ -607,10 +626,22 @@
   <div class="miga"><a onclick="ver('muro')">República Dominicana</a> › <a onclick="ver('monitor')" id="vt-miga-ola"></a> › <span>Vote-Transfer</span></div>
   <div class="mon-cab">
     <h2>Análisis Vote-Transfer</h2><span class="cod" id="vt-ola"></span>
-    <div class="salidas"><button onclick="ver('monitor')">‹ volver al Monitor</button></div>
+    <div class="salidas"><button class="btn-visor" style="display:none" onclick="visorAbrir()">🔍 Visor del proceso</button><button onclick="ver('monitor')">‹ volver al Monitor</button></div>
   </div>
   <div id="vt-cuerpo"><p style="color:var(--tinta3)">cargando el análisis…</p></div>
 </section>
+
+<!-- VISOR DEL PROCESO (solo dirección): el análisis completo de la ola, paso a paso, para aprobar
+     con conocimiento o detectar EN QUÉ MOMENTO del proceso está el error. Regla de Carles, 4-sep-2026. -->
+<div id="visor" style="display:none">
+  <div class="visor-caja">
+    <div class="visor-cab">
+      <h2>Visor del proceso <span class="cod" id="visor-ola"></span></h2>
+      <button onclick="visorCerrar()">✕ cerrar</button>
+    </div>
+    <div id="visor-cuerpo"></div>
+  </div>
+</div>
 
 <section id="biblio">
   <div class="cabecera-zona"><h2>Biblioteca</h2><span>todo lo que el proyecto sabe, ordenado por lo que es</span></div>
@@ -794,6 +825,8 @@ function arrancar(){
   if(YO.rol==='cliente'){alarma('La Sala de Control es del equipo.','Acceso');salir();return}
   $('login').style.display='none';$('app').style.display='block';
   $('quien').textContent=(YO.nombre||YO.usuario)+' · '+(YO.rol==='director'?'dirección':YO.rol);
+  /* el Visor del proceso es SOLO de dirección (regla de Carles): el botón ni se pinta para el resto */
+  if(YO.rol==='director'||YO.rol==='admin'){document.querySelectorAll('.btn-visor').forEach(b=>b.style.display='inline-block')}
   cargarTodo();
 }
 
@@ -1072,6 +1105,80 @@ async function abrirVT(){
   h+='</div>';
   if(!p05)h+='<p class="nota" style="margin-top:10px">Esta ola tiene matriz de transferencia (recuerdo × intención) pero no la estimación anclada completa.</p>';
   $('vt-cuerpo').innerHTML=h;
+}
+
+/* ── VISOR DEL PROCESO (solo dirección): la ola paso a paso, con semáforo por etapa ── */
+let VISOR_JSON={};
+function visorCerrar(){$('visor').style.display='none'}
+function visorJson(k){const e=document.getElementById('vj-'+k);if(e)e.style.display=e.style.display==='block'?'none':'block'}
+async function visorAbrir(){
+  if(!(YO&&(YO.rol==='director'||YO.rol==='admin'))){toast('El Visor del proceso es de dirección.');return}
+  const b=MON; if(!b){toast('Abre primero una ola en el Monitor.');return}
+  $('visor').style.display='flex'; $('visor-ola').textContent=b.codigo;
+  $('visor-cuerpo').innerHTML='<p class="nota">cargando el proceso completo…</p>';
+  let corr=[]; try{corr=await api('/dv/corridas?base_id='+b.id+'&con_resultado=true')}catch(e){}
+  const porId={}; corr.forEach(c=>{porId[c.id]=c});
+  const exp=b.expediente||{}; VISOR_JSON={};
+  const dot=cl=>'<span class="v-dot '+cl+'"></span>';
+  const revisar=(exp.avisos||[]).filter(a=>a.tipo==='revisar_pregunta').length;
+  const graves=(exp.avisos||[]).filter(a=>a.tipo==='verificacion'||a.tipo==='corrida_error');
+  const errores=(exp.corridas||[]).filter(c=>!c.ok);
+  /* semáforo de etapas */
+  let sem='<div class="v-semaforo">'
+    +'<span class="v-chip">'+dot('v-ok')+'1 · Carga y perfil</span>'
+    +'<span class="v-chip">'+dot(revisar?'v-aviso':'v-ok')+'2 · Diccionario'+(revisar?' ('+revisar+' por confirmar)':'')+'</span>';
+  (exp.corridas||[]).forEach(c=>{sem+='<span class="v-chip">'+dot(c.ok?'v-ok':'v-error')+esc(c.paso.replace(/_.*$/,''))+'</span>'});
+  sem+='<span class="v-chip">'+dot((exp.careos||[]).length?'v-ok':'v-gris')+'Careos ('+(exp.careos||[]).length+')</span>'
+    +'<span class="v-chip">'+dot(graves.length?'v-error':((exp.avisos||[]).length?'v-aviso':'v-ok'))+'Verificación</span></div>';
+  let h=sem;
+  /* dónde está el error, sin buscarlo */
+  if(errores.length||graves.length){
+    const donde=errores.length?('el paso '+errores[0].paso):('la verificación: '+String((graves[0]||{}).texto||'').slice(0,120));
+    h+='<div class="v-alerta"><b>Primer punto rojo:</b> '+esc(donde)+'. Ahí es donde hay que mirar antes de aprobar.</div>';
+  }
+  /* 1 · ficha */
+  h+='<div class="v-etapa"><h3>'+dot('v-ok')+'1 · Carga y perfil de la base</h3>'
+    +'<div class="v-fila"><b>'+esc(b.codigo)+'</b><span class="mini">'+esc(b.titulo||'')+'</span></div>'
+    +'<div class="v-fila">'+(b.n_registros||'—')+' casos · fecha de campo '+esc(String(b.fecha_campo_ini||'—'))
+    +' · analizada '+esc(exp.generado||'—')+' por '+esc(exp.por||'—')+' en '+(exp.ms?Math.round(exp.ms/1000)+' s':'—')+'</div></div>';
+  /* 2 · reconocimiento */
+  h+='<div class="v-etapa"><h3>'+dot(revisar?'v-aviso':'v-ok')+'2 · Reconocimiento del diccionario</h3>'
+    +(exp.reconocimiento||[]).map(r=>'<div class="v-fila"><b>'+esc(r.pregunta)+'</b> → '+esc(r.variable)
+      +' <span class="mini">'+esc(r.como||'')+' · confianza '+(r.confianza!=null?r.confianza:'—')+'</span></div>').join('')
+    +((exp.decisiones||[]).length?'<div class="v-fila mini" style="display:block">'+(exp.decisiones||[]).map(d=>'· '+esc(d)).join('<br>')+'</div>':'')
+    +'</div>';
+  /* 3 · pasos, en orden, con su resultado completo */
+  h+='<div class="v-etapa"><h3>'+dot(errores.length?'v-error':'v-ok')+'3 · Pasos del método, en orden</h3>';
+  (exp.corridas||[]).forEach((c,i)=>{
+    const k='p'+i; const res=(porId[c.corrida_id]||{}).resultado;
+    if(res)VISOR_JSON[k]=res;
+    h+='<div class="v-fila">'+dot(c.ok?'v-ok':'v-error')+'<b>'+esc(c.paso)+'</b>'
+      +'<span>'+esc(c.ok?(c.resumen||''):('ERROR: '+(c.error||'')))+'</span>'
+      +'<span class="mini">'+(c.ms||0)+' ms · corrida #'+c.corrida_id+'</span>'
+      +(res?'<button class="v-ver" onclick="visorJson(\''+k+'\')">ver resultado completo</button>':'')
+      +(res?'<pre class="v-json" id="vj-'+k+'"></pre>':'')+'</div>';
+  });
+  (exp.no_corridos||[]).forEach(n=>{h+='<div class="v-fila">'+dot('v-gris')+'<b>'+esc(n.paso)+'</b><span class="mini">'+esc(n.texto||'')+'</span></div>'});
+  h+='</div>';
+  /* 4 · careos */
+  if((exp.careos||[]).length){
+    h+='<div class="v-etapa"><h3>'+dot('v-ok')+'4 · Careos de intención ('+(exp.careos||[]).length+')</h3>';
+    (exp.careos||[]).forEach((c,i)=>{
+      const k='c'+i; const res=(porId[c.corrida_id]||{}).resultado; if(res)VISOR_JSON[k]=res;
+      h+='<div class="v-fila"><b>'+esc(c.variable)+'</b><span class="mini">'+esc((c.pregunta||'').slice(0,80))+'</span>'
+        +'<span>'+esc(c.resumen||'')+'</span>'
+        +(res?'<button class="v-ver" onclick="visorJson(\''+k+'\')">ver</button><pre class="v-json" id="vj-'+k+'"></pre>':'')+'</div>';
+    });
+    h+='</div>';
+  }
+  /* 5 · avisos y verificación */
+  h+='<div class="v-etapa"><h3>'+dot(graves.length?'v-error':((exp.avisos||[]).length?'v-aviso':'v-ok'))+'5 · Avisos y verificación del método</h3>'
+    +((exp.avisos||[]).length?(exp.avisos||[]).map(a=>'<div class="v-fila">'+dot(a.tipo==='verificacion'||a.tipo==='corrida_error'?'v-error':'v-aviso')
+      +'<span>'+esc(a.texto||'')+'</span></div>').join(''):'<div class="v-fila">Sin avisos: la ola pasó limpia.</div>')
+    +'</div>';
+  $('visor-cuerpo').innerHTML=h;
+  /* volcar los JSON después (como texto, nunca como HTML) */
+  Object.keys(VISOR_JSON).forEach(k=>{const e=document.getElementById('vj-'+k);if(e)e.textContent=JSON.stringify(VISOR_JSON[k],null,2)});
 }
 
 /* ── línea de tiempo de sondeos (del primero al último) ── */
