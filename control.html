@@ -1121,9 +1121,23 @@ let VISOR_JSON={};
 function visorCerrar(){$('visor').style.display='none'}
 function visorJson(k){const e=document.getElementById('vj-'+k);if(e)e.style.display=e.style.display==='block'?'none':'block'}
 async function visorAnalizar(bid){
-  $('visor-cuerpo').innerHTML='<p class="nota">analizando la ola (todo el circuito, con sus careos — puede tardar un minuto)…</p>';
-  try{await api('/dv/bases/'+bid+'/analizar','POST',{})}catch(e){toast('No se pudo analizar: '+e.message)}
-  await visorAbrir();
+  /* el análisis corre en el servidor; aunque la conexión se corte, sigue. Por eso aquí se ESPERA DE VERDAD:
+     se lanza y luego se pregunta cada 10 s si el expediente ya existe, hasta 5 minutos. */
+  $('visor-cuerpo').innerHTML='<p class="nota">analizando la ola (todo el circuito, con sus careos)… 0 s</p>';
+  api('/dv/bases/'+bid+'/analizar','POST',{}).catch(()=>{});   // se lanza; si la conexión se corta, el servidor sigue
+  const t0=Date.now();
+  for(let i=0;i<30;i++){
+    await new Promise(r=>setTimeout(r,10000));
+    const seg=Math.round((Date.now()-t0)/1000);
+    const p=$('visor-cuerpo').querySelector('p'); if(p)p.textContent='analizando la ola (todo el circuito, con sus careos)… '+seg+' s';
+    try{
+      const bs=await api('/dv/bases?pais=dom');
+      const f=(bs||[]).find(x=>x.id===bid);
+      if(f&&f.expediente&&(f.expediente.corridas||[]).length){BASES=bs;if(MON&&MON.id===bid)MON=f;await visorAbrir();return}
+    }catch(e){}
+  }
+  $('visor-cuerpo').innerHTML='<div class="v-alerta">El análisis está tardando más de 5 minutos (servidor saturado). '
+    +'No se perdió: sigue corriendo. Cierra el Visor, espera un par de minutos y vuelve a abrirlo.</div>';
 }
 /* etiquetas en lenguaje estadístico llano para los campos de cada corrida */
 const V_ETIQ={n_encuesta:'Casos de la encuesta (n)',n:'Casos (n)',censo:'Censo (electores hábiles)',urna:'Urna ancla usada',
