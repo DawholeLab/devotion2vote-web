@@ -1120,6 +1120,11 @@ async function abrirVT(){
 let VISOR_JSON={};
 function visorCerrar(){$('visor').style.display='none'}
 function visorJson(k){const e=document.getElementById('vj-'+k);if(e)e.style.display=e.style.display==='block'?'none':'block'}
+async function visorAnalizar(bid){
+  $('visor-cuerpo').innerHTML='<p class="nota">analizando la ola (todo el circuito, con sus careos — puede tardar un minuto)…</p>';
+  try{await api('/dv/bases/'+bid+'/analizar','POST',{})}catch(e){toast('No se pudo analizar: '+e.message)}
+  await visorAbrir();
+}
 /* etiquetas en lenguaje estadístico llano para los campos de cada corrida */
 const V_ETIQ={n_encuesta:'Casos de la encuesta (n)',n:'Casos (n)',censo:'Censo (electores hábiles)',urna:'Urna ancla usada',
   urna_total_anclada:'Total de votos anclados a urna',cobertura_origen_pct:'Cobertura del origen (% de la ola con recuerdo asignado)',
@@ -1175,12 +1180,22 @@ function visorDetalle(res,k){
 }
 async function visorAbrir(){
   if(!(YO&&(YO.rol==='director'||YO.rol==='admin'))){toast('El Visor del proceso es de dirección.');return}
-  const b=MON; if(!b){toast('Abre primero una ola en el Monitor.');return}
-  $('visor').style.display='flex'; $('visor-ola').textContent=b.codigo;
+  if(!MON){toast('Abre primero una ola en el Monitor.');return}
+  $('visor').style.display='flex'; $('visor-ola').textContent=MON.codigo;
   $('visor-cuerpo').innerHTML='<p class="nota">cargando el proceso completo…</p>';
+  /* la ficha se pide FRESCA al servidor: el expediente puede haberse actualizado después de abrir la página */
+  let b=MON;
+  try{const bs=await api('/dv/bases?pais=dom'); if(Array.isArray(bs)&&bs.length){BASES=bs; const f=bs.find(x=>x.id===MON.id); if(f){b=f; MON=f}}}catch(e){}
   let corr=[]; try{corr=await api('/dv/corridas?base_id='+b.id+'&con_resultado=true')}catch(e){}
   const porId={}; corr.forEach(c=>{porId[c.id]=c});
-  const exp=b.expediente||{}; VISOR_JSON={};
+  /* SIN expediente no hay nada que supervisar: se dice claro, nunca un falso «todo verde» */
+  if(!b.expediente||!(b.expediente.corridas||[]).length){
+    $('visor-cuerpo').innerHTML='<div class="v-alerta"><b>Esta ola aún no tiene expediente de análisis</b> — no hay proceso que '
+      +'supervisar todavía. Puede estar en la cola de la tanda en curso, o no haberse analizado.</div>'
+      +'<div class="v-etapa"><div class="v-fila"><button class="primaria" onclick="visorAnalizar('+b.id+')">Analizar esta ola ahora y reabrir el Visor</button></div></div>';
+    return;
+  }
+  const exp=b.expediente; VISOR_JSON={};
   const dot=cl=>'<span class="v-dot '+cl+'"></span>';
   const revisar=(exp.avisos||[]).filter(a=>a.tipo==='revisar_pregunta').length;
   const graves=(exp.avisos||[]).filter(a=>a.tipo==='verificacion'||a.tipo==='corrida_error');
