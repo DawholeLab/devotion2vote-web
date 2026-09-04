@@ -1131,9 +1131,8 @@ async function visorAnalizar(bid){
     const seg=Math.round((Date.now()-t0)/1000);
     const p=$('visor-cuerpo').querySelector('p'); if(p)p.textContent='analizando la ola (todo el circuito, con sus careos)… '+seg+' s';
     try{
-      const bs=await api('/dv/bases?pais=dom');
-      const f=(bs||[]).find(x=>x.id===bid);
-      if(f&&f.expediente&&(f.expediente.corridas||[]).length){BASES=bs;if(MON&&MON.id===bid)MON=f;await visorAbrir();return}
+      const f=await api('/dv/bases/'+bid);
+      if(f&&f.expediente&&(f.expediente.corridas||[]).length){await visorAbrir();return}
     }catch(e){}
   }
   $('visor-cuerpo').innerHTML='<div class="v-alerta">El análisis está tardando más de 5 minutos (servidor saturado). '
@@ -1197,9 +1196,10 @@ async function visorAbrir(){
   if(!MON){toast('Abre primero una ola en el Monitor.');return}
   $('visor').style.display='flex'; $('visor-ola').textContent=MON.codigo;
   $('visor-cuerpo').innerHTML='<p class="nota">cargando el proceso completo…</p>';
-  /* la ficha se pide FRESCA al servidor: el expediente puede haberse actualizado después de abrir la página */
+  /* la ficha se pide FRESCA e INDIVIDUAL: la lista de olas viaja SIN expediente (pesa mucho);
+     solo la ficha de una ola concreta lo trae. Este era el fallo del falso «sin expediente». */
   let b=MON;
-  try{const bs=await api('/dv/bases?pais=dom'); if(Array.isArray(bs)&&bs.length){BASES=bs; const f=bs.find(x=>x.id===MON.id); if(f){b=f; MON=f}}}catch(e){}
+  try{const f=await api('/dv/bases/'+MON.id); if(f&&f.id)b=f}catch(e){}
   let corr=[]; try{corr=await api('/dv/corridas?base_id='+b.id+'&con_resultado=true')}catch(e){}
   const porId={}; corr.forEach(c=>{porId[c.id]=c});
   /* SIN expediente no hay nada que supervisar: se dice claro, nunca un falso «todo verde» */
