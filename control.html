@@ -108,7 +108,14 @@
   .v-fila:first-of-type{border-top:none}
   .v-fila b{color:var(--tinta)}
   .v-fila .mini{color:var(--tinta3);font-size:12px}
-  .v-json{display:none;width:100%;max-height:340px;overflow:auto;background:rgba(127,127,127,.08);border:1px solid var(--borde-suave);border-radius:8px;padding:10px;font-size:11.5px;line-height:1.5;white-space:pre;margin-top:6px}
+  .v-json{display:none;width:100%;max-height:520px;overflow:auto;background:rgba(127,127,127,.06);border:1px solid var(--borde-suave);border-radius:8px;padding:12px;font-size:12.5px;line-height:1.55;margin-top:6px}
+  .v-op{margin:10px 0}
+  .v-op>b{display:block;font-size:12.5px;margin-bottom:4px;color:var(--tinta)}
+  .v-op table.calor td,.v-op table.calor th{font-size:11.5px;padding:3px 8px}
+  .v-fila2{font-size:12.5px;padding:2px 0}
+  .v-json details{margin-top:8px}
+  .v-json summary{font-size:11px;color:var(--tinta3);cursor:pointer}
+  .v-json pre{white-space:pre;overflow:auto;max-height:260px;font-size:11px;background:rgba(127,127,127,.08);border-radius:6px;padding:8px}
   .v-ver{font-size:11.5px;border:1px solid var(--borde-suave);border-radius:6px;background:none;color:var(--tinta2);cursor:pointer;padding:2px 8px}
   .v-alerta{border:1px solid #e05252;border-radius:10px;padding:10px 14px;margin-bottom:12px;color:#e05252;font-size:13.5px}
   .a-linea{display:flex;align-items:center;flex-wrap:wrap;gap:10px}
@@ -1107,10 +1114,65 @@ async function abrirVT(){
   $('vt-cuerpo').innerHTML=h;
 }
 
-/* ── VISOR DEL PROCESO (solo dirección): la ola paso a paso, con semáforo por etapa ── */
+/* ── VISOR DEL PROCESO (solo dirección): la ola paso a paso, con semáforo por etapa.
+   Cada paso TRANSPARENTA sus operaciones estadísticas: los números y tablas reales con los que
+   se calculó, para que la dirección pueda SUPERVISAR — no un «todo ok». ── */
 let VISOR_JSON={};
 function visorCerrar(){$('visor').style.display='none'}
 function visorJson(k){const e=document.getElementById('vj-'+k);if(e)e.style.display=e.style.display==='block'?'none':'block'}
+/* etiquetas en lenguaje estadístico llano para los campos de cada corrida */
+const V_ETIQ={n_encuesta:'Casos de la encuesta (n)',n:'Casos (n)',censo:'Censo (electores hábiles)',urna:'Urna ancla usada',
+  urna_total_anclada:'Total de votos anclados a urna',cobertura_origen_pct:'Cobertura del origen (% de la ola con recuerdo asignado)',
+  falsos_recuerdos_descartados:'Falsos recuerdos descartados (nombre → casos)',amortiguacion:'Amortiguación aplicada (columna → divisor)',
+  divisor_calibrado:'Divisor calibrado (buscado contra la participación esperada)',participacion_deseada_pct:'Participación esperada por la dirección (%)',
+  indecisos_repartidos:'Indecisos repartidos proporcionalmente',transferencia_pct_por_origen:'Transferencia % dentro de cada origen (tras amortiguar; cada fila suma 100)',
+  matriz_electores:'Matriz en electores (destino × origen, ya anclada y repartida)',estimacion:'Estimación final por destino',
+  validos_estimados:'Válidos estimados (todo menos abstención)',participacion_estimada_pct:'Participación estimada (válidos ÷ censo, %)',
+  estados_pct:'Estados de transferencia (% de la ola)',estados_n:'Estados de transferencia (casos)',
+  matriz_pct_por_columna:'Matriz % por columna (destino × origen; cada columna suma 100 con su NS/NR)',
+  n_por_origen:'Casos por origen (tamaño de cada columna)',columnas_origen:'Orden de las columnas',filas_destino:'Orden de las filas',
+  ganador_anterior:'Ganador de la elección anterior',fidelidad_ganador_pct:'Fidelidad del ganador (%)',fuga_ganador:'Fuga del ganador (hacia quién y cuánto)'};
+function vNum(x){return typeof x==='number'?(Number.isInteger(x)&&Math.abs(x)>=1000?x.toLocaleString('es-ES'):String(x)):esc(String(x))}
+function vMatriz(m,filas,cols){
+  m=m||{};cols=(cols&&cols.length?cols:[...new Set(Object.values(m).flatMap(o=>Object.keys(o||{})))]).slice(0,14);
+  filas=(filas&&filas.length?filas:Object.keys(m)).slice(0,28);
+  return '<div style="overflow-x:auto"><table class="calor"><tr><th></th>'+cols.map(c=>'<th>'+esc(nombreCorto(c))+'</th>').join('')+'</tr>'
+    +filas.map(f=>'<tr><td class="origen">'+esc(nombreCorto(f))+'</td>'+cols.map(c=>{const v=(m[f]||{})[c];return '<td>'+(v!=null?vNum(v):'·')+'</td>'}).join('')+'</tr>').join('')+'</table></div>';
+}
+function vTabla2(obj){
+  const ks=Object.keys(obj||{}).slice(0,40);
+  return '<div style="overflow-x:auto"><table class="calor">'+ks.map(k=>'<tr><td class="origen">'+esc(nombreCorto(k))+'</td><td>'+vNum(obj[k])+'</td></tr>').join('')+'</table></div>';
+}
+function vCampo(k,v){
+  if(v==null||k==='avisos'||k==='nota')return '';
+  const lab=V_ETIQ[k]||k;
+  if(k==='matriz_final'&&v&&v.en_miles){
+    return '<div class="v-op"><b>MATRIZ FINAL — en MILES de electores (la lámina que se muestra)</b>'+vMatriz(v.en_miles,v.filas_intencion,v.columnas_origen)+'</div>'
+      +'<div class="v-op"><b>MATRIZ FINAL — en % (cada columna suma 100 · TOTAL = % sobre válidos)</b>'+vMatriz(v.en_pct,v.filas_intencion,v.columnas_origen)+'</div>'
+      +(v.lectura?'<div class="v-fila2 mini" style="font-style:italic">'+esc(v.lectura)+'</div>':'');
+  }
+  if(typeof v==='object'&&!Array.isArray(v)){
+    const vals=Object.values(v);
+    if(vals.length&&vals.every(x=>x&&typeof x==='object'&&!Array.isArray(x)))
+      return '<div class="v-op"><b>'+esc(lab)+'</b>'+vMatriz(v)+'</div>';
+    return '<div class="v-op"><b>'+esc(lab)+'</b>'+vTabla2(v)+'</div>';
+  }
+  if(Array.isArray(v))return '<div class="v-op"><b>'+esc(lab)+'</b><div class="v-fila2">'+v.slice(0,24).map(x=>esc(typeof x==='string'?x:JSON.stringify(x))).join(' · ')+'</div></div>';
+  return '<div class="v-fila2"><b>'+esc(lab)+':</b> '+vNum(v)+'</div>';
+}
+const V_ORDEN=['n_encuesta','n','cobertura_origen_pct','falsos_recuerdos_descartados','urna','urna_total_anclada','censo',
+  'participacion_deseada_pct','divisor_calibrado','amortiguacion','transferencia_pct_por_origen','indecisos_repartidos',
+  'n_por_origen','matriz_pct_por_columna','matriz_electores','matriz_final','estimacion','validos_estimados',
+  'participacion_estimada_pct','estados_pct','estados_n','ganador_anterior','fidelidad_ganador_pct','fuga_ganador'];
+function visorDetalle(res,k){
+  let h='';const hechos=new Set();
+  V_ORDEN.forEach(c=>{if(c in res){h+=vCampo(c,res[c]);hechos.add(c)}});
+  Object.keys(res).forEach(c=>{if(!hechos.has(c))h+=vCampo(c,res[c])});
+  if(res.avisos&&res.avisos.length)h+='<div class="v-op" style="color:#e5a63c"><b style="color:inherit">Avisos de esta corrida</b><div class="v-fila2" style="color:inherit">'+res.avisos.map(a=>esc(a)).join('<br>')+'</div></div>';
+  if(res.nota)h+='<div class="v-fila2 mini" style="font-style:italic">'+esc(res.nota)+'</div>';
+  h+='<details><summary>datos crudos (json)</summary><pre id="vjr-'+k+'"></pre></details>';
+  return h||'<div class="v-fila2">sin contenido</div>';
+}
 async function visorAbrir(){
   if(!(YO&&(YO.rol==='director'||YO.rol==='admin'))){toast('El Visor del proceso es de dirección.');return}
   const b=MON; if(!b){toast('Abre primero una ola en el Monitor.');return}
@@ -1155,8 +1217,8 @@ async function visorAbrir(){
     h+='<div class="v-fila">'+dot(c.ok?'v-ok':'v-error')+'<b>'+esc(c.paso)+'</b>'
       +'<span>'+esc(c.ok?(c.resumen||''):('ERROR: '+(c.error||'')))+'</span>'
       +'<span class="mini">'+(c.ms||0)+' ms · corrida #'+c.corrida_id+'</span>'
-      +(res?'<button class="v-ver" onclick="visorJson(\''+k+'\')">ver resultado completo</button>':'')
-      +(res?'<pre class="v-json" id="vj-'+k+'"></pre>':'')+'</div>';
+      +(res?'<button class="v-ver" onclick="visorJson(\''+k+'\')">ver operaciones y números</button>':'')
+      +(res?'<div class="v-json" id="vj-'+k+'">'+visorDetalle(res,k)+'</div>':'')+'</div>';
   });
   (exp.no_corridos||[]).forEach(n=>{h+='<div class="v-fila">'+dot('v-gris')+'<b>'+esc(n.paso)+'</b><span class="mini">'+esc(n.texto||'')+'</span></div>'});
   h+='</div>';
@@ -1167,7 +1229,7 @@ async function visorAbrir(){
       const k='c'+i; const res=(porId[c.corrida_id]||{}).resultado; if(res)VISOR_JSON[k]=res;
       h+='<div class="v-fila"><b>'+esc(c.variable)+'</b><span class="mini">'+esc((c.pregunta||'').slice(0,80))+'</span>'
         +'<span>'+esc(c.resumen||'')+'</span>'
-        +(res?'<button class="v-ver" onclick="visorJson(\''+k+'\')">ver</button><pre class="v-json" id="vj-'+k+'"></pre>':'')+'</div>';
+        +(res?'<button class="v-ver" onclick="visorJson(\''+k+'\')">ver operaciones y números</button><div class="v-json" id="vj-'+k+'">'+visorDetalle(res,k)+'</div>':'')+'</div>';
     });
     h+='</div>';
   }
@@ -1177,8 +1239,8 @@ async function visorAbrir(){
       +'<span>'+esc(a.texto||'')+'</span></div>').join(''):'<div class="v-fila">Sin avisos: la ola pasó limpia.</div>')
     +'</div>';
   $('visor-cuerpo').innerHTML=h;
-  /* volcar los JSON después (como texto, nunca como HTML) */
-  Object.keys(VISOR_JSON).forEach(k=>{const e=document.getElementById('vj-'+k);if(e)e.textContent=JSON.stringify(VISOR_JSON[k],null,2)});
+  /* los datos crudos se vuelcan como TEXTO (nunca como HTML) dentro de cada detalle */
+  Object.keys(VISOR_JSON).forEach(k=>{const e=document.getElementById('vjr-'+k);if(e)e.textContent=JSON.stringify(VISOR_JSON[k],null,2)});
 }
 
 /* ── línea de tiempo de sondeos (del primero al último) ── */
