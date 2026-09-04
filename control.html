@@ -1232,12 +1232,33 @@ async function visorAbrir(){
     +'<div class="v-fila"><b>'+esc(b.codigo)+'</b><span class="mini">'+esc(b.titulo||'')+'</span></div>'
     +'<div class="v-fila">'+(b.n_registros||'—')+' casos · fecha de campo '+esc(String(b.fecha_campo_ini||'—'))
     +' · analizada '+esc(exp.generado||'—')+' por '+esc(exp.por||'—')+' en '+(exp.ms?Math.round(exp.ms/1000)+' s':'—')+'</div></div>';
-  /* 2 · reconocimiento */
-  h+='<div class="v-etapa"><h3>'+dot(revisar?'v-aviso':'v-ok')+'2 · Reconocimiento del diccionario</h3>'
-    +(exp.reconocimiento||[]).map(r=>'<div class="v-fila"><b>'+esc(r.pregunta)+'</b> → '+esc(r.variable)
-      +' <span class="mini">'+esc(r.como||'')+' · confianza '+(r.confianza!=null?r.confianza:'—')+'</span></div>').join('')
-    +((exp.decisiones||[]).length?'<div class="v-fila mini" style="display:block">'+(exp.decisiones||[]).map(d=>'· '+esc(d)).join('<br>')+'</div>':'')
-    +'</div>';
+  /* 2 · LAS DECISIONES QUE TOMÓ EL SISTEMA, CON SU PORQUÉ — el corazón de la supervisión:
+     el director no responde colas; lee aquí qué regla gobernó cada decisión y con qué confianza. */
+  const decs=(exp.decisiones||[]).filter(d=>d&&typeof d==='object');
+  const porQuien=q=>decs.filter(d=>(d.decidido_por||'').indexOf(q)===0).length;
+  const flojas=decs.filter(d=>(d.confianza||0)<0.7);
+  h+='<div class="v-etapa"><h3>'+dot(flojas.length?'v-aviso':'v-ok')+'2 · Cómo resolvió el diccionario (decisiones del sistema)</h3>'
+    +'<div class="v-fila2 mini">'+decs.length+' decisiones · '+porQuien('reglas')+' por reglas del método · '
+      +porQuien('dante')+' arbitradas por DANTE · '+porQuien('dirección')+' fijadas por la dirección'
+      +(flojas.length?' · <b style="color:#e5a63c">'+flojas.length+' con confianza baja (míralas)</b>':' · ninguna floja')+'</div>';
+  if(decs.length){
+    const orden=[...decs].sort((a,b)=>(a.confianza||0)-(b.confianza||0));   // lo dudoso primero: se supervisa en una pasada
+    h+='<div style="overflow-x:auto"><table class="calor" style="margin-top:8px"><tr>'
+      +'<th>pregunta del método</th><th>variable elegida</th><th>regla que decidió</th><th>conf.</th><th>por qué</th></tr>'
+      +orden.map(d=>{
+        const c=(d.confianza||0), col=c>=0.9?'#38b26e':(c>=0.7?'var(--tinta2)':'#e5a63c');
+        const alt=(d.alternativas||[]).map(a=>esc(a.variable)).join(', ');
+        return '<tr><td class="origen">'+esc(d.clave)+'</td>'
+          +'<td><b>'+esc(d.elegida||'—')+'</b><br><span class="mini">«'+esc((d.etiqueta||'').slice(0,70))+'»</span></td>'
+          +'<td>'+esc(d.regla||'')+'<br><span class="mini">'+esc(d.decidido_por||'')+'</span></td>'
+          +'<td style="color:'+col+';font-weight:700">'+c.toFixed(2)+'</td>'
+          +'<td style="max-width:340px;white-space:normal">'+esc(d.por_que||'')
+          +(alt?'<br><span class="mini">descartadas: '+alt+'</span>':'')+'</td></tr>';
+      }).join('')+'</table></div>';
+  }
+  h+='<div class="v-fila2 mini" style="margin-top:8px;font-style:italic">El sistema decide solo: reglas escritas del '
+    +'método primero; lo genuinamente ambiguo lo arbitra DANTE y su criterio queda fijado para toda la serie. '
+    +'Solo llega a la Bandeja lo que ni las reglas ni DANTE pudieron resolver.</div></div>';
   /* 3 · pasos, en orden, con su resultado completo */
   h+='<div class="v-etapa"><h3>'+dot(errores.length?'v-error':'v-ok')+'3 · Pasos del método, en orden</h3>';
   (exp.corridas||[]).forEach((c,i)=>{
@@ -1345,7 +1366,8 @@ function expedienteHTML(x){
     +(c.ok?esc(c.resumen||'corrió bien'):'<span class="mal">'+esc(c.error||'error')+'</span>')+'</td></tr>').join('')+'</table></div>';
   if((x.reconocimiento||[]).length)h+='<p><b style="color:var(--tinta)">Preguntas reconocidas:</b> '
     +x.reconocimiento.map(r=>'<code>'+esc(r.pregunta)+'</code> → '+esc(r.variable)+(r.confianza>=1?' ✓':(r.confianza<0.9?' ⚠':''))).join(' · ')+'</p>';
-  if((x.decisiones||[]).length)h+='<p><b style="color:var(--tinta)">Decisiones que tomó:</b><br>'+x.decisiones.map(d=>'· '+esc(d)).join('<br>')+'</p>';
+  if((x.decisiones||[]).length)h+='<p><b style="color:var(--tinta)">Decisiones que tomó:</b><br>'
+    +x.decisiones.map(d=>'· '+(typeof d==='string'?esc(d):'<code>'+esc(d.clave)+'</code> → '+esc(d.elegida)+' <i>('+esc(d.regla)+')</i>')).join('<br>')+'</p>';
   if((x.no_corridos||[]).length)h+='<p>'+x.no_corridos.map(d=>esc(d.texto)).join('<br>')+'</p>';
   return h;
 }
