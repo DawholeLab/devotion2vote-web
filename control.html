@@ -984,6 +984,23 @@ async function abrirVT(){
     return;
   }
   let h='<div class="vt-grid">';
+  /* 0 · LA MATRIZ FINAL (regla R002 de Carles): la resultante tras TODA la estimación — no el cruce inicial.
+     Filas = intención · TOTAL = total de cada destino · columnas = orígenes de mayor a menor, >18 y Abst+Nul al final.
+     Dos versiones: en MILES de electores (el lenguaje del informe) y en % (cada columna suma 100; TOTAL = % sobre válidos). */
+  if(p05&&p05.matriz_final){
+    const mf=p05.matriz_final,cols=mf.columnas_origen||[],filasM=mf.filas_intencion||[];
+    const f1=v=>v==null?'·':Number(v).toLocaleString('es-ES',{minimumFractionDigits:1,maximumFractionDigits:1});
+    const tablaMF=datos=>'<div style="overflow-x:auto"><table class="calor"><tr><th>intención ↓</th>'
+      +cols.map(c=>'<th>'+esc(c==='TOTAL'?'TOTAL':nombreCorto(c))+'</th>').join('')+'</tr>'
+      +filasM.map(d=>{const f=datos[d]||{};return '<tr><td class="origen">'+esc(nombreCorto(d))+'</td>'
+        +cols.map(c=>'<td'+(c==='TOTAL'?' style="font-weight:700"':'')+'>'+f1(f[c])+'</td>').join('')+'</tr>'}).join('')
+      +'</table></div>';
+    h+='<div class="panel vt-ancho"><h3>La matriz final — el resultado de toda la estimación</h3>'
+      +'<p class="nota">filas = intención de voto · TOTAL = total estimado de cada destino · columnas = orígenes de mayor a menor recuerdo, >18 y Abst+Nul al final</p>'
+      +'<p class="nota" style="margin-top:8px"><b>En miles de electores</b> — el lenguaje del informe</p>'+tablaMF(mf.en_miles||{})
+      +'<p class="nota" style="margin-top:10px"><b>En %</b> — cada columna suma 100 · TOTAL = % sobre válidos</p>'+tablaMF(mf.en_pct||{})
+      +'</div>';
+  }
   /* 1 · matriz de trasvase (mapa de calor, % por origen) */
   if(p05&&p05.transferencia_pct_por_origen){
     const m=p05.transferencia_pct_por_origen;
