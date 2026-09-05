@@ -960,7 +960,8 @@ function pintarBandeja(){
       +'<p class="a-cuerpo">'+(p.con_codigo
         ?'El sistema ya lo dejó listo para ejecutarse. Con tu aprobación entra al método y corre en las próximas olas.'
         :'Aún no tiene receta ejecutable: el sistema la preparará; puedes aprobar el enunciado desde ya.')
-      +'</p><div class="a-acciones"><button class="primaria" onclick="aprobarPaso(\''+esc(p.clave)+'\',this)">Aprobar y sumarlo al método</button></div></div>').join('');
+      +'</p><div class="a-acciones"><button class="primaria" onclick="aprobarPaso(\''+esc(p.clave)+'\',this)">Aprobar y sumarlo al método</button>'
+      +'<button onclick="descartarPaso(\''+esc(p.clave)+'\',this)">Descartar: no entra al método</button></div></div>').join('');
   }else if(pasos.length){
     h+='<div class="asunto"><div class="a-linea"><span class="a-tipo dato">En espera</span>'
       +'<b>'+pasos.length+' paso'+(pasos.length>1?'s':'')+' del cuaderno esperan la aprobación de la dirección</b></div></div>';
@@ -971,6 +972,13 @@ async function aprobarPaso(clave,btn){
   if(btn){btn.disabled=true;btn.textContent='aprobando…'}
   try{await api('/dv/cuaderno/'+clave+'/aprobar','POST',{});toast('Paso «'+clave+'» aprobado: ya es parte del método.');await refrescar()}
   catch(e){toast('No se pudo aprobar: '+e.message);if(btn){btn.disabled=false;btn.textContent='Aprobar y sumarlo al método'}}
+}
+async function descartarPaso(clave,btn){
+  /* el otro lado del veto: un paso que no entra. Queda RETIRADO (no se borra: el método deja rastro). */
+  if(!confirm('¿Descartar el paso «'+clave+'»?\n\nNo entrará al método y dejará de correr. Queda retirado, con rastro, por si hubiera que recuperarlo.'))return;
+  if(btn){btn.disabled=true;btn.textContent='descartando…'}
+  try{await api('/dv/cuaderno/'+clave+'/descartar','POST',{});toast('Paso «'+clave+'» descartado: no entra al método.');await refrescar()}
+  catch(e){toast('No se pudo descartar: '+e.message);if(btn){btn.disabled=false;btn.textContent='Descartar: no entra al método'}}
 }
 async function confirmarPregunta(idx,variable,btn){
   const a=BANDEJA.asuntos[idx]; if(!a)return;
@@ -1223,6 +1231,17 @@ async function visorAbrir(){
   }
   const exp=b.expediente; VISOR_JSON={};
   const dot=cl=>'<span class="v-dot '+cl+'"></span>';
+  /* IDENTIDAD DE LA OLA (dirección, 5-sep-2026): para poder repetir la corrida a mano en SPSS hay que saber
+     exactamente de qué fichero salió, con cuántos casos y de qué fechas de campo. Va arriba del todo. */
+  const fech=[b.fecha_campo_ini,b.fecha_campo_fin].filter(Boolean).map(x=>String(x).slice(0,10)).join(' → ');
+  const ident='<div class="v-etapa" style="margin-bottom:6px"><div class="v-fila2">'
+    +'<b>Ola:</b> '+esc(b.codigo||'')+(b.titulo?' — '+esc(b.titulo):'')+'</div>'
+    +'<div class="v-fila2 mini">fichero: <b>'+esc(b.archivo||'(sin nombre)')+'</b>'
+    +' · n = '+(b.n_registros||'?')+' casos · '+(b.n_variables||'?')+' variables'
+    +(fech?' · campo '+esc(fech):'')+' · ficha #'+b.id
+    +(b.ponderacion?' · ponderación: '+esc(b.ponderacion):' · sin ponderación')+'</div>'
+    +'<div class="v-fila2 mini" style="font-style:italic">Este es el fichero exacto sobre el que corrió todo lo de '
+    +'abajo: ábrelo en SPSS con estas mismas variables y las cifras tienen que salir iguales.</div></div>';
   const revisar=(exp.avisos||[]).filter(a=>a.tipo==='revisar_pregunta').length;
   const graves=(exp.avisos||[]).filter(a=>a.tipo==='verificacion'||a.tipo==='corrida_error');
   const errores=(exp.corridas||[]).filter(c=>!c.ok);
@@ -1233,7 +1252,7 @@ async function visorAbrir(){
   (exp.corridas||[]).forEach(c=>{sem+='<span class="v-chip">'+dot(c.ok?'v-ok':'v-error')+esc(c.paso.replace(/_.*$/,''))+'</span>'});
   sem+='<span class="v-chip">'+dot((exp.careos||[]).length?'v-ok':'v-gris')+'Careos ('+(exp.careos||[]).length+')</span>'
     +'<span class="v-chip">'+dot(graves.length?'v-error':((exp.avisos||[]).length?'v-aviso':'v-ok'))+'Verificación</span></div>';
-  let h=sem;
+  let h=ident+sem;
   /* dónde está el error, sin buscarlo */
   if(errores.length||graves.length){
     const donde=errores.length?('el paso '+errores[0].paso):('la verificación: '+String((graves[0]||{}).texto||'').slice(0,120));
@@ -1260,12 +1279,16 @@ async function visorAbrir(){
       +orden.map(d=>{
         const c=(d.confianza||0), col=c>=0.9?'#38b26e':(c>=0.7?'var(--tinta2)':'#e5a63c');
         const alt=(d.alternativas||[]).map(a=>esc(a.variable)).join(', ');
+        /* una batería temática NO se descarta: se analiza entera y solo se enseña la genérica */
+        const bat=(d.acompanan||[]).map(a=>esc(a.variable)).join(', ');
         return '<tr><td class="origen">'+esc(d.clave)+'</td>'
           +'<td><b>'+esc(d.elegida||'—')+'</b><br><span class="mini">«'+esc((d.etiqueta||'').slice(0,70))+'»</span></td>'
           +'<td>'+esc(d.regla||'')+'<br><span class="mini">'+esc(d.decidido_por||'')+'</span></td>'
           +'<td style="color:'+col+';font-weight:700">'+c.toFixed(2)+'</td>'
           +'<td style="max-width:340px;white-space:normal">'+esc(d.por_que||'')
-          +(alt?'<br><span class="mini">descartadas: '+alt+'</span>':'')+'</td></tr>';
+          +(alt?'<br><span class="mini">descartadas: '+alt+'</span>':'')
+          +(bat?'<br><span class="mini" style="color:#4fb477">se analizan también (misma batería, no se enseñan): '+bat+'</span>':'')
+          +'</td></tr>';
       }).join('')+'</table></div>';
   }
   h+='<div class="v-fila2 mini" style="margin-top:8px;font-style:italic">El sistema decide solo: reglas escritas del '
@@ -1278,7 +1301,7 @@ async function visorAbrir(){
     if(res)VISOR_JSON[k]=res;
     h+='<div class="v-fila">'+dot(c.ok?'v-ok':'v-error')+'<b>'+esc(c.paso)+'</b>'
       +'<span>'+esc(c.ok?(c.resumen||''):('ERROR: '+(c.error||'')))+'</span>'
-      +'<span class="mini">'+(c.ms||0)+' ms · corrida #'+c.corrida_id+'</span>'
+      +'<span class="mini">'+(c.ms||0)+' ms · corrida #'+c.corrida_id+' · ola '+esc(b.codigo||'')+(b.archivo?' · '+esc(b.archivo):'')+'</span>'
       +(res?'<button class="v-ver" onclick="visorJson(\''+k+'\')">ver operaciones y números</button>':'')
       +(res?'<div class="v-json" id="vj-'+k+'">'+visorDetalle(res,k)+'</div>':'')+'</div>';
   });
