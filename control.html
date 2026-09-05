@@ -1143,6 +1143,7 @@ const V_ETIQ={n_encuesta:'Casos de la encuesta (n)',n:'Casos (n)',censo:'Censo (
   urna_total_anclada:'Total de votos anclados a urna',cobertura_origen_pct:'Cobertura del origen (% de la ola con recuerdo asignado)',
   falsos_recuerdos_descartados:'Falsos recuerdos descartados (nombre → casos)',amortiguacion:'Amortiguación aplicada (columna → divisor)',
   divisor_calibrado:'Divisor calibrado (buscado contra la participación esperada)',participacion_deseada_pct:'Participación esperada por la dirección (%)',
+  calibracion:'Estado de la calibración del divisor',participacion_alcanzable_pct:'Participación que esta ola PUEDE dar (con el divisor mínimo y el máximo)',
   indecisos_repartidos:'Indecisos repartidos proporcionalmente',transferencia_pct_por_origen:'Transferencia % dentro de cada origen (tras amortiguar; cada fila suma 100)',
   matriz_electores:'Matriz en electores (destino × origen, ya anclada y repartida)',estimacion:'Estimación final por destino',
   validos_estimados:'Válidos estimados (todo menos abstención)',participacion_estimada_pct:'Participación estimada (válidos ÷ censo, %)',
@@ -1164,6 +1165,17 @@ function vTabla2(obj){
 function vCampo(k,v){
   if(v==null||k==='avisos'||k==='nota')return '';
   const lab=V_ETIQ[k]||k;
+  /* la calibración del divisor se lee de un vistazo: verde si se encontró, ámbar si es aproximada,
+     rojo si NO existe divisor que alcance la participación pedida (entonces la cifra no está anclada) */
+  if(k==='calibracion'){
+    const col=v==='calibrado'?'#4fb477':(v==='fuera_de_alcance'?'#e0575b':'#e5a63c');
+    const txt=v==='calibrado'?'calibrado — se encontró el divisor que lleva a la participación esperada'
+      :(v==='fuera_de_alcance'?'FUERA DE ALCANCE — no existe divisor que llegue a la participación pedida; se corrió con el del borde y la participación NO queda anclada'
+      :'aproximado — el divisor deja la participación a más de un punto de la pedida');
+    return '<div class="v-fila2" style="color:'+col+'"><b style="color:inherit">'+esc(lab)+':</b> '+esc(txt)+'</div>';
+  }
+  if(k==='participacion_alcanzable_pct'&&Array.isArray(v))
+    return '<div class="v-fila2"><b>'+esc(lab)+':</b> de '+vNum(v[0])+'% a '+vNum(v[1])+'%</div>';
   if(k==='matriz_final'&&v&&v.en_miles){
     return '<div class="v-op"><b>MATRIZ FINAL — en MILES de electores (la lámina que se muestra)</b>'+vMatriz(v.en_miles,v.filas_intencion,v.columnas_origen)+'</div>'
       +'<div class="v-op"><b>MATRIZ FINAL — en % (cada columna suma 100 · TOTAL = % sobre válidos)</b>'+vMatriz(v.en_pct,v.filas_intencion,v.columnas_origen)+'</div>'
@@ -1179,7 +1191,7 @@ function vCampo(k,v){
   return '<div class="v-fila2"><b>'+esc(lab)+':</b> '+vNum(v)+'</div>';
 }
 const V_ORDEN=['n_encuesta','n','cobertura_origen_pct','falsos_recuerdos_descartados','urna','urna_total_anclada','censo',
-  'participacion_deseada_pct','divisor_calibrado','amortiguacion','transferencia_pct_por_origen','indecisos_repartidos',
+  'participacion_deseada_pct','participacion_alcanzable_pct','divisor_calibrado','calibracion','amortiguacion','transferencia_pct_por_origen','indecisos_repartidos',
   'n_por_origen','matriz_pct_por_columna','matriz_electores','matriz_final','estimacion','validos_estimados',
   'participacion_estimada_pct','estados_pct','estados_n','ganador_anterior','fidelidad_ganador_pct','fuga_ganador'];
 function visorDetalle(res,k){
