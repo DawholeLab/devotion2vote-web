@@ -708,6 +708,7 @@
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
       <button class="mini-vis" onclick="visLamina('estim')">Estimación (barras)</button>
       <button class="mini-vis" onclick="visLamina('serie')">Serie (líneas)</button>
+      <button class="mini-vis" onclick="visLamina('serie2')">Segunda vuelta</button>
       <button class="mini-vis" id="btn-lam-png" onclick="descargarLaminaPNG()" style="display:none">Descargar PNG</button>
     </div>
     <div id="vis-lamina" style="max-width:100%;overflow:auto;border:1px solid var(--borde-suave);border-radius:8px;background:#fff"></div>
@@ -873,11 +874,11 @@ function estimacionBase(bid){
   /* UNA sola fuente para la cifra grande y para la gráfica: la serie (/dv/serie). Regla de la dirección
      (8-sep-2026): estimación anclada (p05) si la ola tiene recuerdo; si solo tiene intención, la intención
      AJUSTADA con la desviación media estimación−directa del mismo ciclo. Nunca dos números distintos. */
-  const o=SERIE&&(SERIE.olas||[]).find(x=>x.base_id===bid);
+  const o=SERIE&&([...(SERIE.olas||[]),...(SERIE.segunda_vuelta||[])]).find(x=>x.base_id===bid);
   if(o&&o.valores&&Object.keys(o.valores).length){
     const lista=Object.entries(o.valores).map(([k,v])=>({n:(SERIE.etiquetas||{})[k]||k,p:v.grafica,tipo:v.tipo,directa:v.directa,ajuste:v.ajuste_pp})).sort((a,b)=>b.p-a.p);
     const fuente=o.tipo==='estimacion'?'anclada a urna (p05)':(o.tipo==='ajustada'?'intención ajustada (sin recuerdo: directa + desviación media del ciclo)':'intención directa (sin recuerdo y sin desviación que aplicar)');
-    return{fuente,tp:o.tp,urna:o.tipo==='estimacion'?o.urna:null,tipo:o.tipo,comparable:o.comparable,candidatos:o.candidatos_en_pregunta,lista};
+    return{fuente:(o.serie==='segunda_vuelta'?'SEGUNDA VUELTA (careo a dos) · ':'')+fuente,tp:o.tp,urna:o.tipo==='estimacion'?o.urna:null,tipo:o.tipo,serie:o.serie,comparable:o.comparable,candidatos:o.candidatos_en_pregunta,lista};
   }
   /* respaldo si la serie no llegó: lo de siempre */
   const c5=porBase(P05,bid);
@@ -1385,7 +1386,7 @@ function abrirMonitor(bid,quieto){
   const cols=['var(--s1)','var(--s2)','var(--s3)'];
   if(e){
     $('m-nota-est').textContent=e.fuente+(e.tp!=null?' · participación estimada '+e.tp+'%':'')+(e.urna?' · ancla '+e.urna:'')+' · % sobre válidos'
-      +(e.comparable===false?' · ⚠ careo a '+e.candidatos+': no comparable con la serie':'');
+      +(e.serie==='segunda_vuelta'?' · esta ola va en la serie de segunda vuelta, no en la general':'');
     $('m-estim').innerHTML=e.lista.slice(0,3).map((x,k)=>'<div class="cand"><span><i style="background:'+cols[k]+'"></i>'+esc(nombreCorto(x.n))+'</span><b>'+x.p+'%</b>'
       +(x.tipo==='ajustada'?'<small style="display:block;color:var(--tinta3)">directa '+x.directa+' '+(x.ajuste>=0?'+':'')+x.ajuste+' pp</small>':'')+'</div>').join('');
     /* lo que el análisis ANOTA de esta ola: de dónde se nutre cada candidato (regla de Carles, 8-sep-2026) */
@@ -1444,7 +1445,9 @@ function pintarTendencia(bid,e){
   const claveDe=n=>{const et=SERIE.etiquetas||{};return Object.keys(et).find(k=>et[k]===n)||Object.keys(et).find(k=>nombreCorto(et[k])===nombreCorto(n))||null};
   const noms=e.lista.slice(0,3).map(x=>x.n), llaves=noms.map(claveDe);
   const fechaSel=String((BASES.find(x=>x.id===bid)||{}).fecha_campo_ini||'9999').slice(0,10);
-  const olas=SERIE.olas.filter(o=>o.fecha<=fechaSel).slice(-10);     // la serie termina en la ola elegida
+  /* regla 3 (Carles, 8-sep-2026): la ola de careo a dos se grafica en SU serie, la de segunda vuelta */
+  const esSV=e.serie==='segunda_vuelta';
+  const olas=(esSV?(SERIE.segunda_vuelta||[]):SERIE.olas).filter(o=>o.fecha<=fechaSel).slice(-10);     // la serie termina en la ola elegida
   if(olas.length<2){cont.innerHTML='<p class="nota">La serie se dibuja cuando hay al menos dos olas con este análisis.</p>';ley.innerHTML='';return}
   const series=llaves.map(k=>olas.map(o=>k&&o.valores[k]?o.valores[k].grafica:null));
   const etiquetasX=olas.map(o=>o.fecha.slice(2,7));
@@ -1459,8 +1462,7 @@ function pintarTendencia(bid,e){
     +'<text x="'+(M.l-7)+'" y="'+(Y(v)+3.5)+'" text-anchor="end" font-size="10" fill="var(--tinta3)">'+v+'</text>'}
   etiquetasX.forEach((o,i)=>{if(etiquetasX.length<=6||i%2===0||i===etiquetasX.length-1)
     g+='<text x="'+X(i)+'" y="'+(H-8)+'" text-anchor="middle" font-size="10" fill="var(--tinta3)">'+esc(o)+'</text>'});
-  /* olas no comparables (careo a dos): banda gris de aviso */
-  olas.forEach((o,i)=>{if(!o.comparable)g+='<rect x="'+(X(i)-6)+'" y="'+M.t+'" width="12" height="'+(H-M.t-M.b)+'" fill="var(--borde-suave)" opacity=".55"/>'});
+  if(esSV)g+='<text x="'+(W-M.r)+'" y="'+(M.t+10)+'" text-anchor="end" font-size="10" font-weight="700" fill="var(--tinta3)" letter-spacing=".08em">SEGUNDA VUELTA</text>';
   series.forEach((s,k)=>{
     let d='',prev=false;
     s.forEach((v,i)=>{if(v==null){prev=false;return} d+=(prev?'L':'M')+X(i).toFixed(1)+','+Y(v).toFixed(1);prev=true});
@@ -1473,7 +1475,7 @@ function pintarTendencia(bid,e){
   cont.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Evolución de la estimación por ola">'+g
     +'<rect id="zona" x="'+M.l+'" y="'+M.t+'" width="'+(W-M.l-M.r)+'" height="'+(H-M.t-M.b)+'" fill="transparent"/></svg>';
   ley.innerHTML=noms.map((n,k)=>'<span><i style="background:'+cols[k]+'"></i>'+esc(nombreCorto(n))+'</span>').join('')
-    +'<span class="mini" style="margin-left:10px">● estimación anclada · ○ intención ajustada · banda gris = careo a dos (no comparable)</span>';
+    +'<span class="mini" style="margin-left:10px">● estimación anclada · ○ intención ajustada'+(esSV?' · serie de SEGUNDA VUELTA (careo a dos)':'')+'</span>';
   const zona=cont.querySelector('#zona'),tip=$('tip');
   const TIPO={estimacion:'estimación anclada a urna',ajustada:'intención ajustada',directa:'intención directa (sin ajuste)'};
   zona.addEventListener('mousemove',ev=>{
@@ -1481,7 +1483,7 @@ function pintarTendencia(bid,e){
     const i=Math.max(0,Math.min(olas.length-1,Math.round(((ev.clientX-bb.left)/escx-M.l)/((W-M.l-M.r)/Math.max(1,olas.length-1)))));
     const o=olas[i];
     tip.style.display='block';tip.style.left=(ev.clientX+14)+'px';tip.style.top=(ev.clientY-10)+'px';
-    tip.innerHTML='<b>'+esc(o.codigo)+'</b> · '+esc(TIPO[o.tipo]||o.tipo)+(o.comparable?'':' · <span style="color:#e5a63c">careo a '+o.candidatos_en_pregunta+' — no comparable</span>')+'<br>'
+    tip.innerHTML='<b>'+esc(o.codigo)+'</b> · '+esc(TIPO[o.tipo]||o.tipo)+' · pregunta con '+o.candidatos_en_pregunta+' candidatos'+(esSV?' · <b>segunda vuelta</b>':'')+'<br>'
       +noms.map((n,k)=>{const v=llaves[k]&&o.valores[llaves[k]];if(!v)return '<span style="color:'+cols[k]+'">●</span> '+esc(nombreCorto(n))+' —';
         return '<span style="color:'+cols[k]+'">●</span> '+esc(nombreCorto(n))+' <b>'+v.grafica+'%</b>'
           +(v.tipo==='ajustada'?' <span class="mini">(directa '+v.directa+' '+(v.ajuste_pp>=0?'+':'')+v.ajuste_pp+' pp)</span>':'')
@@ -1722,16 +1724,16 @@ function visLamina(tipo){
     svg=lamMarco('Estimación de voto · '+b.codigo,(e.fuente||'')+(e.tp!=null?' · participación estimada '+e.tp+' %':'')+' · % sobre válidos',g);
   }else{
     const fechas={};BASES.forEach(x=>fechas[x.id]=String(x.fecha_campo_ini||''));
-    const olas=(SERIE&&SERIE.olas||[]).slice(-10), et=(SERIE&&SERIE.etiquetas)||{};
+    const sv=(tipo==='serie2');
+    const olas=(SERIE&&(sv?SERIE.segunda_vuelta:SERIE.olas)||[]).slice(-10), et=(SERIE&&SERIE.etiquetas)||{};
     const fo=olas.map(o=>o.fecha);
     if(fo.length<2){$('vis-lamina').innerHTML='<p style="color:#666;padding:20px;font-size:14px">La serie necesita al menos dos olas analizadas.</p>';$('btn-lam-png').style.display='none';return}
-    const noms=(SERIE.protagonistas||[]).slice(0,3);
+    const noms=((sv?SERIE.protagonistas_segunda_vuelta:SERIE.protagonistas)||[]).slice(0,3);
     const vals=[];olas.forEach(o=>noms.forEach(n=>{const v=o.valores[n];if(v)vals.push(v.grafica)}));
     const lo=Math.floor(Math.min(...vals)/5)*5,hi=Math.ceil(Math.max(...vals)/5)*5||5;
     const X=i=>140+i*(830/Math.max(1,fo.length-1)),Y=v=>560-(v-lo)/Math.max(1,hi-lo)*370;
     let g='';for(let v=lo;v<=hi;v+=5)g+='<line x1="140" y1="'+Y(v)+'" x2="1060" y2="'+Y(v)+'" stroke="#eee"/><text x="128" y="'+(Y(v)+6)+'" text-anchor="end" font-size="16" font-family="Helvetica,Arial,sans-serif" fill="'+LAM.gris+'">'+v+'</text>';
     fo.forEach((f,i)=>{g+='<text x="'+X(i)+'" y="592" text-anchor="middle" font-size="15" font-family="Helvetica,Arial,sans-serif" fill="'+LAM.gris+'">'+f.slice(2,7)+'</text>'});
-    olas.forEach((o,i)=>{if(!o.comparable)g+='<rect x="'+(X(i)-7)+'" y="190" width="14" height="370" fill="#eee"/>'});
     noms.forEach((n,k)=>{let d='',prev=false;
       olas.forEach((o,i)=>{const v=o.valores[n];if(!v){prev=false;return}d+=(prev?'L':'M')+X(i)+','+Y(v.grafica);prev=true});
       g+='<path d="'+d+'" fill="none" stroke="'+LAM.serie[k]+'" stroke-width="4" stroke-linejoin="round"/>';
@@ -1741,7 +1743,7 @@ function visLamina(tipo){
       if(vf!=null){const nc=nombreCorto(et[n]||n);const nom=nc.length>20?nc.slice(0,19)+'…':nc;
         g+='<text x="'+(X(fo.length-1)+14)+'" y="'+(Y(vf)+2-k*4)+'" font-size="17" font-weight="bold" font-family="Helvetica,Arial,sans-serif" fill="'+LAM.serie[k]+'">'+esc(nom)+'</text>'
         +'<text x="'+(X(fo.length-1)+14)+'" y="'+(Y(vf)+22-k*4)+'" font-size="17" font-weight="bold" font-family="Helvetica,Arial,sans-serif" fill="'+LAM.serie[k]+'">'+vf+' %</text>';}});
-    svg=lamMarco('Evolución de la serie · República Dominicana','estimación anclada (●) o intención ajustada (○) por ola · % sobre válidos · últimas '+fo.length+' olas',g);
+    svg=lamMarco((sv?'Segunda vuelta · cara a cara':'Evolución de la serie')+' · República Dominicana',(sv?'careo a dos por ola':'estimación anclada (●) o intención ajustada (○) por ola')+' · % sobre válidos · últimas '+fo.length+' olas',g);
   }
   $('vis-lamina').innerHTML=svg;$('btn-lam-png').style.display='inline-block';
 }
