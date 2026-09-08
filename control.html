@@ -1165,7 +1165,8 @@ const V_ETIQ={n_encuesta:'Casos de la encuesta (n)',n:'Casos (n)',censo:'Censo (
   falsos_recuerdos_descartados:'Falsos recuerdos descartados (nombre → casos)',amortiguacion:'Amortiguación aplicada (columna → divisor)',
   divisor_calibrado:'Divisor calibrado (buscado contra la participación esperada)',participacion_deseada_pct:'Participación esperada por la dirección (%)',
   calibracion:'Estado de la calibración del divisor',participacion_alcanzable_pct:'Participación que esta ola PUEDE dar (con el divisor mínimo y el máximo)',
-  indecisos_repartidos:'Indecisos repartidos proporcionalmente',transferencia_pct_por_origen:'Transferencia % dentro de cada origen (tras amortiguar; cada fila suma 100)',
+  indecisos_repartidos:'Indecisos repartidos proporcionalmente',resumen:'Resumen de públicos (miles)',candidatos:'Candidatos analizados (3 primeros en intención)',
+  dimensiones_usadas:'Preguntas usadas para describir a los públicos (dimensión → variable)',potencial_por_candidato:'Pregunta de potencial («votaría / jamás votaría») por candidato',careos_usados:'Careos disponibles',columnas_cruce:'Columnas del cruce',transferencia_pct_por_origen:'Transferencia % dentro de cada origen (tras amortiguar; cada fila suma 100)',
   matriz_electores:'Matriz en electores (destino × origen, ya anclada y repartida)',estimacion:'Estimación final por destino',
   validos_estimados:'Válidos estimados (todo menos abstención)',participacion_estimada_pct:'Participación estimada (válidos ÷ censo, %)',
   estados_pct:'Estados de transferencia (% de la ola)',estados_n:'Estados de transferencia (casos)',
@@ -1184,7 +1185,7 @@ function vTabla2(obj){
   return '<div style="overflow-x:auto"><table class="calor">'+ks.map(k=>'<tr><td class="origen">'+esc(nombreCorto(k))+'</td><td>'+vNum(obj[k])+'</td></tr>').join('')+'</table></div>';
 }
 function vCampo(k,v){
-  if(v==null||k==='avisos'||k==='nota')return '';
+  if(v==null||k==='avisos'||k==='nota'||k==='pesos_caso'||k==='columnas_cruce')return '';
   const lab=V_ETIQ[k]||k;
   /* la calibración del divisor se lee de un vistazo: verde si se encontró, ámbar si es aproximada,
      rojo si NO existe divisor que alcance la participación pedida (entonces la cifra no está anclada) */
@@ -1194,6 +1195,30 @@ function vCampo(k,v){
       :(v==='fuera_de_alcance'?'FUERA DE ALCANCE — no existe divisor que llegue a la participación pedida; se corrió con el del borde y la participación NO queda anclada'
       :'aproximado — el divisor deja la participación a más de un punto de la pedida');
     return '<div class="v-fila2" style="color:'+col+'"><b style="color:inherit">'+esc(lab)+':</b> '+esc(txt)+'</div>';
+  }
+  if(k==='publicos'&&v&&typeof v==='object'){
+    /* p08 · públicos electorales objetivo: por candidato, tres tarjetas (retener · conquistar · movilizar) */
+    const dl=(d,n)=>{if(!d)return '·';return Object.entries(d).slice(0,n||4).map(([c,x])=>esc(nombreCorto(c))+' <b>'+x.pct+'%</b>'+(x.indice&&Math.abs(x.indice-100)>=20?' <span class="mini">(índ. '+x.indice+')</span>':'')).join(' · ')};
+    const bloque=(P,tit,col)=>{if(!P)return '';
+      return '<div class="v-op" style="border-left:3px solid '+col+'"><b>'+esc(tit)+' — '+vNum(P.cuantos.miles)+' mil electores</b> <span class="mini">('+P.cuantos.casos+' casos'+(P.cuantos.miles_brutos!==P.cuantos.miles?' · '+vNum(P.cuantos.miles_brutos)+' mil en bruto':'')+')</span>'
+        +(P.criterio?'<div class="v-fila2 mini" style="font-style:italic">'+esc(P.criterio)+'</div>':'')
+        +(P.nucleo_firme?'<div class="v-fila2">núcleo firme (muy seguros de ir a votar): <b>'+vNum(P.nucleo_firme.miles)+' mil</b> ('+P.nucleo_firme.pct+'%)</div>':'')
+        +(P.con_puerta_abierta?'<div class="v-fila2">con puerta abierta (votarían por él): <b>'+vNum(P.con_puerta_abierta.miles)+' mil</b> ('+P.con_puerta_abierta.pct+'%)</div>':'')
+        +(P.de_donde_vienen?'<div class="v-fila2">de dónde vienen: '+dl(P.de_donde_vienen,5)+'</div>':'')
+        +(P.por_recuerdo?'<div class="v-fila2">por recuerdo: '+dl(P.por_recuerdo,5)+'</div>':'')
+        +'<div class="v-fila2"><b>Dónde:</b> '+dl(P.donde.region,4)+(P.donde.provincias_distintivas&&Object.keys(P.donde.provincias_distintivas).length?' · provincias distintivas: '+dl(P.donde.provincias_distintivas,3):'')+(P.donde.sector?' · '+dl(P.donde.sector,2):'')+'</div>'
+        +'<div class="v-fila2"><b>Qué les mueve:</b> '+dl(P.que_les_mueve.problema_pais,4)+(P.que_les_mueve.tema_prioritario?'<br><span class="mini">tema prioritario: '+dl(P.que_les_mueve.tema_prioritario,3)+'</span>':'')+'</div>'
+        +'<div class="v-fila2"><b>Qué sienten:</b> '+dl(P.que_sienten.emocion,5)+(P.que_sienten.situacion_pais?'<br><span class="mini">'+dl(P.que_sienten.situacion_pais,3)+'</span>':'')+'</div>'
+        +'<div class="v-fila2"><b>Perfil:</b> '+['sexo','edad','clase','educacion','ingresos'].filter(x=>P.perfil[x]).map(x=>x+': '+dl(P.perfil[x],2)).join(' · ')+'</div>'
+        +'<div class="v-fila2"><b>Motivaciones:</b> '+['eje_gob_opos','aprobacion_gob','rumbo','simpatia_partido','seguridad_de_votar'].filter(x=>P.motivaciones[x]).map(x=>x.replace(/_/g,' ')+': '+dl(P.motivaciones[x],3)).join('<br>')+'</div></div>';
+    };
+    return Object.entries(v).map(([c,pub])=>'<div class="v-op"><b style="font-size:14px">'+esc(nombreCorto(c))+'</b> <span class="mini">estimación '+(pub.estimacion_pct_validos!=null?pub.estimacion_pct_validos+'% · ':'')+vNum(pub.estimacion_miles)+' mil</span>'
+      +bloque(pub.retener,'RETENER · su base','#4fb477')+bloque(pub.conquistar,'CONQUISTAR · en otros candidatos, con puerta abierta','#3d8bd3')+bloque(pub.movilizar,'MOVILIZAR · hoy en la abstención','#e5a63c')+'</div>').join('');
+  }
+  if(k==='cruce_estimacion_x_preguntas'&&v&&typeof v==='object'){
+    /* el cruce completo: una tabla por pregunta, plegada */
+    return '<div class="v-op"><b>CRUCE DE LA ESTIMACIÓN (miles de electores) × TODAS LAS PREGUNTAS DE LA OLA</b> <span class="mini">'+Object.keys(v).length+' preguntas</span>'
+      +Object.entries(v).map(([var_,q])=>'<details><summary>'+esc(var_)+' · '+esc((q.pregunta||'').slice(0,110))+'</summary>'+vMatriz(q.miles)+'</details>').join('')+'</div>';
   }
   if(k==='lectura_transferencias'&&v&&v.por_candidato){
     /* lo que Carles pide que el análisis ANOTE: de dónde se nutre cada candidato (8-sep-2026) */
@@ -1227,6 +1252,7 @@ function vCampo(k,v){
 const V_ORDEN=['n_encuesta','n','cobertura_origen_pct','falsos_recuerdos_descartados','urna','urna_total_anclada','censo',
   'participacion_deseada_pct','participacion_alcanzable_pct','divisor_calibrado','calibracion','amortiguacion','transferencia_pct_por_origen','indecisos_repartidos',
   'n_por_origen','matriz_pct_por_columna','matriz_electores','matriz_final','lectura_transferencias','estimacion','validos_estimados',
+  'candidatos','resumen','publicos','dimensiones_usadas','potencial_por_candidato','cruce_estimacion_x_preguntas',
   'participacion_estimada_pct','estados_pct','estados_n','ganador_anterior','fidelidad_ganador_pct','fuga_ganador'];
 function visorDetalle(res,k){
   let h='';const hechos=new Set();
