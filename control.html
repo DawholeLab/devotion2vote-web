@@ -694,6 +694,9 @@
     <button class="dem-card" onclick="descargarSalida('ppt','_presentacion.pptx',this)"><b>📙 Presentación PPT</b>
       <span>portada, estimación en barras, serie y conclusiones (.pptx)</span>
       <span class="gran" style="font-size:13px;color:var(--marca)">Generar y descargar</span></button>
+    <button class="dem-card" onclick="descargarSalida('publicos','_publicos_objetivo.docx',this)"><b>🎯 Públicos objetivo</b>
+      <span>retener · conquistar · movilizar para los 3 primeros: cuántos, dónde, qué les mueve, qué sienten, perfil y motivaciones (.docx)</span>
+      <span class="gran" style="font-size:13px;color:var(--marca)">Generar y descargar</span></button>
     <button class="dem-card" onclick="descargarSalida('excel','_tabulados.xlsx',this)"><b>📗 Tabulados Excel</b>
       <span>estimación, serie completa y expediente en hojas de cálculo (.xlsx)</span>
       <span class="gran" style="font-size:13px;color:var(--marca)">Generar y descargar</span></button>
@@ -967,13 +970,21 @@ function pintarBandeja(){
   }
   const pasos=BANDEJA.pasos_por_aprobar||[];
   if(pasos.length&&YO&&YO.rol==='director'){
-    h+=pasos.map(p=>'<div class="asunto"><div class="a-linea"><span class="a-tipo rev">Paso por aprobar</span>'
-      +'<b>'+esc(p.titulo||p.clave)+'</b><span class="donde">'+esc(p.clave)+'</span></div>'
+    /* SUPERVISAR ANTES DE APROBAR (Carles, 9-sep-2026): qué hace el paso, en qué ola corrió y qué dio, dónde verlo
+       en el Visor y, si produce informe, descargarlo. Nadie aprueba a ciegas. */
+    h+=pasos.map(p=>{const u=p.ultima_corrida;
+      return '<div class="asunto"><div class="a-linea"><span class="a-tipo rev">Paso por aprobar</span>'
+      +'<b>'+esc(p.titulo||p.clave)+'</b><span class="donde">'+esc(p.clave)+(p.version?' · v'+p.version:'')+'</span></div>'
       +'<p class="a-cuerpo">'+(p.con_codigo
         ?'El sistema ya lo dejó listo para ejecutarse. Con tu aprobación entra al método y corre en las próximas olas.'
         :'Aún no tiene receta ejecutable: el sistema la preparará; puedes aprobar el enunciado desde ya.')
-      +'</p><div class="a-acciones"><button class="primaria" onclick="aprobarPaso(\''+esc(p.clave)+'\',this)">Aprobar y sumarlo al método</button>'
-      +'<button onclick="descartarPaso(\''+esc(p.clave)+'\',this)">Descartar: no entra al método</button></div></div>').join('');
+      +(u?' <b>Ya corrió en '+esc(u.ola)+'</b>'+(u.resumen?': '+esc(u.resumen):'')+'.':' Todavía no ha corrido en ninguna ola.')+'</p>'
+      +(p.que_hace?'<details style="margin:6px 0"><summary class="mini" style="cursor:pointer">Qué hace este paso, en palabras (léelo antes de aprobar)</summary><pre style="white-space:pre-wrap;font:12px/1.45 inherit;color:var(--tinta2);margin:6px 0;padding:8px;background:var(--panel2);border-radius:6px">'+esc(p.que_hace)+'</pre></details>':'')
+      +'<div class="a-acciones">'
+      +(u?'<button onclick="verEnVisor('+u.base_id+')">Ver su resultado en el Visor ('+esc(u.ola)+')</button>':'')
+      +(u&&u.informe?'<button onclick="descargar(\''+esc(u.informe)+'\',\'publicos_objetivo_'+esc(u.ola)+'.docx\',this)">Descargar el informe (Word)</button>':'')
+      +'<button class="primaria" onclick="aprobarPaso(\''+esc(p.clave)+'\',this)">Aprobar y sumarlo al método</button>'
+      +'<button onclick="descartarPaso(\''+esc(p.clave)+'\',this)">Descartar: no entra al método</button></div></div>'}).join('');
   }else if(pasos.length){
     h+='<div class="asunto"><div class="a-linea"><span class="a-tipo dato">En espera</span>'
       +'<b>'+pasos.length+' paso'+(pasos.length>1?'s':'')+' del cuaderno esperan la aprobación de la dirección</b></div></div>';
@@ -984,6 +995,19 @@ async function aprobarPaso(clave,btn){
   if(btn){btn.disabled=true;btn.textContent='aprobando…'}
   try{await api('/dv/cuaderno/'+clave+'/aprobar','POST',{});toast('Paso «'+clave+'» aprobado: ya es parte del método.');await refrescar()}
   catch(e){toast('No se pudo aprobar: '+e.message);if(btn){btn.disabled=false;btn.textContent='Aprobar y sumarlo al método'}}
+}
+async function verEnVisor(bid){
+  /* abre la ola en el Monitor y, encima, el Visor del proceso: ahí está cada paso con sus números */
+  try{await abrirMonitor(bid);}catch(e){}
+  setTimeout(()=>{try{visorAbrir()}catch(e){toast('Abre la ola en el Monitor y pulsa el Visor.')}},400);
+}
+async function descargar(ruta,nombre,btn){
+  if(btn){btn.disabled=true;btn.textContent='preparando…'}
+  try{const r=await fetch(API+ruta,{headers:{'Authorization':'Bearer '+TOK}});
+    if(!r.ok){throw new Error((await r.text()).slice(0,160))}
+    const b=await r.blob(),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=nombre;document.body.appendChild(a);a.click();a.remove();
+  }catch(e){toast('No se pudo descargar: '+e.message)}
+  if(btn){btn.disabled=false;btn.textContent='Descargar el informe (Word)'}
 }
 async function descartarPaso(clave,btn){
   /* el otro lado del veto: un paso que no entra. Queda RETIRADO (no se borra: el método deja rastro). */
@@ -1711,7 +1735,7 @@ function irVisual(que){
 async function descargarSalida(tipo,sufijo,btn){
   const bid=$('vis-ola').value; if(!bid){toast('Elige primero la ola.');return}
   const b=BASES.find(x=>x.id==bid);
-  $('vis-msg').textContent=tipo==='excel'?'generando los tabulados…':'generando (DANTE redacta las conclusiones; puede tardar medio minuto)…';
+  $('vis-msg').textContent=tipo==='excel'?'generando los tabulados…':(tipo==='publicos'?'generando (DANTE redacta la lectura de cada candidato; puede tardar un minuto)…':'generando (DANTE redacta las conclusiones; puede tardar medio minuto)…');
   if(btn)btn.disabled=true;
   try{
     const r=await fetch(API+'/dv/salidas/'+bid+'/'+tipo,{headers:{'Authorization':'Bearer '+TOK}});
