@@ -467,6 +467,13 @@
   <div class="paises" id="paises"></div>
 </section>
 
+<section id="regiones">
+  <div class="miga"><a onclick="ver('portada')">Países</a> › <span id="reg-pais"></span></div>
+  <h2 class="portada-titulo" id="reg-titulo"></h2>
+  <p class="portada-sub">Cada región tiene su propia sala: sus elecciones, sus demarcaciones y su motor. Elige una para trabajar.</p>
+  <div class="paises" id="regiones-cards"></div>
+</section>
+
 <section id="demarcaciones">
   <div class="miga"><a onclick="ver('portada')">Países</a> › <span id="dem-pais"></span></div>
   <div class="pais-hero" id="dem-hero"><div class="velo"></div>
@@ -494,6 +501,7 @@
 <section id="territorio">
   <div class="miga"><a onclick="ver('portada')">Países</a> › <a onclick="ver('demarcaciones')" id="terr-pais"></a> › <span id="terr-nivel"></span></div>
   <h2 class="portada-titulo" id="terr-titulo"></h2>
+  <p class="portada-sub" id="terr-elecciones" style="display:none"></p>
   <div class="terr-lista">
     <input id="terr-buscar" placeholder="busca por nombre…" oninput="pintarTerritorios()">
     <div id="terr-filas"></div>
@@ -575,7 +583,7 @@
 </section>
 
 <section id="monitor">
-  <div class="miga"><a onclick="ver('muro')">República Dominicana</a> › <span id="m-miga"></span></div>
+  <div class="miga"><a onclick="ver('muro')" id="m-miga-ambito">República Dominicana</a> › <span id="m-miga"></span></div>
   <div class="mon-cab">
     <h2 id="m-nombre"></h2><span class="cod" id="m-cod"></span>
     <span class="estado-chip" id="m-estado"></span>
@@ -611,9 +619,9 @@
     </div>
     <div style="display:flex;flex-direction:column;gap:12px">
       <div class="panel urna">
-        <h3>Urna real · presidencial 2024</h3>
-        <p class="nota">resultados oficiales JCE por municipio — el ancla del método</p>
-        <input id="u-buscar" placeholder="busca un municipio (p. ej. Santiago)" oninput="urnaBuscar()">
+        <h3 id="m-urna-titulo">Urna real</h3>
+        <p class="nota" id="m-urna-nota">resultados oficiales por municipio — el ancla del método</p>
+        <input id="u-buscar" placeholder="busca un municipio" oninput="urnaBuscar()">
         <div id="m-urna"><p class="nota">cargando la urna territorial…</p></div>
       </div>
       <div class="panel">
@@ -838,29 +846,44 @@ function arrancar(){
   $('quien').textContent=(YO.nombre||YO.usuario)+' · '+(YO.rol==='director'?'dirección':YO.rol);
   /* el Visor del proceso es SOLO de dirección (regla de Carles): el botón ni se pinta para el resto */
   if(YO.rol==='director'||YO.rol==='admin'){document.querySelectorAll('.btn-visor').forEach(b=>b.style.display='inline-block')}
-  cargarTodo();
+  /* primero la lista de ámbitos con datos (para las tarjetas de países y regiones), luego la sala del ámbito vigente */
+  api('/dv/ambitos').then(a=>{AMBITOS=a;FICHA=fichaDe(AMBITO);pintarPaises()}).catch(()=>{}).then(()=>cargarTodo());
 }
 
 /* ── estado global ── */
 let BASES=[],P05=[],P07=[],SERIE=null,BANDEJA={asuntos:[],olas_sin_analizar:[]},URNAS=[],BIB=[],MON=null;
+/* ÁMBITO = la clave con la que el motor guarda todo (bases, parámetros, urna, cuaderno, biblioteca): 'dom' o 'esp-cat' */
+let AMBITO='dom',AMBITOS=[],FICHA={};
+const fichaDe=amb=>((AMBITOS.find(a=>a.pais===amb)||{}).ficha)||{};
+const infoDe=amb=>AMBITOS.find(a=>a.pais===amb)||{elecciones:{},olas:0};
+const eleccionRef=()=>FICHA.eleccion_referencia||'';
+function etiquetaEleccion(e){
+  if(!e)return '';const m=String(e).match(/^(\d{4})(?:-\d{2})?_(\w+)/);if(!m)return e;
+  const tipo={presidencial:'presidencial',autonomicas:'autonómicas',generales:'generales',municipales:'municipales'}[m[2]]||m[2];
+  return tipo+' '+m[1];
+}
+const NO_CAND=['NULOS','VALIDOS','EMITIDOS','OT+BL','CENSO','ABST','BLANCOS','ABST+NUL','OT'];
+const esCand=k=>!NO_CAND.includes(k);
+const NIVEL_NOMBRE={comunidad:'Comunidad',provincia:'Provincias',municipio:'Municipios',distrito:'Distritos',colegio:'Colegios',region:'Regiones'};
 const porBase=(lista,bid)=>lista.filter(c=>c.base_id===bid&&c.ok).sort((a,b)=>b.id-a.id)[0]||null;
 
 async function cargarTodo(){
   try{
     const [bases,p05,p07,bandeja,serie]=await Promise.all([
-      api('/dv/bases?pais=dom'),
-      api('/dv/corridas?paso_clave=p05_matriz_electores_salom&con_resultado=true'),
-      api('/dv/corridas?paso_clave=p07_fila_tracking&con_resultado=true'),
-      api('/dv/bandeja?pais=dom'),
-      api('/dv/serie?pais=dom').catch(()=>null),
+      api('/dv/bases?pais='+AMBITO),
+      api('/dv/corridas?paso_clave=p05_matriz_electores_salom&con_resultado=true&pais='+AMBITO),
+      api('/dv/corridas?paso_clave=p07_fila_tracking&con_resultado=true&pais='+AMBITO),
+      api('/dv/bandeja?pais='+AMBITO),
+      api('/dv/serie?pais='+AMBITO).catch(()=>null),
     ]);
     BASES=bases;P05=p05;P07=p07;BANDEJA=bandeja;SERIE=serie;
     pintarMuro();pintarBandeja();pintarBiblio();pintarPaises();
-    api('/dv/urnas/territorio?nivel=municipio').then(u=>{URNAS=u;pintarPaises();pintarMuro();if(MON)pintarUrna()}).catch(()=>{
+    URNAS=[];URNA_SEL=null;
+    api('/dv/urnas/territorio?pais='+AMBITO+'&nivel=municipio'+(eleccionRef()?'&eleccion='+eleccionRef():'')).then(u=>{URNAS=u;pintarPaises();pintarMuro();pintarUrna()}).catch(()=>{
       $('m-urna').innerHTML='<p class="nota">La urna territorial aún no está cargada en este motor (comando de carga pendiente).</p>'});
-    api('/dv/biblioteca?pais=dom').then(d=>{BIB=d;pintarDocs()}).catch(()=>{});
+    api('/dv/biblioteca?pais='+AMBITO).then(d=>{BIB=d;pintarDocs()}).catch(()=>{});
     const ultima=[...BASES].filter(b=>b.n_registros).sort((a,b)=>String(b.fecha_campo_ini||'').localeCompare(String(a.fecha_campo_ini||'')))[0];
-    if(ultima)abrirMonitor(ultima.id,true);
+    if(ultima)abrirMonitor(ultima.id,true);else vaciarMonitor();
   }catch(e){}
 }
 
@@ -905,7 +928,7 @@ function pintarMuro(){
   const ok=P05.filter(c=>c.ok).length+P07.filter(c=>c.ok).length;
   $('cifras').innerHTML=
     '<div class="cifra"><b>'+BASES.length+'</b><span>olas de encuesta cargadas</span></div>'
-    +'<div class="cifra"><b>'+(URNAS.length||182)+'</b><span>municipios con urna oficial</span></div>'
+    +'<div class="cifra"><b>'+(URNAS.length||'—')+'</b><span>municipios con urna oficial'+(eleccionRef()?' · '+etiquetaEleccion(eleccionRef()):'')+'</span></div>'
     +'<div class="cifra"><b>'+ok+'</b><span>análisis corridos y en orden</span></div>'
     +'<div class="cifra'+(asuntos?' atencion':'')+'"><b>'+asuntos+'</b><span>asuntos esperan una mirada</span></div>';
   const olas=[...BASES].sort((a,b)=>String(b.fecha_campo_ini||'').localeCompare(String(a.fecha_campo_ini||'')));
@@ -1041,9 +1064,9 @@ async function ponerFecha(bid,i){
 }
 async function refrescar(){
   const [bases,p05,p07,bandeja,serie]=await Promise.all([
-    api('/dv/bases?pais=dom'),api('/dv/corridas?paso_clave=p05_matriz_electores_salom&con_resultado=true'),
-    api('/dv/corridas?paso_clave=p07_fila_tracking&con_resultado=true'),api('/dv/bandeja?pais=dom'),
-    api('/dv/serie?pais=dom').catch(()=>null)]);
+    api('/dv/bases?pais='+AMBITO),api('/dv/corridas?paso_clave=p05_matriz_electores_salom&con_resultado=true&pais='+AMBITO),
+    api('/dv/corridas?paso_clave=p07_fila_tracking&con_resultado=true&pais='+AMBITO),api('/dv/bandeja?pais='+AMBITO),
+    api('/dv/serie?pais='+AMBITO).catch(()=>null)]);
   BASES=bases;P05=p05;P07=p07;BANDEJA=bandeja;SERIE=serie;
   pintarMuro();pintarBandeja();pintarBiblio();if(MON)abrirMonitor(MON.id,true);
 }
@@ -1452,6 +1475,31 @@ function moverOla(d){
 }
 
 /* ── monitor ── */
+function vaciarMonitor(){
+  /* ámbito sin olas todavía (p. ej. Cataluña recién abierta): el Monitor enseña su urna territorial y nada más */
+  MON=null;
+  $('m-nombre').textContent='Sin olas de encuesta'; $('m-miga').textContent='—'; $('m-cod').textContent='';
+  $('m-estado').innerHTML='<span style="color:var(--tinta3)">·</span> carga la primera ola en «Cargar»';
+  $('m-nota-est').textContent='esta sala aún no tiene ninguna ola de encuesta: la estimación se enciende con la primera';
+  $('m-estim').innerHTML='<div class="cand"><b style="font-size:22px;color:var(--tinta3)">sin estimación</b></div>';
+  /* si el ámbito trae una estimación de referencia en sus parámetros (P.ESTIMACION.<año>, p. ej. la de Carles
+     para las autonómicas 2021 de Cataluña), se enseña como referencia hasta que haya olas propias */
+  api('/dv/parametros?pais='+AMBITO).then(ps=>{
+    const p=ps.filter(x=>/^P\.ESTIMACION\./.test(x.clave)).sort((a,b)=>b.clave.localeCompare(a.clave))[0]; if(!p||MON)return;
+    const tot=(p.valor||{}).cataluna||(p.valor||{}).total||p.valor; const votos=(tot||{}).votos; if(!votos)return;
+    const abst=votos['ABST+NUL']||0, validos=Object.entries(votos).filter(([k])=>k!=='ABST+NUL').reduce((s,[,v])=>s+v,0);
+    const lista=Object.entries(votos).filter(([k])=>esCand(k)).map(([n,v])=>({n,p:(100*v/validos).toFixed(1),v})).sort((a,b)=>b.p-a.p);
+    const cols=['var(--s1)','var(--s2)','var(--s3)'];
+    $('m-nota-est').textContent='estimación de referencia '+p.clave.replace('P.ESTIMACION.','')+' (transferencia de Carles, por provincia) · % sobre válidos'+(tot.censo?' · participación '+(100*validos/tot.censo).toFixed(1)+'%':'');
+    $('m-estim').innerHTML=lista.slice(0,3).map((x,k)=>'<div class="cand"><span><i style="background:'+cols[k]+'"></i>'+esc(x.n)+'</span><b>'+x.p+'%</b><small style="display:block;color:var(--tinta3)">'+fmt(x.v)+' electores</small></div>').join('')
+      +'<div class="nota" style="grid-column:1/-1;margin-top:6px;color:var(--tinta2)">'+lista.slice(3).map(x=>esc(x.n)+' '+x.p+'%').join(' · ')+'</div>';
+  }).catch(()=>{});
+  $('m-tendencia').innerHTML='';$('m-leyenda').innerHTML='';$('m-checks').innerHTML='';
+  if($('m-avisos'))$('m-avisos').innerHTML='';
+  $('lo-ini').textContent='';$('lo-fin').textContent='';$('lo-actual').textContent='';$('lo-rango').max=0;
+  $('m-exped').style.display='none';
+  pintarUrna();
+}
 function abrirMonitor(bid,quieto){
   const b=BASES.find(x=>x.id===bid); if(!b)return;
   MON=b;
@@ -1575,7 +1623,10 @@ function pintarUrna(){
   if(!URNAS.length)return;
   if(!URNA_SEL)URNA_SEL=[...URNAS].sort((a,b)=>(b.votos.EMITIDOS||0)-(a.votos.EMITIDOS||0))[0];
   const m=URNA_SEL,v=m.votos;
-  const cand=Object.entries(v).filter(([k])=>!['NULOS','VALIDOS','EMITIDOS','OT+BL'].includes(k)).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  $('m-urna-titulo').textContent='Urna real · '+etiquetaEleccion(eleccionRef()||Object.keys(infoDe(AMBITO).elecciones||{}).sort().pop());
+  $('m-urna-nota').textContent='resultados oficiales por municipio — el ancla del método';
+  $('m-miga-ambito').textContent=FICHA.nombre||'República Dominicana';
+  const cand=Object.entries(v).filter(([k])=>esCand(k)).sort((a,b)=>b[1]-a[1]).slice(0,3);
   const max=Math.max(...cand.map(x=>x[1]),1);
   const cols=['var(--s1)','var(--s2)','var(--s3)'];
   $('m-urna').innerHTML='<p style="margin:0 0 6px;font-size:13px"><b>'+esc(m.nombre)+'</b> <span class="cod" style="color:var(--tinta3)">'+esc(m.codigo)+'</span></p>'
@@ -1614,7 +1665,7 @@ async function lanzar(){
   p.innerHTML='<p>· Cargando la base y reconociendo las preguntas…</p><p>· Corriendo el método completo…</p>';
   $('btn_analizar').disabled=true;
   const fd=new FormData();fd.append('archivo',f);
-  fd.append('codigo',$('b_codigo').value.trim());fd.append('pais',$('b_pais').value||'dom');
+  fd.append('codigo',$('b_codigo').value.trim());fd.append('pais',AMBITO);
   fd.append('titulo',$('b_titulo').value.trim()||$('b_codigo').value.trim());
   if($('b_fecha').value)fd.append('fecha_campo_ini',$('b_fecha').value);
   fd.append('ponderacion','autoponderada');
@@ -1635,7 +1686,7 @@ const CATS=[['General','tramo en construcción',null],
   ['Eje gobierno/oposición','identidad contra voto',['p03']],
   ['Techos de potencial','crecimiento posible',['p04']]];
 function pintarBiblio(){
-  $('bib-bases-n').textContent=BASES.length+' olas · 1 urna territorial (18.495 colegios)';
+  $('bib-bases-n').textContent=BASES.length+' olas · '+Object.keys(infoDe(AMBITO).elecciones||{}).length+' elección(es) con urna territorial';
   const olas=[...BASES].sort((a,b)=>String(b.fecha_campo_ini||'').localeCompare(String(a.fecha_campo_ini||'')));
   $('bib-bases').innerHTML=olas.map(b=>'<div class="doc-fila">📊 <b>'+esc(b.codigo)+'</b>'
     +'<span class="cod">'+fmt(b.n_registros)+' casos · <a style="cursor:pointer" onclick="abrirMonitor('+b.id+')">abrir</a></span></div>').join('');
@@ -1663,16 +1714,16 @@ function pintarDocs(){
 }
 async function subirBiblioteca(){
   const f=$('bib_arch').files[0]; if(!f){toast('Elige primero el archivo.');return}
-  const fd=new FormData();fd.append('archivo',f);fd.append('tipo',$('bib_tipo').value);fd.append('pais','dom');
+  const fd=new FormData();fd.append('archivo',f);fd.append('tipo',$('bib_tipo').value);fd.append('pais',AMBITO);
   fd.append('titulo',f.name.replace(/\.[^.]+$/,''));
   $('bib_msg').textContent='subiendo…';$('btn_bib').disabled=true;
   try{const r=await api('/dv/biblioteca','POST',null,fd);$('bib_msg').textContent='✓ leído: '+r.caracteres+' caracteres';
-    $('bib_arch').value='';BIB=await api('/dv/biblioteca?pais=dom');pintarDocs()}
+    $('bib_arch').value='';BIB=await api('/dv/biblioteca?pais='+AMBITO);pintarDocs()}
   catch(e){$('bib_msg').textContent=''}finally{$('btn_bib').disabled=false}
 }
 async function borrarDoc(id){
   if(!confirm('¿Quitar este documento del archivo del caso?'))return;
-  try{await api('/dv/documentos/'+id,'DELETE');BIB=await api('/dv/biblioteca?pais=dom');pintarDocs()}catch(e){}
+  try{await api('/dv/documentos/'+id,'DELETE');BIB=await api('/dv/biblioteca?pais='+AMBITO);pintarDocs()}catch(e){}
 }
 
 /* ── DANTE ── */
@@ -1834,29 +1885,55 @@ function descargarLaminaPNG(){
   img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(xml);
 }
 
-/* ── portada de países y demarcaciones ── */
+/* ── portada de países, regiones y demarcaciones ── */
 const PAISES=[
-  {codigo:'dom',nombre:'República Dominicana',bandera:'🇩🇴',activo:true,imagen:'assets/paises/pais_republicadominicana.jpg'},
+  {codigo:'dom',nombre:'República Dominicana',bandera:'🇩🇴',activo:true,ambito:'dom',imagen:'assets/paises/pais_republicadominicana.jpg'},
+  {codigo:'esp',nombre:'España',bandera:'🇪🇸',activo:true,nota:'comunidades autónomas · provincias · municipios',imagen:'assets/paises/pais_espana.jpg',
+   regiones:[
+     {ambito:'esp-cat',nombre:'Cataluña',activo:true,nota:'4 provincias · 947 municipios · distritos de Barcelona · autonómicas 2017 y generales 2019'},
+     {ambito:'esp-val',nombre:'Comunidad Valenciana',activo:false,nota:'3 provincias · municipios'},
+     {ambito:'esp-mad',nombre:'Madrid',activo:false,nota:'1 provincia · municipios · distritos'},
+     {ambito:'esp-and',nombre:'Andalucía',activo:false,nota:'8 provincias · municipios'},
+     {ambito:'esp-ara',nombre:'Aragón',activo:false,nota:'3 provincias · comarcas · municipios'},
+   ]},
   {codigo:'mex',nombre:'México',bandera:'🇲🇽',activo:false,nota:'estados · municipios · secciones',imagen:'assets/paises/pais_mexico.jpg'},
-  {codigo:'esp',nombre:'España',bandera:'🇪🇸',activo:false,nota:'comunidades autónomas · provincias · municipios',imagen:'assets/paises/pais_espana.jpg'},
   {codigo:'chl',nombre:'Chile',bandera:'🇨🇱',activo:false,nota:'regiones · provincias · comunas',imagen:'assets/paises/pais_chile.jpg'},
   {codigo:'col',nombre:'Colombia',bandera:'🇨🇴',activo:false,nota:'departamentos · municipios',imagen:'assets/paises/pais_colombia.jpg'},
   {codigo:'ecu',nombre:'Ecuador',bandera:'🇪🇨',activo:false,nota:'provincias · cantones · parroquias',imagen:'assets/paises/pais_ecuador.jpg'},
   {codigo:'nuevo',nombre:'Nuevo país',bandera:'🌎',activo:false,nota:'se abre con su protocolo de demarcaciones'},
 ];
 let PAIS='dom';
+function resumenAmbito(amb){
+  const inf=infoDe(amb),eles=Object.keys(inf.elecciones||{}).sort();
+  const ref=inf.elecciones&&(inf.elecciones[(inf.ficha||{}).eleccion_referencia]||inf.elecciones[eles[eles.length-1]])||{};
+  const partes=[(inf.olas||0)+' olas de encuesta'];
+  if(ref.municipio)partes.push(ref.municipio+' municipios con urna oficial');
+  if(ref.colegio)partes.push(fmt(ref.colegio)+' colegios');
+  if(ref.distrito)partes.push(ref.distrito+' distritos');
+  if(eles.length)partes.push(eles.map(etiquetaEleccion).join(' · '));
+  return partes.join(' · ');
+}
 function pintarPaises(){
   $('paises').innerHTML=PAISES.map(p=>{
     const img=p.imagen?' style="background-image:url(\''+p.imagen+'\')"':'';
     if(p.activo){
+      const sub=p.regiones?p.regiones.filter(r=>r.activo).map(r=>r.nombre).join(' · ')+' · '+p.regiones.filter(r=>!r.activo).length+' regiones más en camino':resumenAmbito(p.ambito);
       return '<button class="pais-card activo" onclick="entrarPais(\''+p.codigo+'\')">'
         +'<div class="imagen"'+img+'>'+(p.imagen?'':p.bandera)+'</div><div class="cuerpo"><b>'+p.bandera+' '+esc(p.nombre)+'</b>'
-        +'<span>'+BASES.length+' olas de encuesta · '+(URNAS.length||182)+' municipios con urna oficial · 18.495 colegios</span>'
-        +'<span class="entrarb">Entrar →</span></div></button>';
+        +'<span>'+esc(sub)+'</span><span class="entrarb">Entrar →</span></div></button>';
     }
     return '<button class="pais-card prox" onclick="toast(\'Este país se abre cuando carguemos sus datos y su protocolo de demarcaciones.\')">'
       +'<div class="imagen"'+img+'>'+(p.imagen?'':p.bandera)+'</div><div class="cuerpo"><b>'+p.bandera+' '+esc(p.nombre)+'</b>'
       +'<span>'+esc(p.nota||'')+'</span><span class="entrarb">próximamente</span></div></button>';
+  }).join('');
+}
+function pintarRegiones(p){
+  $('reg-pais').textContent=p.nombre; $('reg-titulo').textContent=p.bandera+' '+p.nombre+' — ¿a qué región entras?';
+  $('regiones-cards').innerHTML=p.regiones.map(r=>{
+    if(r.activo)return '<button class="pais-card activo" onclick="entrarAmbito(\''+r.ambito+'\')"><div class="imagen"'+(p.imagen?' style="background-image:url(\''+p.imagen+'\')"':'')+'></div>'
+      +'<div class="cuerpo"><b>'+esc(r.nombre)+'</b><span>'+esc(resumenAmbito(r.ambito)||r.nota)+'</span><span class="entrarb">Entrar →</span></div></button>';
+    return '<button class="pais-card prox" onclick="toast(\'Esta región se abre cuando carguemos sus datos electorales.\')"><div class="imagen"></div>'
+      +'<div class="cuerpo"><b>'+esc(r.nombre)+'</b><span>'+esc(r.nota||'')+'</span><span class="entrarb">próximamente</span></div></button>';
   }).join('');
 }
 /* las 9 etapas canon del proceso (es · en) */
@@ -1898,13 +1975,12 @@ function elegirEtapa(i){
 let DEM_SEL=null;
 function abrirDemarcacion(t,nivel){
   DEM_SEL={...t,nivel:nivel||TERR_NIVEL};
-  const p=PAISES.find(x=>x.codigo===PAIS)||{};
-  $('dh-pais').textContent=p.nombre||''; $('dh-nivel').textContent=DEM_SEL.nivel==='provincia'?'Provincias':'Municipios';
+  $('dh-nivel').textContent=NIVEL_NOMBRE[DEM_SEL.nivel]||DEM_SEL.nivel;
   $('dh-miga').textContent=t.nombre;
   $('dh-nombre').textContent=t.nombre;
-  $('dh-sub').textContent=(DEM_SEL.nivel==='provincia'?'Provincia':'Municipio')+' '+t.codigo+' · '+fmt(t.votos.VALIDOS)+' votos válidos en 2024 · el proceso completo de esta demarcación';
+  $('dh-sub').textContent=(DEM_SEL.nivel==='provincia'?'Provincia':'Municipio')+' '+t.codigo+' · '+fmt(t.votos.VALIDOS)+' votos válidos en las '+etiquetaEleccion(TERR_ELE)+' · el proceso completo de esta demarcación';
   $('proceso-dem').innerHTML=procesoHTML('elegirEtapaDem',
-    '<b>'+fmt(t.votos.VALIDOS)+' votos válidos</b> en la urna 2024 — el ancla del método aquí');
+    '<b>'+fmt(t.votos.VALIDOS)+' votos válidos</b> en la urna '+etiquetaEleccion(TERR_ELE)+' — el ancla del método aquí');
   $('etapa-det-dem').style.display='none';
   ver('demhome');
 }
@@ -1914,10 +1990,10 @@ function elegirEtapaDem(i){
   const det=$('etapa-det-dem'); det.style.display='block';
   if(e.viva){
     const v=t.votos;
-    const cand=Object.entries(v).filter(([k])=>!['NULOS','VALIDOS','EMITIDOS','OT+BL'].includes(k)).sort((a,b)=>b[1]-a[1]).slice(0,3);
+    const cand=Object.entries(v).filter(([k])=>esCand(k)).sort((a,b)=>b[1]-a[1]).slice(0,3);
     const max=Math.max(...cand.map(x=>x[1]),1); const cols=['var(--s1)','var(--s2)','var(--s3)'];
     det.innerHTML='<h3 style="font-size:19px;margin:0 0 4px">1 · Investigación — '+esc(t.nombre)+'</h3>'
-      +'<p style="font-size:12px;color:var(--tinta3);margin:0 0 10px">la urna oficial 2024 de esta demarcación — el ancla del método aquí</p>'
+      +'<p style="font-size:12px;color:var(--tinta3);margin:0 0 10px">la urna oficial '+esc(etiquetaEleccion(TERR_ELE))+' de esta demarcación — el ancla del método aquí</p>'
       +'<div class="urna">'+cand.map(([n,x],k)=>'<div class="fila-b"><span>'+esc(nombreCorto(n))+'</span>'
         +'<div class="barra"><i style="width:'+(100*x/max).toFixed(1)+'%;background:'+cols[k]+'"></i></div>'
         +'<span class="valor">'+fmt(x)+' · '+(100*x/(v.VALIDOS||1)).toFixed(1)+'%</span></div>').join('')
@@ -1932,40 +2008,57 @@ function elegirEtapaDem(i){
   }
   det.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
+function paisDe(amb){return PAISES.find(x=>x.ambito===amb)||PAISES.find(x=>(x.regiones||[]).some(r=>r.ambito===amb))||PAISES[0]}
 function entrarPais(cod){
-  PAIS=cod;
-  const p=PAISES.find(x=>x.codigo===cod);
-  $('dem-pais').textContent=p.nombre; $('dem-titulo').textContent=p.bandera+' '+p.nombre; $('terr-pais').textContent=p.nombre;
-  $('nav-pais').textContent=p.bandera+' '+(p.codigo==='dom'?'Rep. Dominicana':p.nombre);
+  const p=PAISES.find(x=>x.codigo===cod); PAIS=cod;
+  if(p.regiones){pintarRegiones(p);ver('regiones');return}
+  entrarAmbito(p.ambito||cod);
+}
+async function entrarAmbito(amb){
+  /* cambiar de ámbito = cambiar TODO lo que la sala enseña: muro, bandeja, monitor, biblioteca, urna, visualización */
+  const cambia=amb!==AMBITO;
+  AMBITO=amb; FICHA=fichaDe(amb); const p=paisDe(amb); PAIS=p.codigo;
+  const region=(p.regiones||[]).find(r=>r.ambito===amb);
+  const nombre=FICHA.nombre||(region?region.nombre:p.nombre);
+  $('b_pais').value=amb;
+  if(cambia){MON=null;URNA_SEL=null;$('vis-ola').innerHTML='';await cargarTodo()}
+  $('dem-pais').innerHTML=(region?'<a onclick="entrarPais(\''+p.codigo+'\')">'+esc(p.nombre)+'</a> › ':'')+esc(nombre);
+  $('dem-titulo').textContent=p.bandera+' '+nombre; $('terr-pais').textContent=nombre; $('dh-pais').textContent=nombre;
+  $('nav-pais').textContent=p.bandera+' '+(amb==='dom'?'Rep. Dominicana':nombre);
   if(p.imagen)$('dem-hero').style.backgroundImage='url(\''+p.imagen+'\')';
-  const nProv=new Set(URNAS.map(u=>u.padre)).size||32;
+  const inf=infoDe(amb),eles=inf.elecciones||{},ref=eles[eleccionRef()]||eles[Object.keys(eles).sort().pop()]||{};
+  const niveles=(FICHA.niveles||['provincia','municipio','colegio']).filter(n=>n!=='comunidad'&&n!=='pais');
   const peldano=(i,cl,click,niv,nom,gran,unidad,desc)=>
     '<button class="dem-card '+cl+(i?' hijo':'')+'" style="margin-left:'+(i*30)+'px" onclick="'+click+'">'
     +'<span class="cab-d"><span class="niv">'+niv+'</span><b>'+nom+'</b><span class="desc">'+desc+'</span></span>'
     +'<span class="gran">'+gran+'<small>'+unidad+'</small></span><span class="flecha-d">›</span></button>';
-  $('dem-cards').innerHTML=
-     peldano(0,'pais-entero',"ver('muro')",'Nivel 0 · país entero','Todo el país',BASES.length,'olas de encuesta',
-             'el muro completo: encuestas nacionales, estimaciones y avisos')
-    +peldano(1,'',"abrirTerritorios('provincia')",'Nivel 1','Provincias',(nProv||'—'),'demarcaciones',
-             'resultados oficiales por provincia')
-    +peldano(2,'',"abrirTerritorios('municipio')",'Nivel 2','Municipios',(URNAS.length||'—'),'urnas oficiales',
-             'la urna real de cada municipio — el ancla del método')
-    +peldano(3,'',"toast('Los 18.495 colegios son la celda del nanosegmento: se navegan desde su municipio.')",
-             'Nivel 3 · nanosegmento','Colegios','18.495','celdas de voto','la unidad mínima del voto');
+  const DESC={provincia:'resultados oficiales por provincia',municipio:'la urna real de cada municipio — el ancla del método',
+              distrito:'los distritos de la capital: se navegan desde su municipio',colegio:'la unidad mínima del voto'};
+  let h=peldano(0,'pais-entero',"ver('muro')",'Nivel 0 · '+(region?'región entera':'país entero'),region?'Toda '+nombre:'Todo el país',BASES.length,'olas de encuesta',
+               'el muro completo: encuestas, estimaciones y avisos'+(eleccionRef()?' · urna de referencia: '+etiquetaEleccion(eleccionRef()):''));
+  niveles.forEach((n,k)=>{
+    const cuenta=ref[n]!=null?fmt(ref[n]):'—';
+    const click=(n==='provincia'||n==='municipio')?"abrirTerritorios('"+n+"')":"toast('"+(n==='colegio'?'Los colegios son la celda del nanosegmento: se navegan desde su municipio.':'Los distritos se navegan desde su municipio.')+"')";
+    h+=peldano(k+1,'',click,'Nivel '+(k+1)+(n==='colegio'?' · nanosegmento':''),NIVEL_NOMBRE[n]||n,cuenta,n==='colegio'?'celdas de voto':(n==='municipio'?'urnas oficiales':'demarcaciones'),DESC[n]||'');
+  });
+  $('dem-cards').innerHTML=h;
   pintarProceso();
   $('etapa-det').style.display='none';
   document.querySelectorAll('.etapa-n').forEach(x=>x.classList.remove('sel'));
   ver('demarcaciones');
 }
-let TERR_NIVEL='municipio',TERR_DATOS=[];
-async function abrirTerritorios(nivel){
-  TERR_NIVEL=nivel;
-  $('terr-nivel').textContent=nivel==='provincia'?'Provincias':'Municipios';
-  $('terr-titulo').textContent=(nivel==='provincia'?'Provincias':'Municipios')+' · urna presidencial 2024';
+let TERR_NIVEL='municipio',TERR_DATOS=[],TERR_ELE='';
+async function abrirTerritorios(nivel,eleccion){
+  TERR_NIVEL=nivel; TERR_ELE=eleccion||TERR_ELE||eleccionRef()||Object.keys(infoDe(AMBITO).elecciones||{}).sort().pop()||'';
+  $('terr-nivel').textContent=NIVEL_NOMBRE[nivel]||nivel;
+  $('terr-titulo').textContent=(NIVEL_NOMBRE[nivel]||nivel)+' · urna '+etiquetaEleccion(TERR_ELE);
+  const eles=Object.keys(infoDe(AMBITO).elecciones||{}).sort();
+  const sel=$('terr-elecciones'); sel.style.display=eles.length>1?'':'none';
+  sel.innerHTML=eles.length>1?'Elección: '+eles.map(e=>'<a style="cursor:pointer;margin-right:12px;'+(e===TERR_ELE?'color:var(--marca);font-weight:600':'text-decoration:underline')+'" onclick="abrirTerritorios(TERR_NIVEL,\''+e+'\')">'+esc(etiquetaEleccion(e))+'</a>').join(''):'';
   $('terr-buscar').value='';
   $('terr-filas').innerHTML='<p style="color:var(--tinta3)">cargando…</p>';
   ver('territorio');
-  try{TERR_DATOS=nivel==='municipio'?URNAS:(await api('/dv/urnas/territorio?nivel=provincia'))}catch(e){TERR_DATOS=[]}
+  try{TERR_DATOS=await api('/dv/urnas/territorio?pais='+AMBITO+'&nivel='+nivel+'&eleccion='+encodeURIComponent(TERR_ELE))}catch(e){TERR_DATOS=[]}
   pintarTerritorios();
 }
 function pintarTerritorios(){
@@ -1976,7 +2069,7 @@ function pintarTerritorios(){
   const cols=['var(--s1)','var(--s2)','var(--s3)'];
   $('terr-filas').innerHTML=datos.map(t=>{
     const v=t.votos;
-    const cand=Object.entries(v).filter(([k])=>!['NULOS','VALIDOS','EMITIDOS','OT+BL'].includes(k)).sort((a,b)=>b[1]-a[1]).slice(0,3);
+    const cand=Object.entries(v).filter(([k])=>esCand(k)).sort((a,b)=>b[1]-a[1]).slice(0,3);
     const tot=cand.reduce((s,x)=>s+x[1],0)||1;
     return '<button class="terr-fila" onclick="verTerritorio(\''+t.codigo+'\')"><b>'+esc(t.nombre)+'</b>'
       +'<div class="mini-barra">'+cand.map(([n,x],k)=>'<i style="width:'+(100*x/tot).toFixed(1)+'%;background:'+cols[k]+'"></i>').join('')+'</div>'
@@ -1985,7 +2078,7 @@ function pintarTerritorios(){
 }
 function verTerritorio(codigo){
   const t=TERR_DATOS.find(x=>x.codigo===codigo); if(!t)return;
-  if(TERR_NIVEL==='provincia'){abrirTerritorios('municipio').then(()=>{$('terr-buscar').value='';TERR_DATOS=URNAS.filter(u=>u.padre===codigo);pintarTerritorios();$('terr-titulo').textContent='Municipios de '+t.nombre});return}
+  if(TERR_NIVEL==='provincia'){abrirTerritorios('municipio').then(()=>{$('terr-buscar').value='';TERR_DATOS=TERR_DATOS.filter(u=>u.padre===codigo);pintarTerritorios();$('terr-titulo').textContent='Municipios de '+t.nombre+' · urna '+etiquetaEleccion(TERR_ELE)});return}
   URNA_SEL=t;
   abrirDemarcacion(t,'municipio');   // la demarcación abre con SU propio proceso de 9 etapas
 }
@@ -1993,11 +2086,11 @@ function verTerritorio(codigo){
 /* ── navegación por capas: cada vista deja huella y la flecha ← (o el atrás del navegador) retrocede un paso ── */
 function ver(id,desdeHistorial){
   document.querySelectorAll('main section').forEach(s=>s.classList.toggle('on',s.id===id));
-  const mapa={vt:'monitor',territorio:'pais',demhome:'pais',ruta:'pais',demarcaciones:'pais'};
+  const mapa={vt:'monitor',territorio:'pais',demhome:'pais',ruta:'pais',demarcaciones:'pais',regiones:'portada'};
   const navId=mapa[id]||id;
   document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.id==='nav-'+navId));
   // barra CONTEXTUAL: cada capa enseña solo lo suyo — nada de cruces entre capas
-  const enPais=id!=='portada';                                       // dentro de un país: chip del país
+  const enPais=id!=='portada'&&id!=='regiones';                                       // dentro de un país: chip del país
   const enInv=['muro','cargar','bandeja','monitor','biblio','visual','vt'].includes(id); // dentro de Investigación: sus mesas
   document.querySelectorAll('.nav-ctx').forEach(b=>b.style.display=enPais?'':'none');
   document.querySelectorAll('.nav-inv').forEach(b=>b.style.display=enInv?'':'none');
