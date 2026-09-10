@@ -46,7 +46,7 @@ nav.barra{position:fixed;bottom:0;left:0;right:0;background:var(--panel);border-
 nav.barra button{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;font-weight:600;color:var(--mut);min-width:50px;min-height:44px;padding:4px 3px;border-radius:10px}
 nav.barra button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 nav.barra button.on{color:var(--acc2)}
-.fab{position:fixed;right:16px;bottom:104px;z-index:7;background:var(--acc);color:#fff;border-radius:999px;padding:12px 18px;font-weight:600;font-size:15px;box-shadow:var(--sombra);display:flex;align-items:center;gap:8px;min-height:44px}
+.fab{position:fixed;right:16px;bottom:104px;z-index:2147483001;background:var(--acc);color:#fff;border-radius:999px;padding:12px 18px;font-weight:600;font-size:15px;box-shadow:var(--sombra);display:flex;align-items:center;gap:8px;min-height:44px}
 .fab .p{width:9px;height:9px;border-radius:50%;background:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.35)}
 .card{background:var(--panel);border:1px solid var(--linea);border-radius:14px;padding:16px 18px;min-width:0}
 .cifra{display:flex;gap:16px;align-items:center}
@@ -150,9 +150,10 @@ td .celda{display:inline-block;min-width:44px;padding:2px 6px;border-radius:5px}
 .nodo-btn{cursor:pointer}
 .spark{width:100%;height:auto;display:block}
 .dual{display:flex;height:12px;border-radius:6px;overflow:hidden;margin-top:6px}
-.velo{position:fixed;inset:0;background:rgba(40,40,39,.35);z-index:20;display:none}
+.velo{position:fixed;inset:0;background:rgba(40,40,39,.35);z-index:2147482999;display:none}
 .velo.on{display:block}
-.hoja{position:fixed;left:0;right:0;bottom:0;z-index:21;background:var(--panel);border-radius:20px 20px 0 0;max-height:88vh;display:none;flex-direction:column;box-shadow:var(--sombra)}
+/* Las hojas (DANTE, perfiles, ficha) van por encima de la insignia «Powered by Netlify», que se inyecta abajo a la derecha */
+.hoja{position:fixed;left:0;right:0;bottom:0;z-index:2147483000;background:var(--panel);border-radius:20px 20px 0 0;max-height:88vh;display:none;flex-direction:column;box-shadow:var(--sombra)}
 .hoja.on{display:flex}
 .hoja .asa{width:40px;height:4px;border-radius:2px;background:var(--linea);margin:10px auto 0}
 .hoja .cabh{display:flex;justify-content:space-between;align-items:center;padding:10px 18px 10px;border-bottom:1px solid var(--linea)}
@@ -168,7 +169,7 @@ td .celda{display:inline-block;min-width:44px;padding:2px 6px;border-radius:5px}
 .sug{display:flex;flex-direction:column;gap:6px}
 .sug button{text-align:left;border:1px solid var(--linea);border-radius:12px;padding:10px 14px;font-size:14.5px;min-height:44px;background:var(--panel)}
 .sug button:hover{border-color:var(--acc2)}
-.entrada{display:flex;gap:8px;padding:10px 18px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--linea)}
+.entrada{display:flex;gap:8px;padding:10px 18px calc(66px + env(safe-area-inset-bottom));border-top:1px solid var(--linea)}
 .entrada input{flex:1;font:inherit;font-size:15px;padding:10px 14px;border-radius:999px;border:1px solid var(--linea);background:var(--bg);color:var(--ink);min-height:44px}
 .entrada button{background:var(--acc);color:#fff;border-radius:999px;width:44px;height:44px;font-weight:700}
 .ctx{font-size:12.5px;color:var(--mut);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
