@@ -1,0 +1,16 @@
+{
+  "name": "Devotion2Vote · Sala de Control",
+  "short_name": "D2V Control",
+  "description": "Sala de Control de devotion2vote: motor, cuaderno, bandeja, monitor, DANTE.",
+  "start_url": "/control.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#12151A",
+  "theme_color": "#12151A",
+  "lang": "es",
+  "icons": [
+    { "src": "/assets/icono-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/assets/icono-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
