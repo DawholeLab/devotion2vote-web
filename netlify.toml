@@ -1,6 +1,20 @@
 # devotion2vote-web · sitio estático en Netlify (www.devotion2vote.com)
 [build]
   publish = "."
+# Dirección corta para mandar a los clientes: www.devotion2vote.com/app
+[[redirects]]
+  from = "/app"
+  to = "/app.html"
+  status = 200
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+[[headers]]
+  for = "/*.webmanifest"
+  [headers.values]
+    Cache-Control = "no-cache"
+    Content-Type = "application/manifest+json"
 [[headers]]
   for = "/sala.html"
   [headers.values]
