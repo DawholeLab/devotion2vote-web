@@ -8,11 +8,11 @@
 <title>Mi campaña PRM · Devotion2Vote</title>
 <link rel="icon" href="assets/favicon.png">
 <style>[hidden]{display:none!important}</style>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500;6..96,600&family=Montserrat:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Montserrat:wght@400;500;600;700;800&display=swap">
 <style>
 :root{--bg:#FBF8F4;--bg2:#F3EEE7;--panel:#FFFFFF;--ink:#282827;--mut:#6F6963;--linea:rgba(40,40,39,.14);--acc:#E67C6C;--acc2:#C9614F;--ok:#3F8A5B;--warn:#B9822B;--chip:#EFE7DC;--sombra:0 10px 30px rgba(40,40,39,.10);
 --prm:#1C3F94;--pld:#6B2E8F;--fp:#2E8B57;--prsc:#C8102E;--prd:#F2C11B;
---alofoke:#3B6FC4;--leonel:#2E8B57;--collado:#D9822B;--omar:#7A5BB5;--carolina:#C9477E;--gonzalo:#8C6D3F;--abel:#5B8C8C;--ramfis:#6F6963;--otros:#A39D95;--abst:#C9C2B8;--abinader:#1C3F94;--nuevos:#2F8C8C;--margarita:#B05A8F;--raquel:#4C8CC7;--guido:#8A7F3C;--moreno:#5A5A9A;--vargas:#C9A227;--castillo:#6B2E8F;
+--alofoke:#3B6FC4;--leonel:#2E8B57;--collado:#D9822B;--omar:#7A5BB5;--carolina:#C9477E;--gonzalo:#8C6D3F;--abel:#5B8C8C;--ramfis:#6F6963;--otros:#A39D95;--abst:#C9C2B8;--abinader:#1C3F94;--nuevos:#2F8C8C;--margarita:#B05A8F;--raquel:#4C8CC7;--guido:#8A7F3C;--moreno:#5A5A9A;--vargas:#C9A227;--castillo:#6B2E8F;--ap:#3A7D44;--pc:#B5651D;
 --duro:#282827;--retener:#C9614F;--conquistar:#B9822B;--movilizar:#2F8C8C}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#171614;--bg2:#1F1D1A;--panel:#232019;--ink:#F1ECE4;--mut:#B3ACA3;--linea:rgba(241,236,228,.16);--acc:#F09484;--acc2:#E67C6C;--ok:#7CC496;--warn:#E0B060;--chip:#2E2A24;--sombra:0 10px 30px rgba(0,0,0,.35);--prm:#6E8FE0;--pld:#B08AD6;--fp:#7CC496;--alofoke:#7FA6E6;--leonel:#7CC496;--collado:#EBA463;--omar:#A98BE0;--carolina:#E07AA8;--gonzalo:#B89A6A;--abel:#86B8B8;--ramfis:#B3ACA3;--otros:#8C867E;--abst:#4A453E;--abinader:#6E8FE0;--nuevos:#6FC2C2;--margarita:#D48FC0;--raquel:#7FB0E0;--guido:#BDB06A;--moreno:#9A9AD0;--vargas:#E0C25A;--castillo:#B08AD6;--duro:#F1ECE4;--retener:#F09484;--conquistar:#E0B060;--movilizar:#6FC2C2}}
 :root[data-theme="dark"]{--bg:#171614;--bg2:#1F1D1A;--panel:#232019;--ink:#F1ECE4;--mut:#B3ACA3;--linea:rgba(241,236,228,.16);--acc:#F09484;--acc2:#E67C6C;--ok:#7CC496;--warn:#E0B060;--chip:#2E2A24;--sombra:0 10px 30px rgba(0,0,0,.35);--prm:#6E8FE0;--pld:#B08AD6;--fp:#7CC496;--alofoke:#7FA6E6;--leonel:#7CC496;--collado:#EBA463;--omar:#A98BE0;--carolina:#E07AA8;--gonzalo:#B89A6A;--abel:#86B8B8;--ramfis:#B3ACA3;--otros:#8C867E;--abst:#4A453E;--abinader:#6E8FE0;--nuevos:#6FC2C2;--margarita:#D48FC0;--raquel:#7FB0E0;--guido:#BDB06A;--moreno:#9A9AD0;--vargas:#E0C25A;--castillo:#B08AD6;--duro:#F1ECE4;--retener:#F09484;--conquistar:#E0B060;--movilizar:#6FC2C2}
@@ -20,7 +20,8 @@
 [hidden]{display:none!important}
 html,body{margin:0;background:var(--bg);color:var(--ink)}
 body{font-family:Montserrat,Arial,system-ui,sans-serif;font-size:16px;line-height:1.5;font-variant-numeric:tabular-nums;padding-block:0}
-h1,h2,h3,.num{font-family:"Bodoni Moda",Georgia,serif;font-weight:500;line-height:1.1;margin:0;text-wrap:balance}
+h1,h2,h3{font-family:Lora,Georgia,serif;font-weight:600;line-height:1.1;margin:0;text-wrap:balance}
+.num,.cifra .num,.fila .n,.publico .n,.cruce .b em,.cand .pc,.toma .c .pc,.flecha .val b,.ctrl .ola-txt,.msg .num{font-family:Montserrat,Arial,sans-serif!important;font-weight:700;font-variant-numeric:tabular-nums lining-nums;letter-spacing:-.01em}
 h1{font-size:28px}h2{font-size:22px}h3{font-size:18px}
 p{margin:0}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
@@ -37,7 +38,7 @@ header.cab{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1p
 .cab .sub{font-size:13px;color:var(--mut)}
 .foto{border-radius:50%;object-fit:cover;display:block;background:var(--chip);flex:0 0 auto}
 .foto.b{box-shadow:0 0 0 3px var(--panel),0 0 0 5px var(--c,var(--prm))}
-.ini{border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-family:"Bodoni Moda",Georgia,serif;font-weight:500;color:#fff;background:var(--c,var(--otros));flex:0 0 auto}
+.ini{border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-family:Lora,Georgia,serif;font-weight:500;color:#fff;background:var(--c,var(--otros));flex:0 0 auto}
 main{padding:18px 16px 96px;max-width:860px;width:100%;min-width:0;margin:0 auto;display:flex;flex-direction:column;gap:18px}
 .pantalla{display:none;flex-direction:column;gap:18px}
 .pantalla.activa{display:flex}
@@ -49,7 +50,7 @@ nav.barra button.on{color:var(--acc2)}
 .fab .p{width:9px;height:9px;border-radius:50%;background:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.35)}
 .card{background:var(--panel);border:1px solid var(--linea);border-radius:14px;padding:16px 18px;min-width:0}
 .cifra{display:flex;gap:16px;align-items:center}
-.cifra .num{font-size:52px;line-height:1;letter-spacing:-.01em}
+.cifra .num{font-size:50px;line-height:1;letter-spacing:-.02em}
 .cifra .num small{font-size:22px;color:var(--mut);font-family:inherit}
 .fuente{font-size:13px;color:var(--mut);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .fuente button,.enlace{color:var(--acc2);font-weight:600;text-decoration:underline;text-underline-offset:3px;font-size:inherit}
@@ -57,14 +58,14 @@ nav.barra button.on{color:var(--acc2)}
 .delta.up{color:var(--ok)}.delta.down{color:var(--acc2)}
 .fila{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:9px 0;border-bottom:1px solid var(--linea)}
 .fila:last-child{border-bottom:0}
-.fila .n{font-family:"Bodoni Moda",Georgia,serif;font-size:19px;white-space:nowrap}
+.fila .n{font-family:Lora,Georgia,serif;font-size:19px;white-space:nowrap}
 .barra-h{height:8px;border-radius:4px;background:var(--chip);overflow:hidden;margin-top:6px}
 .barra-h i{display:block;height:100%;border-radius:4px}
 .hallazgo{border-left:3px solid var(--acc);padding:2px 0 2px 14px;display:flex;flex-direction:column;gap:3px}
-.hallazgo b{font-family:"Bodoni Moda",Georgia,serif;font-weight:500;font-size:18px}
+.hallazgo b{font-family:Lora,Georgia,serif;font-weight:500;font-size:18px}
 .hallazgo .g{font-size:13px;color:var(--mut)}
 .publico{border-radius:14px;padding:16px 18px;background:var(--panel);border:1px solid var(--linea);border-top:4px solid var(--c);display:flex;flex-direction:column;gap:8px}
-.publico .n{font-family:"Bodoni Moda",Georgia,serif;font-size:32px;line-height:1}
+.publico .n{font-family:Lora,Georgia,serif;font-size:32px;line-height:1}
 .publico .q{font-size:13.5px;color:var(--mut)}
 .publico .sub{display:flex;flex-direction:column;gap:4px;margin-top:4px;padding-top:8px;border-top:1px dashed var(--linea);font-size:13.5px}
 .publico .sub span{display:flex;justify-content:space-between;gap:8px}
@@ -108,7 +109,7 @@ td .celda{display:inline-block;min-width:44px;padding:2px 6px;border-radius:5px}
 .cruce .r:last-child{border-bottom:0}
 .cruce .r.h{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);font-weight:600}
 .cruce .b{display:flex;flex-direction:column;gap:3px}
-.cruce .b em{font-style:normal;font-family:"Bodoni Moda",Georgia,serif;font-size:17px}
+.cruce .b em{font-style:normal;font-family:Lora,Georgia,serif;font-size:17px}
 .cruce .b i{display:block;height:7px;border-radius:4px}
 .cruce .b small{color:var(--mut);font-size:12px}
 .vacio{padding:24px;text-align:center;color:var(--mut);border:1px dashed var(--linea);border-radius:14px}
@@ -118,7 +119,7 @@ td .celda{display:inline-block;min-width:44px;padding:2px 6px;border-radius:5px}
 .cand.yo{background:var(--bg2);border-color:var(--prm)}
 .cand .info{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
 .cand .nombre{font-weight:600;font-size:14px;line-height:1.2}
-.cand .pc{font-family:"Bodoni Moda",Georgia,serif;font-size:30px;line-height:1}
+.cand .pc{font-family:Lora,Georgia,serif;font-size:30px;line-height:1}
 .cand .e{font-size:12.5px;color:var(--mut)}
 .cand .tu{position:absolute;top:8px;right:10px;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--prm)}
 .pos{position:absolute;left:8px;top:8px;width:20px;height:20px;border-radius:50%;background:var(--ink);color:var(--bg);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
@@ -126,11 +127,11 @@ td .celda{display:inline-block;min-width:44px;padding:2px 6px;border-radius:5px}
 .ctrl .rb{width:40px;height:40px;border-radius:50%;background:var(--chip);display:inline-flex;align-items:center;justify-content:center;font-size:16px;flex:0 0 auto}
 .ctrl .rb.play{background:var(--ink);color:var(--bg)}
 .ctrl input[type=range]{flex:1;min-width:140px;accent-color:var(--acc2)}
-.ctrl .ola-txt{font-family:"Bodoni Moda",Georgia,serif;font-size:20px;min-width:130px}
+.ctrl .ola-txt{font-family:Lora,Georgia,serif;font-size:20px;min-width:130px}
 .toma{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:10px}
 .toma .c{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;padding:10px 6px;border-radius:12px;border:1px solid var(--linea);background:var(--panel)}
 .toma .c.yo{background:var(--bg2);border-color:var(--prm)}
-.toma .c .pc{font-family:"Bodoni Moda",Georgia,serif;font-size:26px;line-height:1}
+.toma .c .pc{font-family:Lora,Georgia,serif;font-size:26px;line-height:1}
 .toma .c .nm{font-size:12px;font-weight:600;line-height:1.15}
 .toma .c .d{font-size:12px;font-weight:600}
 .toma .c .d.up{color:var(--ok)}.toma .c .d.down{color:var(--acc2)}
@@ -144,7 +145,7 @@ td .celda{display:inline-block;min-width:44px;padding:2px 6px;border-radius:5px}
 .flecha .bar{height:14px;border-radius:0 7px 7px 0;margin-top:5px;position:relative}
 .flecha .bar:after{content:"";position:absolute;right:-8px;top:-4px;border-left:10px solid var(--cc);border-top:11px solid transparent;border-bottom:11px solid transparent}
 .flecha .val{text-align:right;min-width:96px;max-width:46%;flex:0 0 auto}
-.flecha .val b{font-family:"Bodoni Moda",Georgia,serif;font-weight:500;font-size:22px;display:block;line-height:1}
+.flecha .val b{font-family:Lora,Georgia,serif;font-weight:500;font-size:22px;display:block;line-height:1}
 .flecha .val small{color:var(--mut);font-size:12px;display:block;line-height:1.3}
 .nodo-btn{cursor:pointer}
 .spark{width:100%;height:auto;display:block}
@@ -176,7 +177,7 @@ td .celda{display:inline-block;min-width:44px;padding:2px 6px;border-radius:5px}
 .ficha dt{color:var(--mut)}.ficha dd{margin:0}
 #acceso{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px;background:var(--bg)}
 #acceso .caja{width:100%;max-width:380px;background:var(--panel);border:1px solid var(--linea);border-radius:18px;padding:28px 26px;box-shadow:var(--sombra);display:flex;flex-direction:column;gap:12px}
-#acceso .marca{font-family:"Bodoni Moda",Georgia,serif;font-size:26px;line-height:1.1}
+#acceso .marca{font-family:Lora,Georgia,serif;font-size:26px;line-height:1.1}
 #acceso .marca small{display:block;font-family:Montserrat,sans-serif;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin-top:4px}
 #acceso label{font-size:12.5px;font-weight:600;color:var(--mut);display:flex;flex-direction:column;gap:5px}
 #acceso input{font:inherit;font-size:16px;padding:11px 14px;border-radius:10px;border:1px solid var(--linea);background:var(--bg);color:var(--ink);min-height:44px;width:100%}
@@ -188,7 +189,7 @@ td .celda{display:inline-block;min-width:44px;padding:2px 6px;border-radius:5px}
   .demo{grid-column:1/-1}
   header.cab{grid-column:2;position:static;border:0;padding:26px 40px 0;max-width:940px}
   aside.rail{grid-column:1;grid-row:2/4;border-right:1px solid var(--linea);padding:26px 18px;display:flex;flex-direction:column;gap:6px;position:sticky;top:0;height:100vh}
-  aside.rail .marca{font-family:"Bodoni Moda",Georgia,serif;font-size:20px;margin-bottom:18px;padding:0 10px}
+  aside.rail .marca{font-family:Lora,Georgia,serif;font-size:20px;margin-bottom:18px;padding:0 10px}
   aside.rail .marca small{display:block;font-family:Montserrat,sans-serif;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin-top:2px}
   aside.rail button{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;font-weight:600;font-size:15px;color:var(--mut);min-height:44px;text-align:left}
   aside.rail button.on{background:var(--panel);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.06)}
@@ -266,6 +267,7 @@ td .celda{display:inline-block;min-width:44px;padding:2px 6px;border-radius:5px}
     <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:12px"><span class="lab">Estimación de voto · <span id="hoy-ola-e"></span></span><span class="small mut" id="hoy-e-urna">Ajustada a los resultados reales · % sobre votos válidos</span></div>
     <div class="voto" id="hoy-voto"></div>
     <p class="small mut" id="hoy-voto-txt" style="margin-top:12px"></p>
+    <div class="acciones" style="margin-top:12px"><button class="btn sec chico" data-hoja="perfiles">Perfiles electorales</button><span class="small mut" style="align-self:center">prototipos de electores a los que dirigirse, a partir de esta estimación</span></div>
   </div>
 
   <div class="grid2">
@@ -301,7 +303,7 @@ td .celda{display:inline-block;min-width:44px;padding:2px 6px;border-radius:5px}
   </div>
   <div class="chips" id="series-chips">
     <button class="chip on" data-s="aprob">Aprobación del gobierno</button>
-    <button class="chip" data-s="ajustada">Estimación ajustada</button>
+    <button class="chip" data-s="ajustada">Estimación electoral</button>
     <button class="chip" data-s="declarada">Intención declarada</button>
     <button class="chip" data-s="careo">Cara a cara</button>
     <button class="chip" data-s="partido">Partidos</button>
@@ -505,6 +507,17 @@ td .celda{display:inline-block;min-width:44px;padding:2px 6px;border-radius:5px}
   <form class="entrada" id="form-dante"><input id="dante-in" placeholder="Pregunte a DANTE…" autocomplete="off" aria-label="Pregunte a DANTE"><button type="submit" aria-label="Enviar">↑</button></form>
 </div>
 
+<div class="hoja ficha" id="hoja-perfiles" role="dialog" aria-label="Perfiles electorales">
+  <div class="asa"></div>
+  <div class="cabh"><h3>Perfiles electorales</h3><button class="cerrar" data-cerrar aria-label="Cerrar">×</button></div>
+  <div class="cuerpo">
+    <p>A partir de la estimación y de la matriz de transferencia, el sistema construye <b>prototipos de electores</b>: quiénes son, dónde están, qué les mueve y cómo se les habla. Cada prototipo lleva su tamaño en electores, su territorio, su origen de voto y su lectura estratégica.</p>
+    <div class="grid2" id="perfiles-base"></div>
+    <p class="small mut">Los cuatro públicos (voto duro · a retener · a conquistar · a movilizar) salen del paso de públicos objetivo de la última encuesta con voto anterior. Los prototipos por segmento, subsegmento y microsegmento se construyen con la segmentación LOCUS y se entregan como informe.</p>
+    <div class="acciones"><button class="btn" id="pedir-perfiles">Pedir perfiles electorales</button></div>
+    <p class="small mut" id="perfiles-msg"></p>
+  </div>
+</div>
 <div class="hoja ficha" id="hoja-ficha" role="dialog" aria-label="Ficha técnica">
   <div class="asa"></div>
   <div class="cabh"><h3>Ficha técnica</h3><button class="cerrar" data-cerrar aria-label="Cerrar">×</button></div>
@@ -581,9 +594,9 @@ let TOK=null,YO=null;
 
   function arrancar(){
   /* ---------- diccionario ---------- */
-  const C={prm:'var(--prm)',pld:'var(--pld)',fp:'var(--fp)',prsc:'var(--prsc)',prd:'var(--prd)',raquel:'var(--raquel)',alofoke:'var(--alofoke)',leonel:'var(--leonel)',collado:'var(--collado)',omar:'var(--omar)',carolina:'var(--carolina)',gonzalo:'var(--gonzalo)',abel:'var(--abel)',ramfis:'var(--ramfis)',otros:'var(--otros)',abst:'var(--abst)',abinader:'var(--abinader)',nuevos:'var(--nuevos)',margarita:'var(--margarita)',guido:'var(--guido)',moreno:'var(--moreno)',vargas:'var(--vargas)',castillo:'var(--castillo)',fjavier:'var(--gonzalo)',brito:'var(--otros)',wellington:'var(--otros)',yayo:'var(--otros)',ito:'var(--otros)','peña_guaba':'var(--otros)',hipolito:'var(--otros)',danilo:'var(--pld)',roque:'var(--otros)',nadie:'var(--abst)'};
-  const CAND={prm:'PRM',pld:'PLD',fp:'Fuerza del Pueblo',prsc:'PRSC',prd:'PRD',raquel:'Raquel Peña',alofoke:'Santiago Matías Alofoke',leonel:'Leonel Fernández',collado:'David Collado',omar:'Omar Fernández',carolina:'Carolina Mejía',gonzalo:'Gonzalo Castillo',abel:'Abel Martínez',ramfis:'Ramfis Trujillo',otros:'Otros',abst:'Abstención',abinader:'Luis Abinader',nuevos:'Nuevos votantes',margarita:'Margarita Cedeño',guido:'Guido Gómez Mazara',moreno:'Guillermo Moreno',vargas:'Miguel Vargas',castillo:'Gonzalo Castillo',fjavier:'Francisco Javier García',brito:'Francisco Domínguez Brito',wellington:'Wellington Arnaud',yayo:'Yayo Sanz Lovatón',ito:'Ito Bisonó','peña_guaba':'Tony Peña Guaba',hipolito:'Hipólito Mejía',danilo:'Danilo Medina',roque:'Roque Espaillat',nadie:'Ninguno / no sabe'};
-  const CORTO={prm:'PRM',pld:'PLD',fp:'FP',prsc:'PRSC',prd:'PRD',raquel:'Raquel P.',alofoke:'Alofoke',leonel:'Leonel',collado:'Collado',omar:'Omar F.',carolina:'Carolina M.',gonzalo:'Gonzalo C.',abel:'Abel M.',ramfis:'Ramfis T.',otros:'Otros',abst:'Abstención',abinader:'Abinader',nuevos:'Nuevos',margarita:'Margarita C.',guido:'Guido G.',moreno:'G. Moreno',vargas:'M. Vargas',castillo:'G. Castillo',fjavier:'F. Javier',brito:'D. Brito',wellington:'Wellington',yayo:'Yayo S.',ito:'Ito B.','peña_guaba':'Peña Guaba',hipolito:'Hipólito',danilo:'Danilo M.',roque:'Roque E.',nadie:'Ninguno'};
+  const C={prm:'var(--prm)',pld:'var(--pld)',fp:'var(--fp)',prsc:'var(--prsc)',prd:'var(--prd)',raquel:'var(--raquel)',alofoke:'var(--alofoke)',leonel:'var(--leonel)',collado:'var(--collado)',omar:'var(--omar)',carolina:'var(--carolina)',gonzalo:'var(--gonzalo)',abel:'var(--abel)',ramfis:'var(--ramfis)',otros:'var(--otros)',abst:'var(--abst)',abinader:'var(--abinader)',nuevos:'var(--nuevos)',margarita:'var(--margarita)',guido:'var(--guido)',moreno:'var(--moreno)',vargas:'var(--vargas)',castillo:'var(--castillo)',ap:'var(--ap)',pc:'var(--pc)',fjavier:'var(--gonzalo)',brito:'var(--otros)',wellington:'var(--otros)',yayo:'var(--otros)',ito:'var(--otros)','peña_guaba':'var(--otros)',hipolito:'var(--otros)',danilo:'var(--pld)',roque:'var(--otros)',nadie:'var(--abst)'};
+  const CAND={prm:'PRM',pld:'PLD',fp:'Fuerza del Pueblo',prsc:'PRSC',prd:'PRD',raquel:'Raquel Peña',alofoke:'Santiago Matías Alofoke',leonel:'Leonel Fernández',collado:'David Collado',omar:'Omar Fernández',carolina:'Carolina Mejía',gonzalo:'Gonzalo Castillo',abel:'Abel Martínez',ramfis:'Ramfis Trujillo',otros:'Otros',abst:'Abstención',abinader:'Luis Abinader',nuevos:'Nuevos votantes',margarita:'Margarita Cedeño',guido:'Guido Gómez Mazara',moreno:'Guillermo Moreno',vargas:'Miguel Vargas',castillo:'Gonzalo Castillo',ap:'Alianza País',pc:'País Posible',fjavier:'Francisco Javier García',brito:'Francisco Domínguez Brito',wellington:'Wellington Arnaud',yayo:'Yayo Sanz Lovatón',ito:'Ito Bisonó','peña_guaba':'Tony Peña Guaba',hipolito:'Hipólito Mejía',danilo:'Danilo Medina',roque:'Roque Espaillat',nadie:'Ninguno / no sabe'};
+  const CORTO={prm:'PRM',pld:'PLD',fp:'FP',prsc:'PRSC',prd:'PRD',raquel:'Raquel P.',alofoke:'Alofoke',leonel:'Leonel',collado:'Collado',omar:'Omar F.',carolina:'Carolina M.',gonzalo:'Gonzalo C.',abel:'Abel M.',ramfis:'Ramfis T.',otros:'Otros',abst:'Abstención',abinader:'Abinader',nuevos:'Nuevos',margarita:'Margarita C.',guido:'Guido G.',moreno:'G. Moreno',vargas:'M. Vargas',castillo:'G. Castillo',ap:'AP',pc:'PC',fjavier:'F. Javier',brito:'D. Brito',wellington:'Wellington',yayo:'Yayo S.',ito:'Ito B.','peña_guaba':'Peña Guaba',hipolito:'Hipólito',danilo:'Danilo M.',roque:'Roque E.',nadie:'Ninguno'};
   const CARGO={abinader:'Presidente de la República · PRM',raquel:'Vicepresidenta de la República · PRM',collado:'Ministro de Turismo · PRM',carolina:'Alcaldesa del Distrito Nacional · PRM',guido:'PRM',wellington:'PRM'};
   const PRMS=new Set(['abinader','collado','carolina','raquel','guido','wellington','yayo','ito','peña_guaba','hipolito','prm']);
   const ORI={ABINADIER:{k:'abinader',n:'Abinader 2024'},ABINADER:{k:'abinader',n:'Abinader 2020'},LEONEL:{k:'leonel',n:'Leonel'},ABEL:{k:'abel',n:'Abel 2024'},CASTILLO:{k:'castillo',n:'G. Castillo 2020'},MORENO:{k:'moreno',n:'G. Moreno 2020'},'OT+BL':{k:'otros',n:'Otros y blancos'},'ABST+NUL':{k:'abst',n:'No votó'},'>18':{k:'nuevos',n:'Nuevos votantes'}};
@@ -676,7 +689,7 @@ let TOK=null,YO=null;
    });
    seguro('estimación',()=>{
     const oe=ultimo(DATA.ajustada), E=DATA.ajustada[oe], pe=anterior(DATA.ajustada,oe); document.getElementById('hoy-ola-e').textContent=nomOla(oe).toLowerCase();
-    document.getElementById('hoy-e-urna').textContent='Ajustada a los resultados reales de '+(E.urna||'2024')+' · % sobre votos válidos';
+    document.getElementById('hoy-e-urna').innerHTML='Ajustada a los resultados reales de '+(E.urna||'2024')+' · % sobre votos válidos'+(E.tp?` · <b class="num" style="font-size:15px;color:var(--ink)">Participación estimada ${p1(E.tp)} %</b>`:'');
     const ordE=Object.entries(E.pct).filter(([k,v])=>v!=null&&k!=='otros').sort((a,b)=>b[1]-a[1]).slice(0,3);
     document.getElementById('hoy-voto').innerHTML=ordE.map(([k,v],i)=>{const prev=pe&&DATA.ajustada[pe].pct[k];return `<div class="cand ${PRMS.has(k)?'yo':''}"><span class="pos">${i+1}</span>${PRMS.has(k)?'<span class="tu">PRM</span>':''}${foto(k,56)}<div class="info"><span class="nombre">${CAND[k]}</span><span class="pc">${pct(v)}</span><span class="e">${fmt(E.tot[k])} electores${prev!=null?' · en '+nomCorto(pe)+' '+pct(prev):''}</span></div></div>`}).join('');
     const col=E.pct[candPRM], todos=Object.entries(E.pct).filter(([k,v])=>v!=null&&k!=='otros'&&k!=='abst').sort((a,b)=>b[1]-a[1]), pos=todos.findIndex(([k])=>k===candPRM)+1;
@@ -721,7 +734,7 @@ let TOK=null,YO=null;
   let serie='aprob', sub=null, idx=0, timer=null, S=null, ocultas=new Set();
   const DESC={
     aprob:'Aprobación del gobierno del presidente Luis Abinader: «¿aprueba o desaprueba el gobierno?». Porcentaje sobre el total de entrevistados. Existe en casi todas las encuestas desde mayo de 2021.',
-    ajustada:'Cifra final de cada encuesta que preguntó el voto de la presidencial anterior: ajustada a los resultados oficiales (2020 hasta abril de 2024, 2024 después) y con los indecisos repartidos. Porcentaje sobre votos válidos.',
+    ajustada:'Serie oficial de estimación electoral de la Sala de Control. Cifra final de cada encuesta que preguntó el voto de la presidencial anterior: ajustada a los resultados oficiales (2020 hasta abril de 2024, 2024 después) y con los indecisos repartidos. Porcentaje sobre votos válidos.',
     declarada:'Respuesta directa a «si las elecciones fuesen mañana, ¿por quién votaría?» con la lista más completa de candidatos de cada encuesta. Porcentaje sobre el total de entrevistados, sin ajustar. Los candidatos cambian con el tiempo: hasta 2024 la pregunta era sobre la reelección de Abinader; desde 2025, sobre la sucesión.',
     careo:'Si solo estuvieran los dos, ¿por quién votaría? Porcentaje sobre el total de entrevistados.',
     partido:'Hasta septiembre de 2024: «si tuviera que votar por un partido, ¿por cuál votaría?». Desde noviembre de 2024: «¿de qué partido debería ser el presidente en 2028?». Porcentaje sobre el total de entrevistados.',
@@ -737,7 +750,7 @@ let TOK=null,YO=null;
   function prepara(){
     const s=serie; let olas=[],lineas=[],val={},titulo='',nota='',unidad='%';
     if(s==='aprob'){olas=Object.keys(DATA.aprob).sort();lineas=['aprueba','desaprueba'];olas.forEach(o=>val[o]={aprueba:DATA.aprob[o].a,desaprueba:DATA.aprob[o].d});titulo='Aprobación del gobierno';nota='El resto hasta 100 no sabe o no responde.';}
-    else if(s==='ajustada'){olas=Object.keys(DATA.ajustada).sort();const cnt={};olas.forEach(o=>Object.entries(DATA.ajustada[o].pct).forEach(([k,v])=>{if(v!=null&&k!=='otros'&&k!=='abst')cnt[k]=Math.max(cnt[k]||0,v)}));lineas=Object.entries(cnt).filter(([k,v])=>v>=3).sort((a,b)=>b[1]-a[1]).map(x=>x[0]);olas.forEach(o=>{val[o]={};lineas.forEach(k=>{const v=DATA.ajustada[o].pct[k];if(v!=null)val[o][k]=v})});titulo='Estimación ajustada';nota='Solo las encuestas que preguntan el voto anterior. Hasta abril de 2024 se ajusta a la presidencial de 2020; desde junio de 2024, a la de 2024.';}
+    else if(s==='ajustada'){const SRC=vacio(DATA.serie)?null:DATA.serie; const F=SRC||DATA.ajustada; olas=Object.keys(F).sort();const cnt={};olas.forEach(o=>Object.entries(F[o].pct).forEach(([k,v])=>{if(v!=null&&k!=='otros'&&k!=='abst')cnt[k]=Math.max(cnt[k]||0,v)}));lineas=Object.entries(cnt).filter(([k,v])=>v>=3).sort((a,b)=>b[1]-a[1]).map(x=>x[0]);olas.forEach(o=>{val[o]={};lineas.forEach(k=>{const v=F[o].pct[k];if(v!=null)val[o][k]=v});if(F[o].tipo)val[o]._tipo=F[o].tipo;if(F[o].tp!=null)val[o]._tp=F[o].tp});titulo=SRC?'Estimación electoral':'Estimación ajustada';nota=SRC?'La misma serie que ve la dirección en la Sala de Control: en las encuestas que preguntan el voto anterior, la estimación anclada al resultado real; en las demás, la intención declarada corregida con la desviación media aprendida en el mismo ciclo. El cuadro de cada toma indica cuál es.':'Solo las encuestas que preguntan el voto anterior. Hasta abril de 2024 se ajusta a la presidencial de 2020; desde junio de 2024, a la de 2024.';}
     else if(s==='declarada'){olas=Object.keys(DATA.intencion).sort();const cnt={};olas.forEach(o=>Object.entries(DATA.intencion[o].pct).forEach(([k,v])=>{if(k!=='otros')cnt[k]=Math.max(cnt[k]||0,v)}));lineas=Object.entries(cnt).filter(([k,v])=>v>=5).sort((a,b)=>b[1]-a[1]).map(x=>x[0]);olas.forEach(o=>{val[o]={};lineas.forEach(k=>{const v=DATA.intencion[o].pct[k];if(v!=null)val[o][k]=v});val[o].nadie=DATA.intencion[o].nadie});titulo='Intención de voto declarada';nota='Incluye en el total a quienes no votarían por nadie o no saben. Un candidato solo aparece cuando estaba en la lista de esa encuesta.';}
     else if(s==='careo'){sub=(sub&&DATA.careos[sub])?sub:PAR;const cd=DATA.careos[sub]||{};olas=Object.keys(cd).sort();lineas=sub.split('|');olas.forEach(o=>val[o]={...cd[o]});titulo='Cara a cara: '+lineas.map(k=>CAND[k]).join(' frente a ');nota='El resto hasta 100 no votaría por ninguno o no sabe.';}
     else if(s==='partido'){olas=Object.keys(DATA.partido).sort();lineas=['PRM','PLD','FP','PRSC'];olas.forEach(o=>{val[o]={};lineas.forEach(k=>{const v=DATA.partido[o].pct[k];if(v!=null)val[o][k]=v})});titulo='Partidos';const tipos=[...new Set(olas.map(o=>DATA.partido[o].tipo))];nota=tipos.length>1?'Dos preguntas distintas: voto por partido hasta 2024 y partido que debería gobernar en 2028 desde noviembre de 2024. La línea vertical de puntos marca el cambio.':tipoPartido(tipos[0])+' · sobre el total de entrevistados.';}
@@ -776,17 +789,18 @@ let TOK=null,YO=null;
     });
     const labs=separar(lineas.filter(k=>S.val[olas[idx]][k]!=null).map(k=>({k,y:ys(S.val[olas[idx]][k])})),14);
     const der=idx>n*0.6;
-    labs.forEach(l=>{g+=`<text x="${xs(idx)+(der?-12:12)}" y="${l.y+4}" text-anchor="${der?'end':'start'}" font-size="12" font-weight="600" fill="${colorDe(l.k)}" font-family="Bodoni Moda,Georgia,serif">${p1(S.val[olas[idx]][l.k])}${n>1&&lineas.length>1?' '+(CORTO[l.k.toLowerCase()]||l.k):''}</text>`;});
+    labs.forEach(l=>{g+=`<text x="${xs(idx)+(der?-12:12)}" y="${l.y+4}" text-anchor="${der?'end':'start'}" font-size="12" font-weight="600" fill="${colorDe(l.k)}" font-family="Montserrat,Arial,sans-serif" font-weight="700">${p1(S.val[olas[idx]][l.k])}${n>1&&lineas.length>1?' '+(CORTO[l.k.toLowerCase()]||l.k):''}</text>`;});
     svg.innerHTML=g;
     document.getElementById('ev-ola').textContent=nomOla(olas[idx]);
     document.getElementById('ev-range').value=idx;
     const o=olas[idx], prev=idx>0?olas[idx-1]:null;
     document.getElementById('toma-lab').textContent='Cuadro de la toma · '+nomOla(o)+' · '+S.titulo;
-    const orden=S.lineas.filter(k=>S.val[o][k]!=null).sort((a,b)=>(S.val[o][b]||0)-(S.val[o][a]||0));
+    const orden=S.lineas.filter(k=>!k.startsWith('_')&&S.val[o][k]!=null).sort((a,b)=>(S.val[o][b]||0)-(S.val[o][a]||0));
     document.getElementById('toma').innerHTML=orden.map(k=>{const v=S.val[o][k];const pv=prev?S.val[prev][k]:null;const dv=pv!=null?v-pv:null;const kk=k.toLowerCase();const esP=gruesa(k);
       const cab=(POS.has(kk)||NEG.has(kk))?`<span class="ini" style="width:56px;height:56px;font-size:20px;--c:${colorDe(k)}">${POS.has(kk)?'✓':'✕'}</span>`:(kk==='prm'?foto('prm',56):(['pld','fp','prsc','prd'].includes(kk)?`<span class="ini" style="width:56px;height:56px;font-size:16px;--c:${C[kk]}">${k}</span>`:foto(kk,56)));
       return `<div class="c ${esP?'yo':''}">${cab}<span class="nm">${nomLinea(k)}</span><span class="pc">${pct(v)}</span>${dv===null?'<span class="d mut">'+(prev?'no estaba':'primera toma')+'</span>':`<span class="d ${dv>0?'up':dv<0?'down':''}">${dv>0?'▲ +':dv<0?'▼ ':''}${p1(dv)} desde ${nomCorto(prev)}</span>`}</div>`}).join('')+(S.val[o].nadie!=null&&!['aprob','eval','rumbo','econ'].includes(serie)?`<div class="c"><span class="ini" style="width:56px;height:56px;font-size:22px;--c:var(--otros)">—</span><span class="nm">Ninguno / no sabe</span><span class="pc">${pct(S.val[o].nadie)}</span></div>`:'');
-    document.getElementById('toma-nota').textContent=S.nota+(DATA.intencion[o]&&serie==='declarada'?` Esta encuesta ofrecía ${DATA.intencion[o].k} nombres.`:'');
+    const tipoT={estimacion:'Estimación anclada al voto real (esta encuesta preguntó el voto anterior).',ajustada:'Intención declarada corregida con la desviación media del ciclo (esta encuesta no preguntó el voto anterior).',directa:'Intención declarada sin corregir: aún no hay dos encuestas con estimación en este ciclo.'}[S.val[o]._tipo]||'';
+    document.getElementById('toma-nota').textContent=(tipoT?tipoT+' ':'')+(S.val[o]._tp!=null?`Participación estimada ${p1(S.val[o]._tp)} %. `:'')+S.nota+(DATA.intencion[o]&&serie==='declarada'?` Esta encuesta ofrecía ${DATA.intencion[o].k} nombres.`:'');
   }
   const svgL=document.getElementById('linea'), tt=document.getElementById('tt');
   svgL.addEventListener('mousemove',e=>{const p=e.target.closest('.pt'); if(!p){tt.style.display='none';return;} const c=p.dataset.c,i=+p.dataset.i; tt.textContent=(CAND[c.toLowerCase()]||c)+' · '+nomOla(S.olas[i])+' · '+pct(S.val[S.olas[i]][c]); const r=svgL.getBoundingClientRect(); tt.style.left=(e.clientX-r.left)+'px'; tt.style.top=(e.clientY-r.top)+'px'; tt.style.display='block';});
@@ -948,6 +962,26 @@ let TOK=null,YO=null;
     if(!cont.querySelector('.solicitud:not([hidden])')){const d=document.createElement('div');d.className='small mut sin-sol';d.textContent='Nada en preparación.';cont.appendChild(d);}
   }
   pintaSolicitudes();
+
+  /* ---------- perfiles electorales ---------- */
+  seguro('perfiles',()=>{
+    const oe=ultimo(DATA.ajustada), E=DATA.ajustada[oe];
+    const kAb=E.cols.find(c=>/ABINAD/.test(c)); const m=E.matriz[candPRM]||{};
+    const tot=E.tot[candPRM]||1; const orig=Object.entries(m).sort((a,b)=>b[1]-a[1]).slice(0,3);
+    document.getElementById('perfiles-base').innerHTML=`<div class="card"><span class="lab">Base · ${nomCorto(oe)}</span><div class="num" style="font-size:26px">${fmt(tot)}</div><div class="small mut">electores que hoy votarían por ${CAND[candPRM]}${E.tp?` · participación ${p1(E.tp)} %`:''}</div></div>`+
+      `<div class="card"><span class="lab">De dónde vienen</span>${orig.map(([k,v])=>`<div class="fila" style="padding:5px 0"><span>${(ORI[k]||{n:k}).n}</span><span class="n" style="font-size:16px">${p1(100*v/tot)} %</span></div>`).join('')}</div>`;
+    const b=document.getElementById('pedir-perfiles');
+    b.addEventListener('click',async()=>{
+      b.disabled=true;b.style.opacity=.6;
+      const msg=document.getElementById('perfiles-msg');
+      if(SITIO&&TOK){
+        try{const r=await fetch(API+'/dv/campana/solicitudes',{method:'POST',headers:{'Authorization':'Bearer '+TOK,'Content-Type':'application/json'},body:JSON.stringify({tipo:'segmentacion',titulo:'Perfiles electorales · '+nomOla(oe),detalle:{ola:oe,candidato:candPRM}})});
+          if(!r.ok) throw new Error('HTTP '+r.status); const j=await r.json(); SALA.solicitudes=j.solicitudes; if(typeof pintaSolicitudes==='function') pintaSolicitudes();
+          msg.textContent='Pedido registrado. La dirección lo prepara y avisa cuando esté en Informes.';
+        }catch(e){b.disabled=false;b.style.opacity=1;msg.textContent='No se pudo enviar. Vuelva a intentarlo.';}
+      } else msg.textContent='Pedido registrado (demostración).';
+    });
+  });
 
   /* ---------- DANTE ---------- */
   const R=(rx,fn,fuente,acc)=>[rx,(()=>{try{return fn()}catch(e){return null}})(),fuente,acc||[]];
