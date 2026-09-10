@@ -384,7 +384,8 @@
   .linea-olas .actual{font-size:13px;font-weight:600;font-family:"Barlow Condensed";letter-spacing:.04em;min-width:120px;text-align:center}
 
   #dante{position:fixed;top:0;right:-390px;width:370px;max-width:92vw;bottom:0;background:var(--panel);
-         border-left:1px solid var(--borde);z-index:8;display:flex;flex-direction:column;transition:right .25s}
+         border-left:1px solid var(--borde);z-index:2147483000;display:flex;flex-direction:column;transition:right .25s;
+         box-shadow:-8px 0 24px rgba(0,0,0,.35)}
   #dante.abierto{right:0}
   #dante .d-cab{display:flex;align-items:center;gap:9px;padding:13px 16px;border-bottom:1px solid var(--borde)}
   #dante .d-cab b{font-family:"Barlow Condensed";font-size:17px;letter-spacing:.05em}
@@ -411,7 +412,9 @@
   .d-nota .fila-n button{border-radius:6px;padding:5px 12px;font-size:11.5px;cursor:pointer}
   .d-nota .si{background:var(--marca);border:1px solid var(--marca);color:#fff}
   .d-nota .no{background:none;border:1px solid var(--borde);color:var(--tinta3)}
-  .d-pie{padding:12px 16px;border-top:1px solid var(--borde);display:flex;gap:8px}
+  /* El pie del chat deja 60 px libres abajo para que la insignia «Powered by Netlify»
+     (que Netlify inyecta en la esquina inferior derecha) no tape la caja de escribir ni el botón Enviar. */
+  .d-pie{padding:12px 16px 66px;border-top:1px solid var(--borde);display:flex;gap:8px}
   .d-pie input{flex:1;background:var(--fondo);border:1px solid var(--borde);border-radius:6px;color:var(--tinta);
                padding:9px 12px;font-size:13px}
   .d-pie button{background:var(--marca);border:none;color:#fff;border-radius:6px;padding:0 16px;font-weight:600}
