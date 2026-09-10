@@ -7,6 +7,11 @@
     Cache-Control = "no-store"
     X-Robots-Tag = "noindex"
 [[headers]]
+  for = "/campana.html"
+  [headers.values]
+    Cache-Control = "no-store"
+    X-Robots-Tag = "noindex"
+[[headers]]
   for = "/*"
   [headers.values]
     X-Frame-Options = "DENY"

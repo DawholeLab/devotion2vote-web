@@ -1,0 +1,805 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#FBF8F4">
+<title>Mi campaña · Devotion2Vote</title>
+<link rel="icon" href="assets/favicon.png">
+<style>[hidden]{display:none!important}</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500;6..96,600&family=Montserrat:wght@400;500;600;700&display=swap">
+<style>
+:root{--bg:#FBF8F4;--bg2:#F3EEE7;--panel:#FFFFFF;--ink:#282827;--mut:#6F6963;--linea:rgba(40,40,39,.14);--acc:#E67C6C;--acc2:#C9614F;--ok:#3F8A5B;--warn:#B9822B;--chip:#EFE7DC;--sombra:0 10px 30px rgba(40,40,39,.10);
+--alofoke:#3B6FC4;--leonel:#2E8B57;--collado:#D9822B;--omar:#7A5BB5;--carolina:#C9477E;--gonzalo:#8C6D3F;--abel:#5B8C8C;--ramfis:#6F6963;--otros:#A39D95;--abst:#C9C2B8;--abinader:#4C8CC7;--nuevos:#2F8C8C;
+--duro:#282827;--retener:#C9614F;--conquistar:#B9822B;--movilizar:#2F8C8C}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#171614;--bg2:#1F1D1A;--panel:#232019;--ink:#F1ECE4;--mut:#B3ACA3;--linea:rgba(241,236,228,.16);--acc:#F09484;--acc2:#E67C6C;--ok:#7CC496;--warn:#E0B060;--chip:#2E2A24;--sombra:0 10px 30px rgba(0,0,0,.35);--alofoke:#7FA6E6;--leonel:#7CC496;--collado:#EBA463;--omar:#A98BE0;--carolina:#E07AA8;--gonzalo:#B89A6A;--abel:#86B8B8;--ramfis:#B3ACA3;--otros:#8C867E;--abst:#4A453E;--abinader:#7FB0E0;--nuevos:#6FC2C2;--duro:#F1ECE4;--retener:#F09484;--conquistar:#E0B060;--movilizar:#6FC2C2}}
+:root[data-theme="dark"]{--bg:#171614;--bg2:#1F1D1A;--panel:#232019;--ink:#F1ECE4;--mut:#B3ACA3;--linea:rgba(241,236,228,.16);--acc:#F09484;--acc2:#E67C6C;--ok:#7CC496;--warn:#E0B060;--chip:#2E2A24;--sombra:0 10px 30px rgba(0,0,0,.35);--alofoke:#7FA6E6;--leonel:#7CC496;--collado:#EBA463;--omar:#A98BE0;--carolina:#E07AA8;--gonzalo:#B89A6A;--abel:#86B8B8;--ramfis:#B3ACA3;--otros:#8C867E;--abst:#4A453E;--abinader:#7FB0E0;--nuevos:#6FC2C2;--duro:#F1ECE4;--retener:#F09484;--conquistar:#E0B060;--movilizar:#6FC2C2}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{font-family:Montserrat,Arial,system-ui,sans-serif;font-size:16px;line-height:1.5;font-variant-numeric:tabular-nums;padding-block:0}
+h1,h2,h3,.num{font-family:"Bodoni Moda",Georgia,serif;font-weight:500;line-height:1.1;margin:0;text-wrap:balance}
+h1{font-size:28px}h2{font-size:22px}h3{font-size:18px}
+p{margin:0}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+button:focus-visible,input:focus-visible{outline:2px solid var(--acc2);outline-offset:2px}
+.lab{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);font-weight:600}
+.mut{color:var(--mut)}.small{font-size:13.5px}
+svg text{font-family:Montserrat,Arial,sans-serif}
+
+/* marco */
+.app{min-height:100vh;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto 1fr auto}
+.demo{background:var(--ink);color:var(--bg);font-size:12.5px;padding:7px 16px;display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;text-align:center}
+.demo b{font-weight:600}
+header.cab{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--linea);padding:12px 16px 10px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.cab .t{display:flex;align-items:center;gap:12px}
+.cab .txt{display:flex;flex-direction:column;gap:1px}
+.cab .sub{font-size:13px;color:var(--mut)}
+.foto{border-radius:50%;object-fit:cover;display:block;background:var(--chip);flex:0 0 auto}
+.foto.b{box-shadow:0 0 0 3px var(--panel),0 0 0 5px var(--c,var(--collado))}
+.ini{border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-family:"Bodoni Moda",Georgia,serif;font-weight:500;color:#fff;background:var(--c,var(--otros));flex:0 0 auto}
+main{padding:18px 16px 96px;max-width:820px;width:100%;min-width:0;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.pantalla{display:none;flex-direction:column;gap:18px}
+.pantalla.activa{display:flex}
+nav.barra{position:fixed;bottom:0;left:0;right:0;background:var(--panel);border-top:1px solid var(--linea);display:flex;justify-content:space-around;padding:6px 2px calc(6px + env(safe-area-inset-bottom));z-index:6}
+nav.barra button{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;font-weight:600;color:var(--mut);min-width:52px;min-height:44px;padding:4px 4px;border-radius:10px}
+nav.barra button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+nav.barra button.on{color:var(--acc2)}
+.fab{position:fixed;right:16px;bottom:84px;z-index:7;background:var(--acc);color:#fff;border-radius:999px;padding:12px 18px;font-weight:600;font-size:15px;box-shadow:var(--sombra);display:flex;align-items:center;gap:8px;min-height:44px}
+.fab .p{width:9px;height:9px;border-radius:50%;background:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.35)}
+
+/* componentes */
+.card{background:var(--panel);border:1px solid var(--linea);border-radius:14px;padding:16px 18px}
+.cifra{display:flex;gap:16px;align-items:center}
+.cifra .num{font-size:54px;line-height:1;letter-spacing:-.01em}
+.cifra .num small{font-size:24px;color:var(--mut);font-family:inherit}
+.fuente{font-size:13px;color:var(--mut);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.fuente button,.enlace{color:var(--acc2);font-weight:600;text-decoration:underline;text-underline-offset:3px;font-size:inherit}
+.delta{display:inline-flex;align-items:center;gap:5px;font-weight:600;font-size:14px;padding:3px 10px;border-radius:999px;background:var(--chip)}
+.delta.up{color:var(--ok)}.delta.down{color:var(--acc2)}
+.fila{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:9px 0;border-bottom:1px solid var(--linea)}
+.fila:last-child{border-bottom:0}
+.fila .n{font-family:"Bodoni Moda",Georgia,serif;font-size:19px;white-space:nowrap}
+.barra-h{height:8px;border-radius:4px;background:var(--chip);overflow:hidden;margin-top:6px}
+.barra-h i{display:block;height:100%;border-radius:4px}
+.hallazgo{border-left:3px solid var(--acc);padding:2px 0 2px 14px;display:flex;flex-direction:column;gap:3px}
+.hallazgo b{font-family:"Bodoni Moda",Georgia,serif;font-weight:500;font-size:18px}
+.hallazgo .g{font-size:13px;color:var(--mut)}
+.publico{border-radius:14px;padding:16px 18px;background:var(--panel);border:1px solid var(--linea);border-top:4px solid var(--c);display:flex;flex-direction:column;gap:8px}
+.publico .n{font-family:"Bodoni Moda",Georgia,serif;font-size:32px;line-height:1}
+.publico .q{font-size:13.5px;color:var(--mut)}
+.publico .sub{display:flex;flex-direction:column;gap:4px;margin-top:4px;padding-top:8px;border-top:1px dashed var(--linea);font-size:13.5px}
+.publico .sub span{display:flex;justify-content:space-between;gap:8px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:560px){.grid2{grid-template-columns:1fr}}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{background:var(--chip);border-radius:999px;padding:7px 14px;font-size:14px;font-weight:500;min-height:36px;display:inline-flex;align-items:center;gap:6px;border:1px solid transparent}
+.chip.on{background:var(--ink);color:var(--bg)}
+.chip:hover{border-color:var(--linea)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 18px;border-radius:10px;font-weight:600;font-size:15px;background:var(--ink);color:var(--bg)}
+.btn.sec{background:transparent;color:var(--ink);border:1px solid var(--ink)}
+.btn.chico{min-height:36px;padding:6px 12px;font-size:13.5px;border-radius:8px}
+.acciones{display:flex;gap:10px;flex-wrap:wrap}
+.seg{display:flex;background:var(--chip);border-radius:10px;padding:3px;gap:3px}
+.seg button{flex:1;padding:8px 6px;border-radius:8px;font-weight:600;font-size:13.5px;color:var(--mut);min-height:40px}
+.seg button.on{background:var(--panel);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.estado{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:999px;display:inline-block}
+.estado.listo{background:rgba(63,138,91,.14);color:var(--ok)}
+.estado.prep{background:rgba(185,130,43,.16);color:var(--warn)}
+.solicitud{display:flex;flex-direction:column;gap:6px;padding:12px 0;border-bottom:1px solid var(--linea)}
+.solicitud:last-child{border-bottom:0}
+.solicitud .l{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.solicitud b{font-weight:600}
+.prog{height:5px;border-radius:3px;background:var(--chip);overflow:hidden}
+.prog i{display:block;height:100%;background:var(--warn);border-radius:3px}
+.tabla-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--linea);vertical-align:middle;white-space:nowrap}
+th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);font-weight:600}
+td.n,th.n{text-align:right}
+tr.yo td{background:var(--bg2);font-weight:600}
+td .celda{display:inline-block;min-width:44px;padding:2px 6px;border-radius:5px}
+.leyenda{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--mut)}
+.leyenda span{display:inline-flex;align-items:center;gap:6px}
+.leyenda i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.mapa-lista .fila{flex-direction:column;align-items:stretch;gap:2px}
+.mapa-lista .l{display:flex;justify-content:space-between;align-items:baseline}
+.cruce{display:flex;flex-direction:column;gap:6px}
+.cruce .r{display:grid;grid-template-columns:minmax(120px,1.2fr) 1fr 1fr;gap:10px;align-items:center;font-size:14px;padding:6px 0;border-bottom:1px solid var(--linea)}
+.cruce .r:last-child{border-bottom:0}
+.cruce .r.h{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);font-weight:600}
+.cruce .b{display:flex;flex-direction:column;gap:3px}
+.cruce .b em{font-style:normal;font-family:"Bodoni Moda",Georgia,serif;font-size:17px}
+.cruce .b i{display:block;height:7px;border-radius:4px}
+.cruce .b small{color:var(--mut);font-size:12px}
+.vacio{padding:24px;text-align:center;color:var(--mut);border:1px dashed var(--linea);border-radius:14px}
+
+/* votómetro (fila de candidatos con foto) */
+.voto{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media (max-width:560px){.voto{grid-template-columns:1fr}}
+.cand{display:flex;gap:12px;align-items:center;padding:12px;border-radius:14px;border:1px solid var(--linea);background:var(--panel);position:relative}
+.cand.yo{background:var(--bg2);border-color:var(--collado)}
+.cand .info{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.cand .nombre{font-weight:600;font-size:14px;line-height:1.2}
+.cand .pc{font-family:"Bodoni Moda",Georgia,serif;font-size:30px;line-height:1}
+.cand .e{font-size:12.5px;color:var(--mut)}
+.cand .tu{position:absolute;top:8px;right:10px;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--acc2)}
+.pos{position:absolute;left:8px;top:8px;width:20px;height:20px;border-radius:50%;background:var(--ink);color:var(--bg);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+/* línea de tiempo */
+.ctrl{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ctrl .rb{width:40px;height:40px;border-radius:50%;background:var(--chip);display:inline-flex;align-items:center;justify-content:center;font-size:16px}
+.ctrl .rb.play{background:var(--ink);color:var(--bg)}
+.ctrl input[type=range]{flex:1;min-width:140px;accent-color:var(--acc2)}
+.ctrl .ola-txt{font-family:"Bodoni Moda",Georgia,serif;font-size:20px;min-width:130px}
+.toma{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.toma .c{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;padding:10px 6px;border-radius:12px;border:1px solid var(--linea);background:var(--panel)}
+.toma .c.yo{background:var(--bg2);border-color:var(--collado)}
+.toma .c .pc{font-family:"Bodoni Moda",Georgia,serif;font-size:26px;line-height:1}
+.toma .c .nm{font-size:12px;font-weight:600;line-height:1.15}
+.toma .c .d{font-size:12px;font-weight:600}
+.toma .c .d.up{color:var(--ok)}.toma .c .d.down{color:var(--acc2)}
+.tt{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12.5px;padding:6px 10px;border-radius:8px;white-space:nowrap;transform:translate(-50%,-115%);display:none;z-index:3}
+.rel{position:relative}
+.flecha{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--linea)}
+.flecha:last-child{border-bottom:0}
+.flecha .txt{flex:1;min-width:0}
+.flecha .txt .q{color:var(--mut);font-size:12.5px}
+.flecha .txt b{font-weight:600}
+.flecha .bar{height:14px;border-radius:0 7px 7px 0;margin-top:5px;position:relative}
+.flecha .bar:after{content:"";position:absolute;right:-8px;top:-4px;border-left:10px solid var(--cc);border-top:11px solid transparent;border-bottom:11px solid transparent}
+.flecha .val{text-align:right;min-width:96px;max-width:46%;flex:0 0 auto}
+.flecha .val small{display:block;line-height:1.3}
+.flecha .val b{font-family:"Bodoni Moda",Georgia,serif;font-weight:500;font-size:22px;display:block;line-height:1}
+.flecha .val small{color:var(--mut);font-size:12px}
+.nodo-btn{cursor:pointer}
+
+/* hojas */
+.velo{position:fixed;inset:0;background:rgba(40,40,39,.35);z-index:20;display:none}
+.velo.on{display:block}
+.hoja{position:fixed;left:0;right:0;bottom:0;z-index:21;background:var(--panel);border-radius:20px 20px 0 0;max-height:88vh;display:none;flex-direction:column;box-shadow:var(--sombra)}
+.hoja.on{display:flex}
+.hoja .asa{width:40px;height:4px;border-radius:2px;background:var(--linea);margin:10px auto 0}
+.hoja .cabh{display:flex;justify-content:space-between;align-items:center;padding:10px 18px 10px;border-bottom:1px solid var(--linea)}
+.hoja .cuerpo{overflow:auto;padding:14px 18px 18px;display:flex;flex-direction:column;gap:12px}
+.cerrar{width:40px;height:40px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:20px;background:var(--chip)}
+.msg{border-radius:14px;padding:10px 14px;max-width:92%;font-size:15px;line-height:1.45}
+.msg.d{background:var(--bg2);align-self:flex-start}
+.msg.yo{background:var(--ink);color:var(--bg);align-self:flex-end}
+.msg .f{display:block;font-size:12.5px;color:var(--mut);margin-top:6px}
+.msg.yo .f{color:rgba(251,248,244,.7)}
+.msg .acc{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.msg .acc button{font-size:13px;font-weight:600;color:var(--acc2);border:1px solid var(--acc2);border-radius:999px;padding:5px 12px;min-height:32px}
+.sug{display:flex;flex-direction:column;gap:6px}
+.sug button{text-align:left;border:1px solid var(--linea);border-radius:12px;padding:10px 14px;font-size:14.5px;min-height:44px;background:var(--panel)}
+.sug button:hover{border-color:var(--acc2)}
+.entrada{display:flex;gap:8px;padding:10px 18px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--linea)}
+.entrada input{flex:1;font:inherit;font-size:15px;padding:10px 14px;border-radius:999px;border:1px solid var(--linea);background:var(--bg);color:var(--ink);min-height:44px}
+.entrada button{background:var(--acc);color:#fff;border-radius:999px;width:44px;height:44px;font-weight:700}
+.ctx{font-size:12.5px;color:var(--mut);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.ctx i{width:8px;height:8px;border-radius:50%;background:var(--ok);display:inline-block}
+.ficha dl{margin:0;display:grid;grid-template-columns:1fr 1.4fr;gap:8px 14px;font-size:14.5px}
+.ficha dt{color:var(--mut)}.ficha dd{margin:0}
+
+/* acceso */
+#acceso{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px;background:var(--bg)}
+#acceso .caja{width:100%;max-width:380px;background:var(--panel);border:1px solid var(--linea);border-radius:18px;padding:28px 26px;box-shadow:var(--sombra);display:flex;flex-direction:column;gap:12px}
+#acceso .marca{font-family:"Bodoni Moda",Georgia,serif;font-size:26px;line-height:1.1}
+#acceso .marca small{display:block;font-family:Montserrat,sans-serif;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin-top:4px}
+#acceso label{font-size:12.5px;font-weight:600;color:var(--mut);display:flex;flex-direction:column;gap:5px}
+#acceso input{font:inherit;font-size:16px;padding:11px 14px;border-radius:10px;border:1px solid var(--linea);background:var(--bg);color:var(--ink);min-height:44px;width:100%}
+#acceso .btn{width:100%;margin-top:4px}
+#acceso .msg{font-size:13.5px;color:var(--acc2);min-height:20px}
+#acceso .pie{font-size:12.5px;color:var(--mut);text-align:center;margin-top:6px}
+/* escritorio */
+@media (min-width:900px){
+  .app{grid-template-columns:230px minmax(0,1fr);grid-template-rows:auto 1fr}
+  .demo{grid-column:1/-1}
+  header.cab{grid-column:2;position:static;border:0;padding:26px 40px 0;max-width:900px}
+  aside.rail{grid-column:1;grid-row:2/4;border-right:1px solid var(--linea);padding:26px 18px;display:flex;flex-direction:column;gap:6px;position:sticky;top:0;height:100vh}
+  aside.rail .marca{font-family:"Bodoni Moda",Georgia,serif;font-size:20px;margin-bottom:18px;padding:0 10px}
+  aside.rail .marca small{display:block;font-family:Montserrat,sans-serif;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin-top:2px}
+  aside.rail button{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;font-weight:600;font-size:15px;color:var(--mut);min-height:44px;text-align:left}
+  aside.rail button.on{background:var(--panel);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.06)}
+  aside.rail button svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+  aside.rail .pie{margin-top:auto;font-size:12.5px;color:var(--mut);padding:0 10px;line-height:1.4}
+  main{grid-column:2;padding:22px 40px 60px;margin:0;max-width:900px}
+  nav.barra{display:none}
+  .fab{bottom:28px;right:28px}
+  .hoja{left:auto;right:0;top:0;bottom:0;width:420px;max-height:none;border-radius:0;border-left:1px solid var(--linea)}
+  .hoja .asa{display:none}
+  h1{font-size:32px}
+}
+@media (max-width:899px){aside.rail{display:none}}
+@media (prefers-reduced-motion:no-preference){.pantalla.activa{animation:ap .18s ease-out}@keyframes ap{from{opacity:.5;transform:translateY(4px)}to{opacity:1;transform:none}}}
+</style>
+</head>
+<body>
+
+
+<div id="acceso">
+  <form class="caja" id="form-acceso" autocomplete="on">
+    <div class="marca">Devotion2Vote<small>Sala de clientes · Mi campaña</small></div>
+    <p class="small mut">Entre con el usuario y la clave que le facilitó su consultor.</p>
+    <label>Usuario<input id="au" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required></label>
+    <label>Clave<input id="ap" name="password" type="password" autocomplete="current-password" required></label>
+    <button class="btn" type="submit" id="ab">Entrar</button>
+    <div class="msg" id="amsg"></div>
+    <div class="pie">Todo lo que consulte queda registrado a su nombre.</div>
+  </form>
+</div>
+
+<div class="app" id="app" hidden>
+<div class="demo"><b>Versión de demostración 0.1</b><span>Datos reales de las encuestas nacionales 2024–2026. Las respuestas de DANTE y las solicitudes de informes son ejemplos preparados.</span></div>
+
+<aside class="rail">
+  <div class="marca">Devotion2Vote<small>Sala de clientes</small></div>
+  <button data-ir="hoy" class="on"><svg viewBox="0 0 24 24"><path d="M3 12l9-8 9 8M5 10v10h14V10"/></svg>Hoy</button>
+  <button data-ir="evolucion"><svg viewBox="0 0 24 24"><path d="M3 17l5-6 4 3 5-8 4 5M3 21h18"/></svg>Evolución</button>
+  <button data-ir="flujos"><svg viewBox="0 0 24 24"><path d="M3 6h5c4 0 4 6 8 6h5M3 18h5c4 0 4-6 8-6h5M3 12h5"/></svg>Transferencias</button>
+  <button data-ir="publicos"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><circle cx="17" cy="10" r="2.5"/><path d="M3 19c0-3.3 2.7-5 6-5s6 1.7 6 5M15 15c2.8 0 5 1.5 5 4"/></svg>Públicos</button>
+  <button data-ir="territorio"><svg viewBox="0 0 24 24"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2zM9 4v14M15 6v14"/></svg>Territorio</button>
+  <button data-ir="informes"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6zM15 3v4h4M9 12h6M9 16h6"/></svg>Informes</button>
+  <div class="pie">Sesión del <b>equipo de campaña de David Collado</b><br>Solo ve su campaña. Todo lo que pide queda registrado a su nombre.</div>
+</aside>
+
+<header class="cab">
+  <div class="t">
+    <img class="foto b" width="52" height="52" src="data:image/jpeg;base64,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" alt="David Collado">
+    <div class="txt"><span class="lab">Mi campaña</span><h1>David Collado</h1><span class="sub">República Dominicana · Presidencial 2028</span></div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center"><button class="btn sec chico" data-hoja="ficha">Ficha técnica</button><button class="btn sec chico" id="salir" title="Cerrar sesión">Salir</button></div>
+</header>
+
+<main>
+
+<!-- ============ HOY ============ -->
+<section class="pantalla activa" id="p-hoy">
+  <div class="card">
+    <div class="cifra">
+      <img class="foto b" width="84" height="84" src="data:image/jpeg;base64,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" alt="">
+      <div style="display:flex;flex-direction:column;gap:6px;min-width:0">
+        <span class="lab">Estimación de voto · junio 2026</span>
+        <div class="num">17,2<small> %</small></div>
+        <div><span class="delta down">▼ −1,8 puntos desde mayo</span></div>
+      </div>
+    </div>
+    <p style="margin-top:12px">El candidato David Collado obtiene 793.200 electores y ocupa el tercer lugar, a 4,9 puntos de Leonel Fernández y a 5,6 de Alofoke.</p>
+    <div class="fuente" style="margin-top:8px">Encuesta de junio 2026 · 1.500 entrevistas · ajustada a los resultados reales de 2024 · <button data-hoja="ficha">ver ficha técnica</button></div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:12px"><span class="lab">Los tres primeros · junio 2026</span><span class="small mut">Porcentaje sobre votos válidos</span></div>
+    <div class="voto">
+      <div class="cand"><span class="pos">1</span><img class="foto" width="56" height="56" src="data:image/jpeg;base64,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" alt=""><div class="info"><span class="nombre">Santiago Matías Alofoke</span><span class="pc">22,8 %</span><span class="e">1.048.800 · en mayo 9,8 %</span></div></div>
+      <div class="cand"><span class="pos">2</span><img class="foto" width="56" height="56" src="data:image/jpeg;base64,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" alt=""><div class="info"><span class="nombre">Leonel Fernández</span><span class="pc">22,1 %</span><span class="e">1.017.000 · en mayo 26,4 %</span></div></div>
+      <div class="cand yo"><span class="pos">3</span><span class="tu">candidato</span><img class="foto" width="56" height="56" src="data:image/jpeg;base64,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" alt=""><div class="info"><span class="nombre">David Collado</span><span class="pc">17,2 %</span><span class="e">793.200 · en mayo 19,0 %</span></div></div>
+    </div>
+    <p class="small mut" style="margin-top:12px">Irían a votar 56 de cada 100 electores (en mayo, 58). <button class="enlace" data-ir="evolucion">Ver la evolución completa</button></p>
+  </div>
+
+  <div class="card">
+    <span class="lab">Cara a cara · segunda vuelta · junio 2026</span>
+    <div class="grid2" style="margin-top:10px">
+      <div class="rel" id="careo-leonel"></div>
+      <div class="rel" id="careo-omar"></div>
+    </div>
+    <p class="small mut" style="margin-top:10px">Respuesta declarada sobre el total de entrevistados. <button class="enlace" data-ir="evolucion" data-serie="careo_leonel">Ver cómo ha cambiado desde 2024</button></p>
+  </div>
+
+  <div class="card" style="display:flex;flex-direction:column;gap:14px">
+    <span class="lab">Qué dicen los datos de junio</span>
+    <div class="hallazgo"><b>El voto de Collado es el voto de Abinader</b><p>De cada 100 electores que hoy votan por David Collado, 88 votaron a Abinader en 2024. Casi no recibe voto de ningún otro origen: su techo hoy es el electorado del gobierno.</p><span class="g">Recuerdo de voto 2024 cruzado con intención actual · junio 2026 · <button class="enlace small" data-ir="flujos">ver transferencias</button></span></div>
+    <div class="hallazgo"><b>Tiene la base más sólida de los tres</b><p>427.186 electores son voto duro: 56 de cada 100 de sus votantes (Leonel 47, Alofoke 31). Los otros 339.196 votan por él pero algo diverge: 57 % no está seguro de ir a votar y 6 de cada 10 «votarían» también por Omar Fernández o Carolina Mejía.</p><span class="g">Públicos objetivo · junio 2026</span></div>
+    <div class="hallazgo"><b>Tiene el mayor terreno de conquista: 1.513.484 electores</b><p>Hoy votan por otro sin ser voto duro de nadie y tienen un rasgo cercano al candidato: 419.228 votan hoy por Alofoke y 301.838 por Leonel. Además, 258.724 electores en la abstención tienen afinidad con él.</p><span class="g">Públicos objetivo · junio 2026 · <button class="enlace small" data-ir="publicos">ver públicos</button></span></div>
+  </div>
+</section>
+
+<!-- ============ EVOLUCIÓN ============ -->
+<section class="pantalla" id="p-evolucion">
+  <div>
+    <h2>¿Cómo ha evolucionado?</h2>
+    <p class="mut small" style="margin-top:4px">Elija qué serie ver, y recorra las tomas con las flechas o el reproductor. Cada punto es una encuesta nacional de 1.500 entrevistas.</p>
+  </div>
+  <div class="chips" id="series-chips">
+    <button class="chip on" data-s="ajustada">Estimación ajustada</button>
+    <button class="chip" data-s="declarada">Intención declarada</button>
+    <button class="chip" data-s="careo_leonel">Cara a cara con Leonel</button>
+    <button class="chip" data-s="careo_omar">Cara a cara con Omar</button>
+  </div>
+  <div class="card">
+    <p class="small mut" id="serie-desc" style="margin-bottom:8px"></p>
+    <div class="rel"><svg id="linea" viewBox="0 0 680 300" style="width:100%;height:auto;display:block"></svg><div class="tt" id="tt"></div></div>
+    <div class="ctrl" style="margin-top:8px">
+      <button class="rb" id="ev-prev" aria-label="Toma anterior">◀</button>
+      <button class="rb play" id="ev-play" aria-label="Reproducir">▶</button>
+      <button class="rb" id="ev-next" aria-label="Toma siguiente">▶</button>
+      <input type="range" id="ev-range" min="0" max="1" value="1" aria-label="Toma">
+      <span class="ola-txt" id="ev-ola"></span>
+    </div>
+  </div>
+  <div class="card">
+    <span class="lab" id="toma-lab">Cuadro de la toma</span>
+    <div class="toma" id="toma" style="margin-top:10px"></div>
+    <p class="small mut" id="toma-nota" style="margin-top:10px"></p>
+  </div>
+</section>
+
+<!-- ============ TRANSFERENCIAS ============ -->
+<section class="pantalla" id="p-flujos">
+  <div>
+    <h2>¿De dónde viene cada voto?</h2>
+    <p class="mut small" style="margin-top:4px">Lo que votó cada elector en 2024 (izquierda) y por quién votaría hoy (derecha). El grosor es el número de electores. Toque un nombre para seguir su voto.</p>
+  </div>
+  <div class="card">
+    <div class="ctrl" style="margin-bottom:6px">
+      <button class="rb" id="tr-prev" aria-label="Toma anterior">◀</button>
+      <button class="rb play" id="tr-play" aria-label="Reproducir">▶</button>
+      <button class="rb" id="tr-next" aria-label="Toma siguiente">▶</button>
+      <span class="ola-txt" id="tr-ola"></span>
+      <span class="small mut" id="tr-nota"></span>
+    </div>
+    <div class="rel"><svg id="sankey" viewBox="0 0 680 640" style="width:100%;height:auto;display:block"></svg><div class="tt" id="tt2"></div></div>
+    <div class="leyenda" style="margin-top:8px"><span><i style="background:var(--abinader)"></i>Abinader 2024</span><span><i style="background:var(--leonel)"></i>Leonel 2024</span><span><i style="background:var(--abel)"></i>Abel 2024</span><span><i style="background:var(--otros)"></i>Otros y blancos</span><span><i style="background:var(--abst)"></i>No votó</span><span><i style="background:var(--nuevos)"></i>Nuevos votantes</span></div>
+  </div>
+
+  <div class="card">
+    <span class="lab" id="flechas-lab">De dónde viene el voto de David Collado</span>
+    <div id="flechas" style="margin-top:6px"></div>
+  </div>
+
+  <div class="card">
+    <span class="lab" id="abinader-lab">Qué hacen hoy los votantes de Abinader en 2024</span>
+    <div id="abinader" style="margin-top:6px"></div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px">
+      <span class="lab">Cuadro completo de transferencias</span>
+      <div class="seg" style="min-width:220px"><button class="on" data-unidad="electores">Electores</button><button data-unidad="pct">% de cada origen</button></div>
+    </div>
+    <div class="tabla-wrap"><table id="matriz"></table></div>
+    <p class="small mut" style="margin-top:10px" id="matriz-nota"></p>
+  </div>
+</section>
+
+<!-- ============ PÚBLICOS ============ -->
+<section class="pantalla" id="p-publicos">
+  <div>
+    <h2>Los cuatro públicos del candidato</h2>
+    <p class="mut small" style="margin-top:4px">Electores completos. Encuesta de junio 2026, ajustada a los resultados de 2024.</p>
+  </div>
+  <div class="grid2">
+    <div class="publico" style="--c:var(--duro)">
+      <span class="lab">Voto duro</span>
+      <div class="n">427.186</div>
+      <span class="q">Votan por David Collado y nadie puede quitárselos. 56 de cada 100 de sus votantes: la base más sólida de los tres primeros.</span>
+      <div class="sub"><span><span>Enterados del Plan Anti-Crisis, orgullosos de los Juegos</span><b>316.006</b></span><span><span>Menos enterados, menos interesados</span><b>111.180</b></span></div>
+    </div>
+    <div class="publico" style="--c:var(--retener)">
+      <span class="lab">Voto a retener</span>
+      <div class="n">339.196</div>
+      <span class="q">Votan por él, pero algo falla: 57 % no está seguro de ir a votar. 63 % «votaría» también por Omar Fernández y 60 % por Carolina Mejía.</span>
+      <div class="sub"><span><span>Critican al gobierno («seguimos peor», salud)</span><b>178.925</b></span><span><span>Aprueban al gobierno, cercanos a Carolina Mejía</span><b>160.271</b></span></div>
+    </div>
+    <div class="publico" style="--c:var(--conquistar)">
+      <span class="lab">Voto a conquistar</span>
+      <div class="n">1.513.484</div>
+      <span class="q">Hoy votan por otro (419.228 por Alofoke, 301.838 por Leonel), no son voto duro de nadie y tienen un rasgo cercano al candidato.</span>
+      <div class="sub"><span><span>Desaprueban al gobierno</span><b>805.778</b></span><span><span>Aprueban al gobierno</span><b>707.706</b></span></div>
+    </div>
+    <div class="publico" style="--c:var(--movilizar)">
+      <span class="lab">Voto a movilizar</span>
+      <div class="n">258.724</div>
+      <span class="q">Hoy en la abstención o indecisos, con afinidad hacia él. La mitad votó a Abinader en 2024; 64 % son mujeres.</span>
+      <div class="sub"><span><span>Desaprueban al gobierno (8 de cada 10, mujeres)</span><b>144.287</b></span><span><span>Aprueban al gobierno</span><b>114.438</b></span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="lab">A quién podría irse su voto a retener</span>
+    <div id="fuga" style="margin-top:8px"></div>
+    <p class="small mut" style="margin-top:10px">De los 339.196 electores del voto a retener, cuántos «votarían» también por cada uno de estos candidatos (pueden nombrar a varios).</p>
+  </div>
+
+  <div class="card">
+    <span class="lab">Qué mueve a su voto a retener</span>
+    <div class="fila"><span>La delincuencia</span><span class="n">27,6 %</span></div>
+    <div class="fila"><span>La mala economía</span><span class="n">17,0 %</span></div>
+    <div class="fila"><span>Alto costo de la vida</span><span class="n">13,2 %</span></div>
+    <div class="fila"><span>Corrupción de funcionarios</span><span class="n">8,8 %</span></div>
+    <div class="fila"><span>El desempleo</span><span class="n">7,0 %</span></div>
+    <p class="small mut" style="margin-top:10px">Principal problema del país según 339.196 electores. Su voto duro coincide en la delincuencia (21,1 %) y añade la inmigración haitiana (7,6 %).</p>
+  </div>
+
+  <div class="card" style="display:flex;flex-direction:column;gap:12px">
+    <h3>Cruzar una pregunta</h3>
+    <span class="lab">Pregunta</span>
+    <div class="chips" id="preg"><button class="chip on" data-p="problema">Principal problema del país</button><button class="chip" data-p="origen">De dónde vienen (voto 2024)</button><button class="chip" data-p="edad">Edad</button><button class="chip" data-p="rumbo">Rumbo del país</button></div>
+    <span class="lab">Según</span>
+    <div class="chips" id="por"><button class="chip on" data-x="publico">Sus públicos</button><button class="chip" data-x="candidato">Candidato</button><button class="chip" data-x="region">Región</button><button class="chip" data-x="sexo">Sexo</button></div>
+  </div>
+  <div class="card" id="cruce-listo">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:8px"><h3 id="cruce-titulo">Principal problema del país · según sus públicos</h3><span class="small mut">Junio 2026</span></div>
+    <div class="cruce" id="cruce-problema">
+      <div class="r h"><span>Respuesta</span><span style="color:var(--duro)">Voto duro</span><span style="color:var(--retener)">A retener</span></div>
+      <div class="r"><span>La delincuencia</span><div class="b"><em>21,1 %</em><i style="width:76%;background:var(--duro)"></i><small>90.184</small></div><div class="b"><em>27,6 %</em><i style="width:100%;background:var(--retener)"></i><small>93.674</small></div></div>
+      <div class="r"><span>La mala economía</span><div class="b"><em>14,8 %</em><i style="width:54%;background:var(--duro)"></i><small>63.186</small></div><div class="b"><em>17,0 %</em><i style="width:62%;background:var(--retener)"></i><small>57.824</small></div></div>
+      <div class="r"><span>Alto costo de la vida</span><div class="b"><em>11,8 %</em><i style="width:43%;background:var(--duro)"></i><small>50.264</small></div><div class="b"><em>13,2 %</em><i style="width:48%;background:var(--retener)"></i><small>44.726</small></div></div>
+      <div class="r"><span>Corrupción de funcionarios</span><div class="b"><em>8,2 %</em><i style="width:30%;background:var(--duro)"></i><small>34.994</small></div><div class="b"><em>8,8 %</em><i style="width:32%;background:var(--retener)"></i><small>29.794</small></div></div>
+      <div class="r"><span>La inmigración haitiana</span><div class="b"><em>7,6 %</em><i style="width:28%;background:var(--duro)"></i><small>32.394</small></div><div class="b"><em>—</em><small>fuera de los 5 primeros</small></div></div>
+      <div class="r"><span>El desempleo</span><div class="b"><em>—</em><small>fuera de los 5 primeros</small></div><div class="b"><em>7,0 %</em><i style="width:25%;background:var(--retener)"></i><small>23.695</small></div></div>
+    </div>
+    <div class="cruce" id="cruce-origen" hidden>
+      <div class="r h"><span>Votó en 2024 a…</span><span style="color:var(--duro)">Voto duro</span><span style="color:var(--retener)">A retener</span></div>
+      <div class="r"><span>Abinader</span><div class="b"><em>95,0 %</em><i style="width:100%;background:var(--duro)"></i><small>405.930</small></div><div class="b"><em>79,4 %</em><i style="width:84%;background:var(--retener)"></i><small>269.453</small></div></div>
+      <div class="r"><span>Leonel Fernández</span><div class="b"><em>—</em><small>sin casos</small></div><div class="b"><em>11,7 %</em><i style="width:12%;background:var(--retener)"></i><small>39.664</small></div></div>
+      <div class="r"><span>No votó</span><div class="b"><em>1,1 %</em><i style="width:2%;background:var(--duro)"></i><small>4.498</small></div><div class="b"><em>6,4 %</em><i style="width:7%;background:var(--retener)"></i><small>21.591</small></div></div>
+      <div class="r"><span>No tenía edad</span><div class="b"><em>1,1 %</em><i style="width:2%;background:var(--duro)"></i><small>4.791</small></div><div class="b"><em>1,4 %</em><i style="width:2%;background:var(--retener)"></i><small>4.791</small></div></div>
+      <div class="r"><span>Abel Martínez</span><div class="b"><em>0,9 %</em><i style="width:2%;background:var(--duro)"></i><small>3.696</small></div><div class="b"><em>1,1 %</em><i style="width:2%;background:var(--retener)"></i><small>3.696</small></div></div>
+      <div class="r"><span>Otros y blancos</span><div class="b"><em>1,9 %</em><i style="width:2%;background:var(--duro)"></i><small>8.271</small></div><div class="b"><em>—</em><small>sin casos</small></div></div>
+    </div>
+    <div class="vacio" id="cruce-pendiente" hidden>Este cruce se calcula al momento cuando el servicio de cruces esté conectado (fase 2). En el prototipo solo están listos «Principal problema» y «De dónde vienen» según sus públicos.</div>
+    <div class="acciones" style="margin-top:14px"><button class="btn chico" data-dante="Explique este cruce">Que DANTE lo explique</button><button class="btn sec chico" data-ir="informes">Añadir a un informe</button></div>
+  </div>
+</section>
+
+<!-- ============ TERRITORIO ============ -->
+<section class="pantalla" id="p-territorio">
+  <div>
+    <h2>¿Dónde están sus votantes?</h2>
+    <p class="mut small" style="margin-top:4px">766.382 electores que hoy votan por David Collado, por región y provincia. Encuesta de junio 2026.</p>
+  </div>
+  <div class="seg" role="tablist"><button class="on" data-terr="regiones">Regiones</button><button data-terr="provincias">Provincias</button><button data-terr="urna">Resultados 2024</button></div>
+  <div class="card mapa-lista" data-terr-panel="regiones">
+    <div class="fila"><div class="l"><span>Norte</span><span class="n">294.209</span></div><div class="barra-h"><i style="width:100%;background:var(--collado)"></i></div><span class="small mut">38 de cada 100 de sus votantes</span></div>
+    <div class="fila"><div class="l"><span>Metropolitana</span><span class="n">233.392</span></div><div class="barra-h"><i style="width:79%;background:var(--collado)"></i></div><span class="small mut">30 de cada 100</span></div>
+    <div class="fila"><div class="l"><span>Este</span><span class="n">132.210</span></div><div class="barra-h"><i style="width:45%;background:var(--collado)"></i></div><span class="small mut">17 de cada 100</span></div>
+    <div class="fila"><div class="l"><span>Sur</span><span class="n">106.570</span></div><div class="barra-h"><i style="width:36%;background:var(--collado)"></i></div><span class="small mut">14 de cada 100</span></div>
+  </div>
+  <div class="card mapa-lista" data-terr-panel="provincias" hidden>
+    <div class="fila"><div class="l"><span>Santo Domingo</span><span class="n">148.339</span></div><div class="barra-h"><i style="width:100%;background:var(--collado)"></i></div></div>
+    <div class="fila"><div class="l"><span>Distrito Nacional</span><span class="n">85.053</span></div><div class="barra-h"><i style="width:57%;background:var(--collado)"></i></div></div>
+    <div class="fila"><div class="l"><span>Santiago</span><span class="n">84.147</span></div><div class="barra-h"><i style="width:57%;background:var(--collado)"></i></div></div>
+    <div class="fila"><div class="l"><span>La Altagracia</span><span class="n">31.495</span></div><div class="barra-h"><i style="width:21%;background:var(--collado)"></i></div></div>
+    <div class="fila"><div class="l"><span>Puerto Plata</span><span class="n">28.895</span></div><div class="barra-h"><i style="width:19%;background:var(--collado)"></i></div></div>
+    <div class="fila"><div class="l"><span>La Romana</span><span class="n">21.930</span></div><div class="barra-h"><i style="width:15%;background:var(--collado)"></i></div></div>
+    <div class="fila"><div class="l"><span>Monte Plata</span><span class="n">20.996</span></div><div class="barra-h"><i style="width:14%;background:var(--collado)"></i></div></div>
+    <div class="fila"><div class="l"><span>Sánchez Ramírez</span><span class="n">20.996</span></div><div class="barra-h"><i style="width:14%;background:var(--collado)"></i></div></div>
+    <div class="fila"><div class="l"><span>San Pedro de Macorís</span><span class="n">20.996</span></div><div class="barra-h"><i style="width:14%;background:var(--collado)"></i></div></div>
+    <div class="fila"><div class="l"><span>Duarte</span><span class="n">17.497</span></div><div class="barra-h"><i style="width:12%;background:var(--collado)"></i></div></div>
+    <div class="fila"><div class="l"><span>San Juan</span><span class="n">13.998</span></div><div class="barra-h"><i style="width:9%;background:var(--collado)"></i></div></div>
+    <div class="fila"><div class="l"><span>San Cristóbal</span><span class="n">13.197</span></div><div class="barra-h"><i style="width:9%;background:var(--collado)"></i></div></div>
+    <p class="small mut" style="margin-top:10px">Las provincias con menos de 10 entrevistas se agrupan en «resto del país» y no se muestran sueltas. La estimación municipio a municipio llegará cuando el motor territorial esté validado.</p>
+  </div>
+  <div class="card" data-terr-panel="urna" hidden>
+    <span class="lab">Presidencial 2024 · resultados oficiales (JCE)</span>
+    <div class="fila"><span>Luis Abinader</span><span class="n">2.507.297</span></div>
+    <div class="fila"><span>Leonel Fernández</span><span class="n">1.259.427</span></div>
+    <div class="fila"><span>Abel Martínez</span><span class="n">453.468</span></div>
+    <div class="fila"><span>Otros y blancos</span><span class="n">144.955</span></div>
+    <div class="fila"><span>Abstención</span><span class="n">3.780.401</span></div>
+    <div class="fila"><span class="mut">Censo electoral</span><span class="n">8.145.548</span></div>
+    <p class="small mut" style="margin-top:10px">Es la urna sobre la que se ajusta cada estimación. Puede pedirse por provincia, municipio o colegio desde <button class="enlace small" data-ir="informes">Informes</button>.</p>
+  </div>
+  <div class="card">
+    <span class="lab">Rural y urbano</span>
+    <div class="grid2" style="margin-top:8px">
+      <div><div class="num" style="font-size:30px">85 %</div><span class="small mut">urbano · 651.569 electores</span></div>
+      <div><div class="num" style="font-size:30px">15 %</div><span class="small mut">rural · 114.813 electores</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ INFORMES ============ -->
+<section class="pantalla" id="p-informes">
+  <div>
+    <h2>Informes</h2>
+    <p class="mut small" style="margin-top:4px">Pida lo que necesite; avisamos cuando esté listo.</p>
+  </div>
+  <div class="card" style="display:flex;flex-direction:column;gap:10px">
+    <span class="lab">Pedir</span>
+    <div class="chips"><button class="chip">Resumen ejecutivo</button><button class="chip">Presentación</button><button class="chip on">Públicos objetivo</button><button class="chip">Transferencias de voto</button><button class="chip">Láminas para redes</button><button class="chip">Tablas completas</button><button class="chip">Resultados 2024 por municipio</button></div>
+    <div class="acciones"><button class="btn" id="pedir">Pedir «Públicos objetivo» de junio</button></div>
+  </div>
+  <div class="card">
+    <span class="lab">En preparación</span>
+    <div class="solicitud" id="sol-nueva" hidden><div class="l"><b>Públicos objetivo · junio 2026</b><span class="estado prep">Preparando</span></div><div class="prog"><i style="width:15%"></i></div><span class="small mut">Pedido ahora mismo · avisamos en el móvil cuando esté</span></div>
+    <div class="solicitud"><div class="l"><b>Presentación · junio 2026</b><span class="estado prep">Preparando</span></div><div class="prog"><i style="width:70%"></i></div><span class="small mut">Pedida hoy a las 10:12 · unos 3 minutos más</span></div>
+  </div>
+  <div class="card">
+    <span class="lab">Entregados</span>
+    <div class="solicitud"><div class="l"><b>Resumen ejecutivo · junio 2026</b><span class="estado listo">Listo</span></div><span class="small mut">9 de septiembre · PDF, 6 páginas</span><div class="acciones"><button class="btn chico">Abrir</button><button class="btn sec chico">Enviar por WhatsApp</button></div></div>
+    <div class="solicitud"><div class="l"><b>Públicos objetivo · junio 2026</b><span class="estado listo">Listo</span></div><span class="small mut">9 de septiembre · Word, 24 páginas</span><div class="acciones"><button class="btn chico">Abrir</button><button class="btn sec chico">Enviar por WhatsApp</button></div></div>
+    <div class="solicitud"><div class="l"><b>Tablas completas · mayo 2026</b><span class="estado listo">Listo</span></div><span class="small mut">14 de agosto · Excel</span><div class="acciones"><button class="btn chico">Abrir</button></div></div>
+  </div>
+</section>
+
+</main>
+
+<nav class="barra" aria-label="Secciones">
+  <button data-ir="hoy" class="on"><svg viewBox="0 0 24 24"><path d="M3 12l9-8 9 8M5 10v10h14V10"/></svg>Hoy</button>
+  <button data-ir="evolucion"><svg viewBox="0 0 24 24"><path d="M3 17l5-6 4 3 5-8 4 5M3 21h18"/></svg>Evolución</button>
+  <button data-ir="flujos"><svg viewBox="0 0 24 24"><path d="M3 6h5c4 0 4 6 8 6h5M3 18h5c4 0 4-6 8-6h5M3 12h5"/></svg>Flujos</button>
+  <button data-ir="publicos"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><circle cx="17" cy="10" r="2.5"/><path d="M3 19c0-3.3 2.7-5 6-5s6 1.7 6 5M15 15c2.8 0 5 1.5 5 4"/></svg>Públicos</button>
+  <button data-ir="territorio"><svg viewBox="0 0 24 24"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2zM9 4v14M15 6v14"/></svg>Territorio</button>
+  <button data-ir="informes"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6zM15 3v4h4M9 12h6M9 16h6"/></svg>Informes</button>
+</nav>
+
+<button class="fab" data-hoja="dante" aria-label="Abrir DANTE"><span class="p"></span>DANTE</button>
+</div>
+
+<div class="velo" id="velo"></div>
+
+<div class="hoja" id="hoja-dante" role="dialog" aria-label="DANTE">
+  <div class="asa"></div>
+  <div class="cabh"><div><h3>DANTE</h3><div class="ctx"><i></i><span id="dante-ctx">Mirando: Hoy · junio 2026</span></div></div><button class="cerrar" data-cerrar aria-label="Cerrar">×</button></div>
+  <div class="cuerpo" id="hilo">
+    <div class="msg d">Buenos días. Tengo delante la campaña de David Collado con las encuestas de 2024 a 2026. Puedo dar cualquier cifra con su fuente, hacer un gráfico o pedir un informe.</div>
+    <div class="sug" id="sug">
+      <button data-q="¿Por qué bajó Collado desde mayo?">¿Por qué bajó desde mayo?</button>
+      <button data-q="¿De dónde viene el voto de Collado?">¿De dónde viene su voto?</button>
+      <button data-q="¿Cómo va Collado en un cara a cara con Leonel?">¿Cómo va en un cara a cara con Leonel?</button>
+    </div>
+  </div>
+  <form class="entrada" id="form-dante"><input id="dante-in" placeholder="Pregunte a DANTE…" autocomplete="off" aria-label="Pregunte a DANTE"><button type="submit" aria-label="Enviar">↑</button></form>
+</div>
+
+<div class="hoja ficha" id="hoja-ficha" role="dialog" aria-label="Ficha técnica">
+  <div class="asa"></div>
+  <div class="cabh"><h3>Ficha técnica</h3><button class="cerrar" data-cerrar aria-label="Cerrar">×</button></div>
+  <div class="cuerpo">
+    <dl>
+      <dt>Encuesta de referencia</dt><dd>Junio 2026 · 1.500 entrevistas presenciales · 124 preguntas · campo desde el 1 de junio</dd>
+      <dt>Serie</dt><dd>Encuestas nacionales mensuales de 1.500 entrevistas, agosto 2024 – junio 2026. Cada serie de la pantalla Evolución indica en qué encuestas existe la pregunta.</dd>
+      <dt>Ajuste</dt><dd>Cada entrevista recibe el peso en electores que le corresponde según a quién votó en 2024, con los resultados oficiales de la JCE. Así la encuesta suma exactamente el censo: 8.145.548 electores.</dd>
+      <dt>Participación</dt><dd>56,5 % esperada en junio (57,8 % en mayo), declarada por la dirección del estudio. Con ella se calcula qué parte de la abstención de 2024 vuelve a votar.</dd>
+      <dt>Votantes nuevos</dt><dd>Quienes cumplieron 18 años desde 2024: 3 de cada 100 electores.</dd>
+      <dt>Indecisos</dt><dd>Repartidos antes de dar la cifra final.</dd>
+      <dt>Transferencias</dt><dd>La matriz completa de mayo y junio se ha recalculado con el método sobre las bases de esas encuestas (1.421 y 1.404 entrevistas con recuerdo de voto). Puede diferir en décimas de la cifra publicada en el informe; en la versión definitiva la matriz y la cifra salen del mismo cálculo.</dd>
+      <dt>Método</dt><dd>Vote-Transfer, de Carles Salom. Revisado por el sistema en cada paso y supervisado por el equipo antes de publicarse.</dd>
+    </dl>
+  </div>
+</div>
+
+<script>
+/* ---- acceso (misma credencial que la Sala de Control: POST /token) ---- */
+const API='https://devotion2vote-api.onrender.com';
+(function(){
+  let TOK=null,YO=null; try{TOK=sessionStorage.getItem('d2v_ctok');YO=JSON.parse(sessionStorage.getItem('d2v_cyo')||'null')}catch(e){}
+  const acc=document.getElementById('acceso'), app=document.getElementById('app'), msg=document.getElementById('amsg');
+  function dentro(){acc.hidden=true;app.hidden=false;window.dispatchEvent(new Event('resize'));}
+  function fuera(){TOK=null;YO=null;try{sessionStorage.removeItem('d2v_ctok');sessionStorage.removeItem('d2v_cyo')}catch(e){} app.hidden=true;acc.hidden=false;}
+  if(TOK&&YO){dentro();}
+  document.getElementById('form-acceso').addEventListener('submit',async e=>{
+    e.preventDefault(); const b=document.getElementById('ab'); b.disabled=true; msg.textContent='Comprobando…';
+    try{
+      const f=new URLSearchParams({username:document.getElementById('au').value.trim(),password:document.getElementById('ap').value});
+      const r=await fetch(API+'/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:f});
+      let j=null; try{j=await r.json()}catch(x){}
+      if(!r.ok) throw new Error((j&&j.detail)||('HTTP '+r.status));
+      TOK=j.access_token; YO={usuario:document.getElementById('au').value.trim().toLowerCase(),rol:j.rol,nombre:j.nombre,ambito:j.ambito};
+      try{sessionStorage.setItem('d2v_ctok',TOK);sessionStorage.setItem('d2v_cyo',JSON.stringify(YO))}catch(x){}
+      msg.textContent=''; dentro();
+    }catch(err){
+      let m=err.message||'';
+      if(/Failed to fetch|NetworkError|Load failed/i.test(m)) m='El sistema se está poniendo en marcha (1-3 minutos). Espere un momento y pulse Entrar otra vez.';
+      else if(/401|Incorrect|credencial|denegado/i.test(m)) m='Usuario o clave incorrectos. Revise mayúsculas y minúsculas.';
+      msg.textContent=m;
+    } finally{b.disabled=false;}
+  });
+  document.getElementById('salir').addEventListener('click',fuera);
+})();
+const DATA={"transfer": {"2026-05": {"n": 1421, "participacion": 57.8, "validos": 4708100, "censo": 8145548, "divisor": 9.08, "matriz": {"Santiago Matías Alofoke": {"ABINADIER": 262300, "LEONEL": 38000, "ABEL": 21100, "OT+BL": 11700, "ABST+NUL": 43500, ">18": 84600}, "Leonel Fernández": {"ABINADIER": 308600, "LEONEL": 689900, "ABEL": 98400, "OT+BL": 5800, "ABST+NUL": 81600, ">18": 59800}, "David Collado": {"ABINADIER": 736700, "LEONEL": 50600, "ABEL": 17600, "OT+BL": 11700, "ABST+NUL": 55500, ">18": 19900}, "Omar Fernández": {"ABINADIER": 216000, "LEONEL": 284800, "ABEL": 70300, "OT+BL": 17500, "ABST+NUL": 76100, ">18": 39800}, "Carolina Mejía": {"ABINADIER": 270000, "LEONEL": 6300, "ABEL": 0, "OT+BL": 0, "ABST+NUL": 13100, ">18": 5000}, "Gonzalo Castillo": {"ABINADIER": 73300, "LEONEL": 31600, "ABEL": 63300, "OT+BL": 35100, "ABST+NUL": 12000, ">18": 10000}, "Abel Martínez": {"ABINADIER": 146600, "LEONEL": 31600, "ABEL": 116000, "OT+BL": 5800, "ABST+NUL": 33700, ">18": 10000}, "Ramfis Trujillo": {"ABINADIER": 69400, "LEONEL": 6300, "ABEL": 3500, "OT+BL": 23400, "ABST+NUL": 21800, ">18": 0}, "Otros": {"ABINADIER": 243000, "LEONEL": 63200, "ABEL": 38600, "OT+BL": 23300, "ABST+NUL": 40400, ">18": 10000}, "Abstención": {"ABINADIER": 106200, "LEONEL": 19100, "ABEL": 11000, "OT+BL": 6100, "ABST+NUL": 3289600, ">18": 5400}}, "total_destino": {"Santiago Matías Alofoke": 461200, "Leonel Fernández": 1244100, "David Collado": 892000, "Omar Fernández": 704500, "Carolina Mejía": 294400, "Gonzalo Castillo": 225300, "Abel Martínez": 343700, "Ramfis Trujillo": 124400, "Otros": 418500, "Abstención": 3437400}, "pct_validos": {"Santiago Matías Alofoke": 9.8, "Leonel Fernández": 26.4, "David Collado": 18.9, "Omar Fernández": 15.0, "Carolina Mejía": 6.3, "Gonzalo Castillo": 4.8, "Abel Martínez": 7.3, "Ramfis Trujillo": 2.6, "Otros": 8.9, "Abstención": null}, "total_origen": {"ABINADIER": 2432100, "LEONEL": 1221400, "ABEL": 439800, "OT+BL": 140400, "ABST+NUL": 3667300, ">18": 244500}}, "2026-06": {"n": 1404, "participacion": 56.5, "validos": 4602200, "censo": 8145548, "divisor": 11.57, "matriz": {"Santiago Matías Alofoke": {"ABINADIER": 490800, "LEONEL": 194100, "ABEL": 72000, "OT+BL": 37200, "ABST+NUL": 102900, ">18": 131900}, "Leonel Fernández": {"ABINADIER": 258100, "LEONEL": 630800, "ABEL": 45500, "OT+BL": 4100, "ABST+NUL": 42400, ">18": 40600}, "David Collado": {"ABINADIER": 701700, "LEONEL": 40400, "ABEL": 7600, "OT+BL": 8300, "ABST+NUL": 26200, ">18": 10100}, "Omar Fernández": {"ABINADIER": 203600, "LEONEL": 242600, "ABEL": 41700, "OT+BL": 20700, "ABST+NUL": 37900, ">18": 25400}, "Carolina Mejía": {"ABINADIER": 225400, "LEONEL": 16200, "ABEL": 7600, "OT+BL": 8300, "ABST+NUL": 9900, ">18": 10100}, "Gonzalo Castillo": {"ABINADIER": 83600, "LEONEL": 32300, "ABEL": 136400, "OT+BL": 8300, "ABST+NUL": 13500, ">18": 0}, "Abel Martínez": {"ABINADIER": 32700, "LEONEL": 16200, "ABEL": 79600, "OT+BL": 8300, "ABST+NUL": 9900, ">18": 10100}, "Ramfis Trujillo": {"ABINADIER": 94500, "LEONEL": 16200, "ABEL": 7600, "OT+BL": 4100, "ABST+NUL": 19000, ">18": 5100}, "Otros": {"ABINADIER": 214500, "LEONEL": 24300, "ABEL": 38000, "OT+BL": 24800, "ABST+NUL": 18900, ">18": 10200}, "Abstención": {"ABINADIER": 127000, "LEONEL": 8600, "ABEL": 4100, "OT+BL": 16500, "ABST+NUL": 3386200, ">18": 800}}, "total_destino": {"Santiago Matías Alofoke": 1028900, "Leonel Fernández": 1021500, "David Collado": 794300, "Omar Fernández": 571900, "Carolina Mejía": 277500, "Gonzalo Castillo": 274100, "Abel Martínez": 156800, "Ramfis Trujillo": 146500, "Otros": 330700, "Abstención": 3543200}, "pct_validos": {"Santiago Matías Alofoke": 22.4, "Leonel Fernández": 22.2, "David Collado": 17.3, "Omar Fernández": 12.4, "Carolina Mejía": 6.0, "Gonzalo Castillo": 6.0, "Abel Martínez": 3.4, "Ramfis Trujillo": 3.2, "Otros": 7.2, "Abstención": null}, "total_origen": {"ABINADIER": 2431900, "LEONEL": 1221700, "ABEL": 440100, "OT+BL": 140600, "ABST+NUL": 3666800, ">18": 244300}}}, "declarada": [{"ola": "2025-09", "n": 1500, "pregunta": "P23. Si se realizaran las elecciones para escoger al próximo presidente de la re", "var": "p23", "pct": {"Leonel Fernández": 23.1, "Omar Fernández": 17.1, "David Collado": 15.7, "Abel Martínez": 5.2, "Carolina Mejía": 4.3, "Gonzalo Castillo": 3.7, "Otros": 6.1, "Raquel Peña": 2.1, "Alofoke": 1.4, "Ramfis Trujillo": 1.3, "Guido Gómez Mazara": 1.0, "Francisco Javier García": 0.8}}, {"ola": "2025-11", "n": 1500, "pregunta": "P26. Si se realizaran las elecciones para escoger al próximo presidente de la re", "var": "p26", "pct": {"Leonel Fernández": 21.5, "David Collado": 19.1, "Omar Fernández": 16.5, "Abel Martínez": 5.1, "Carolina Mejía": 4.0, "Otros": 7.2, "Gonzalo Castillo": 2.5, "Alofoke": 1.4, "Raquel Peña": 1.2, "Ramfis Trujillo": 1.1, "Guido Gómez Mazara": 0.7, "Francisco Javier García": 0.5}}, {"ola": "2026-04", "n": 1500, "pregunta": "P32. Si el próximo domingo se realizaran las elecciones para escoger al próximo ", "var": "p32", "pct": {"David Collado": 27.5, "Leonel Fernández": 19.1, "Omar Fernández": 10.8, "Carolina Mejía": 8.9, "Gonzalo Castillo": 4.8, "Abel Martínez": 3.9, "Raquel Peña": 3.7, "Alofoke": 2.5, "Ramfis Trujillo": 1.2, "Guido Gómez Mazara": 1.0, "Francisco Javier García": 0.2, "Otros": 0.1}}, {"ola": "2026-05", "n": 1500, "pregunta": "P8.  Si las elecciones para elegir al próximo presidente fuesen mañana, de los c", "var": "p8", "pct": {"Leonel Fernández": 21.3, "David Collado": 18.0, "Omar Fernández": 14.5, "Alofoke": 9.6, "Carolina Mejía": 5.7, "Abel Martínez": 7.7, "Gonzalo Castillo": 4.1, "Margarita Cedeño": 3.6, "Ramfis Trujillo": 3.1, "Raquel Peña": 1.3, "Guido Gómez Mazara": 1.2, "Otros": 1.9, "Francisco Javier García": 0.5}}, {"ola": "2026-06", "n": 1500, "pregunta": "P8.  Si las elecciones para elegir al próximo presidente fuesen mañana, de los c", "var": "p8", "pct": {"Alofoke": 23.4, "David Collado": 16.0, "Leonel Fernández": 15.4, "Omar Fernández": 10.7, "Gonzalo Castillo": 5.7, "Carolina Mejía": 5.5, "Ramfis Trujillo": 3.8, "Abel Martínez": 3.4, "Margarita Cedeño": 2.5, "Guido Gómez Mazara": 1.5, "Francisco Javier García": 0.9, "Raquel Peña": 0.9, "Otros": 1.7}}], "careos": [{"ola": "2025-01", "rival": "leonel", "var": "P24", "n": 1500, "collado": 54.3, "rival_pct": 35.1, "otros": 10.6, "preg": "P24. Y si las elecciones presidenciales se realizaran el pró"}, {"ola": "2025-01", "rival": "omar", "var": "P27", "n": 1500, "collado": 42.5, "rival_pct": 46.7, "otros": 10.8, "preg": "P27. Si las elecciones presidenciales se realizaran el próxi"}, {"ola": "2025-03", "rival": "leonel", "var": "P38", "n": 1500, "collado": 47.5, "rival_pct": 38.3, "otros": 14.2, "preg": "P38. Y si los candidatos fueran estos que le voy a mencionar"}, {"ola": "2025-03", "rival": "omar", "var": "P40", "n": 1500, "collado": 41.2, "rival_pct": 47.2, "otros": 11.6, "preg": "P40. Y si los candidatos fueran estos que le voy a mencionar"}, {"ola": "2026-03", "rival": "leonel", "var": "p46", "n": 1500, "collado": 42.3, "rival_pct": 44.1, "otros": 13.5, "preg": "P46.  Si la elección se decidiese en una segunda vuelta elec"}, {"ola": "2026-03", "rival": "omar", "var": "p47", "n": 1500, "collado": 39.6, "rival_pct": 48.5, "otros": 11.9, "preg": "P47.  ¿Y si en esa segunda vuelta los candidatos fueran Davi"}, {"ola": "2025-04", "rival": "leonel", "var": "P32", "n": 1500, "collado": 47.9, "rival_pct": 37.1, "otros": 15.0, "preg": "P32. Y si las elecciones presidenciales se realizaran el pró"}, {"ola": "2025-04", "rival": "omar", "var": "P35", "n": 1500, "collado": 40.9, "rival_pct": 45.5, "otros": 13.6, "preg": "P35. Si las elecciones presidenciales se realizaran el próxi"}, {"ola": "2026-04", "rival": "leonel", "var": "p45", "n": 1500, "collado": 43.0, "rival_pct": 44.7, "otros": 12.3, "preg": "P45.  Si la elección se decidiese en una segunda vuelta elec"}, {"ola": "2026-04", "rival": "omar", "var": "p46", "n": 1500, "collado": 40.5, "rival_pct": 46.2, "otros": 13.3, "preg": "P46.  ¿Y si en esa segunda vuelta los candidatos fueran Davi"}, {"ola": "2025-05", "rival": "leonel", "var": "P26", "n": 1500, "collado": 46.1, "rival_pct": 41.7, "otros": 12.2, "preg": "P26. Y si las elecciones presidenciales se realizaran el pró"}, {"ola": "2025-05", "rival": "omar", "var": "p29", "n": 1500, "collado": 40.5, "rival_pct": 46.1, "otros": 13.4, "preg": "P29. Si las elecciones presidenciales se realizaran el próxi"}, {"ola": "2026-05", "rival": "leonel", "var": "P26", "n": 1500, "collado": 38.1, "rival_pct": 53.1, "otros": 8.8, "preg": "P26.  Si la elección se decidiese en una segunda vuelta elec"}, {"ola": "2026-05", "rival": "omar", "var": "P27", "n": 1500, "collado": 37.3, "rival_pct": 53.2, "otros": 9.5, "preg": "P27.  ¿Y si en esa segunda vuelta los candidatos fueran Davi"}, {"ola": "2025-06", "rival": "leonel", "var": "P24", "n": 1500, "collado": 47.2, "rival_pct": 40.3, "otros": 12.5, "preg": "P24. Y si las elecciones presidenciales se realizaran el pró"}, {"ola": "2025-06", "rival": "omar", "var": "p27", "n": 1500, "collado": 39.8, "rival_pct": 47.1, "otros": 13.1, "preg": "P27. Si las elecciones presidenciales se realizaran el próxi"}, {"ola": "2026-06", "rival": "leonel", "var": "P28", "n": 1500, "collado": 38.6, "rival_pct": 47.3, "otros": 14.1, "preg": "P28.  Si la elección se decidiese en una segunda vuelta elec"}, {"ola": "2026-06", "rival": "omar", "var": "P29", "n": 1500, "collado": 34.5, "rival_pct": 50.7, "otros": 14.8, "preg": "P29  ¿Y si en esa segunda vuelta los candidatos fueran David"}, {"ola": "2025-07", "rival": "leonel", "var": "P20", "n": 1500, "collado": 46.5, "rival_pct": 42.1, "otros": 11.3, "preg": "P20. Y si las elecciones presidenciales se realizaran el pró"}, {"ola": "2025-07", "rival": "omar", "var": "p23", "n": 1500, "collado": 39.3, "rival_pct": 48.4, "otros": 12.3, "preg": "P23. Si las elecciones presidenciales se realizaran el próxi"}, {"ola": "2024-08", "rival": "leonel", "var": "P26", "n": 1500, "collado": 52.8, "rival_pct": 32.5, "otros": 14.7, "preg": "P26. Y si las elecciones presidenciales se realizaran el pró"}, {"ola": "2024-08", "rival": "omar", "var": "P29", "n": 1500, "collado": 40.0, "rival_pct": 45.4, "otros": 14.6, "preg": "P29. Si las elecciones presidenciales se realizaran el próxi"}, {"ola": "2025-08", "rival": "leonel", "var": "P19", "n": 1500, "collado": 46.2, "rival_pct": 43.6, "otros": 10.2, "preg": "P19. Y si las elecciones presidenciales se realizaran el pró"}, {"ola": "2025-08", "rival": "omar", "var": "p22", "n": 1500, "collado": 41.1, "rival_pct": 46.9, "otros": 12.1, "preg": "P22. Si las elecciones presidenciales se realizaran el próxi"}, {"ola": "2024-09", "rival": "leonel", "var": "P25", "n": 1500, "collado": 55.3, "rival_pct": 32.6, "otros": 12.1, "preg": "P25. Y si las elecciones presidenciales se realizaran el pró"}, {"ola": "2024-09", "rival": "omar", "var": "P28", "n": 1500, "collado": 44.6, "rival_pct": 43.2, "otros": 12.2, "preg": "P28. Si las elecciones presidenciales se realizaran el próxi"}, {"ola": "2025-09", "rival": "leonel", "var": "p36", "n": 1500, "collado": 41.1, "rival_pct": 47.1, "otros": 11.8, "preg": "P36. Si la elección se decidiese en una segunda vuelta elect"}, {"ola": "2024-11", "rival": "leonel", "var": "P25", "n": 1500, "collado": 49.9, "rival_pct": 37.1, "otros": 13.1, "preg": "P25. Y si las elecciones presidenciales se realizaran el pró"}, {"ola": "2024-11", "rival": "omar", "var": "P28", "n": 1500, "collado": 39.9, "rival_pct": 46.0, "otros": 14.1, "preg": "P28. Si las elecciones presidenciales se realizaran el próxi"}, {"ola": "2025-11", "rival": "leonel", "var": "p39", "n": 1500, "collado": 42.3, "rival_pct": 43.4, "otros": 14.3, "preg": "P39. Si la elección se decidiese en una segunda vuelta elect"}, {"ola": "2024-12", "rival": "leonel", "var": "P24", "n": 1500, "collado": 53.5, "rival_pct": 34.1, "otros": 12.4, "preg": "P24. Y si las elecciones presidenciales se realizaran el pró"}, {"ola": "2024-12", "rival": "omar", "var": "P27", "n": 1500, "collado": 40.2, "rival_pct": 47.9, "otros": 11.9, "preg": "P27. Si las elecciones presidenciales se realizaran el próxi"}]};
+const FOTOS={"leonel": "data:image/jpeg;base64,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", "omar": "data:image/jpeg;base64,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", "carolina": "data:image/jpeg;base64,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", "collado": "data:image/jpeg;base64,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", "alofoke": "data:image/jpeg;base64,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"};
+(function(){
+  const C={raquel:'var(--otros)',alofoke:'var(--alofoke)',leonel:'var(--leonel)',collado:'var(--collado)',omar:'var(--omar)',carolina:'var(--carolina)',gonzalo:'var(--gonzalo)',abel:'var(--abel)',ramfis:'var(--ramfis)',otros:'var(--otros)',abst:'var(--abst)',abinader:'var(--abinader)',nuevos:'var(--nuevos)'};
+  const CAND={raquel:'Raquel Peña',alofoke:'Santiago Matías Alofoke',leonel:'Leonel Fernández',collado:'David Collado',omar:'Omar Fernández',carolina:'Carolina Mejía',gonzalo:'Gonzalo Castillo',abel:'Abel Martínez',ramfis:'Ramfis Trujillo',otros:'Otros candidatos',abst:'Abstención'};
+  const CORTO={raquel:'Raquel P.',alofoke:'Alofoke',leonel:'Leonel',collado:'Collado',omar:'Omar F.',carolina:'Carolina M.',gonzalo:'Gonzalo C.',abel:'Abel M.',ramfis:'Ramfis T.',otros:'Otros',abst:'Abstención'};
+  const KEY={'Santiago Matías Alofoke':'alofoke','Leonel Fernández':'leonel','David Collado':'collado','Omar Fernández':'omar','Carolina Mejía':'carolina','Gonzalo Castillo':'gonzalo','Abel Martínez':'abel','Ramfis Trujillo':'ramfis','Otros':'otros','Abstención':'abst','Alofoke':'alofoke'};
+  const ORI={ABINADIER:{k:'abinader',n:'Abinader 2024'},LEONEL:{k:'leonel',n:'Leonel 2024'},ABEL:{k:'abel',n:'Abel 2024'},'OT+BL':{k:'otros',n:'Otros y blancos'},'ABST+NUL':{k:'abst',n:'No votó'},'>18':{k:'nuevos',n:'Nuevos votantes'}};
+  const MESES=['','enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const nomOla=o=>{const [y,m]=o.split('-');return MESES[+m].charAt(0).toUpperCase()+MESES[+m].slice(1)+' '+y};
+  const nomCorto=o=>{const [y,m]=o.split('-');return MESES[+m].slice(0,3)+' '+y.slice(2)};
+  const fmt=n=>String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+  function separar(items,gap){items.sort((a,b)=>a.y-b.y);for(let i=1;i<items.length;i++){if(items[i].y-items[i-1].y<gap)items[i].y=items[i-1].y+gap;}return items;}
+  const pct=n=>n.toLocaleString('es-ES',{minimumFractionDigits:1,maximumFractionDigits:1})+' %';
+  const foto=(k,s)=>FOTOS[k]?`<img class="foto" width="${s}" height="${s}" src="${FOTOS[k]}" alt="">`:`<span class="ini" style="width:${s}px;height:${s}px;font-size:${Math.round(s*.4)}px;--c:${C[k]||C.otros}">${(CORTO[k]||'?').charAt(0)}</span>`;
+
+  /* ---------- navegación ---------- */
+  const nombres={hoy:'Hoy',evolucion:'Evolución',flujos:'Transferencias',publicos:'Públicos',territorio:'Territorio',informes:'Informes'};
+  function ir(id){
+    document.querySelectorAll('.pantalla').forEach(s=>s.classList.toggle('activa',s.id==='p-'+id));
+    document.querySelectorAll('[data-ir]').forEach(b=>{if(b.closest('nav,aside'))b.classList.toggle('on',b.dataset.ir===id)});
+    document.getElementById('dante-ctx').textContent='Mirando: '+nombres[id]+' · junio 2026';
+    window.scrollTo({top:0});
+  }
+  document.addEventListener('click',e=>{
+    const b=e.target.closest('[data-ir]'); if(b){ir(b.dataset.ir); if(b.dataset.serie) setSerie(b.dataset.serie); return;}
+    const h=e.target.closest('[data-hoja]'); if(h){abrir(h.dataset.hoja);return;}
+    const c=e.target.closest('[data-cerrar]'); if(c){cerrar();return;}
+    const d=e.target.closest('[data-dante]'); if(d){abrir('dante');preguntar(d.dataset.dante);return;}
+    const t=e.target.closest('[data-terr]'); if(t){document.querySelectorAll('[data-terr]').forEach(x=>x.classList.toggle('on',x===t));document.querySelectorAll('[data-terr-panel]').forEach(p=>p.hidden=p.dataset.terrPanel!==t.dataset.terr);return;}
+    const p=e.target.closest('#preg .chip'); if(p){document.querySelectorAll('#preg .chip').forEach(x=>x.classList.toggle('on',x===p));cruce();return;}
+    const x=e.target.closest('#por .chip'); if(x){document.querySelectorAll('#por .chip').forEach(y=>y.classList.toggle('on',y===x));cruce();return;}
+    const s=e.target.closest('#sug button'); if(s){preguntar(s.dataset.q);return;}
+    const sc=e.target.closest('#series-chips .chip'); if(sc){setSerie(sc.dataset.s);return;}
+    const u=e.target.closest('[data-unidad]'); if(u){document.querySelectorAll('[data-unidad]').forEach(y=>y.classList.toggle('on',y===u));unidad=u.dataset.unidad;tabla();return;}
+  });
+  document.getElementById('velo').addEventListener('click',cerrar);
+  function abrir(id){cerrar();document.getElementById('velo').classList.add('on');document.getElementById('hoja-'+id).classList.add('on');}
+  function cerrar(){document.getElementById('velo').classList.remove('on');document.querySelectorAll('.hoja').forEach(h=>h.classList.remove('on'));}
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')cerrar()});
+
+  /* ---------- careos en HOY ---------- */
+  function careoCard(id,rival){
+    const c=DATA.careos.filter(x=>x.rival===rival).sort((a,b)=>a.ola<b.ola?-1:1).pop();
+    const el=document.getElementById(id);
+    el.innerHTML=`<div style="display:flex;align-items:center;gap:10px;justify-content:space-between"><div style="display:flex;align-items:center;gap:8px">${foto('collado',44)}<b class="num" style="font-size:24px">${pct(c.collado)}</b></div><span class="lab">frente a</span><div style="display:flex;align-items:center;gap:8px"><b class="num" style="font-size:24px">${pct(c.rival_pct)}</b>${foto(rival,44)}</div></div>
+    <div style="display:flex;height:10px;border-radius:5px;overflow:hidden;margin-top:8px"><i style="width:${c.collado}%;background:${C.collado}"></i><i style="width:${c.otros}%;background:var(--chip)"></i><i style="width:${c.rival_pct}%;background:${C[rival]}"></i></div>
+    <div class="small mut" style="margin-top:4px">David Collado frente a ${CAND[rival]} · ${pct(c.otros)} ninguno o no sabe</div>`;
+  }
+  careoCard('careo-leonel','leonel'); careoCard('careo-omar','omar');
+
+  /* ---------- EVOLUCIÓN ---------- */
+  const SERIES={
+    ajustada:{titulo:'Estimación ajustada a los resultados de 2024',desc:'Cifra final de cada encuesta, ajustada a los resultados reales de 2024 y con los indecisos repartidos. Porcentaje sobre votos válidos. Solo existe en las encuestas que preguntan el voto de 2024: mayo y junio de 2026.',
+      olas:['2026-05','2026-06'],cands:['alofoke','leonel','collado','omar','carolina'],
+      val:{'2026-05':{alofoke:9.8,leonel:26.4,collado:19.0,omar:15.0,carolina:6.3},'2026-06':{alofoke:22.8,leonel:22.1,collado:17.2,omar:12.4,carolina:6.0}},
+      nota:'Alofoke, Leonel y Collado: cifras publicadas en el informe de junio. Omar y Carolina: mismo método aplicado a la base de la encuesta.'},
+    declarada:{titulo:'Intención de voto declarada (lista completa de candidatos)',desc:'Respuesta directa a «si las elecciones fuesen mañana, ¿por quién votaría?» con la lista completa de candidatos. Porcentaje sobre el total de entrevistados, sin ajustar. Existe en cinco encuestas.',
+      olas:DATA.declarada.map(x=>x.ola),cands:['alofoke','leonel','collado','omar','carolina'],
+      val:Object.fromEntries(DATA.declarada.map(x=>[x.ola,{alofoke:x.pct['Alofoke']||0,leonel:x.pct['Leonel Fernández']||0,collado:x.pct['David Collado']||0,omar:x.pct['Omar Fernández']||0,carolina:x.pct['Carolina Mejía']||0}])),
+      nota:'Incluye a quienes no saben o no votarían por nadie en el total, por eso los porcentajes son más bajos que en la estimación.'},
+    careo_leonel:{titulo:'Cara a cara: David Collado frente a Leonel Fernández',desc:'Si solo estuvieran los dos, ¿por quién votaría? Porcentaje sobre el total de entrevistados. Se pregunta en casi todas las encuestas desde agosto de 2024.',
+      olas:DATA.careos.filter(x=>x.rival==='leonel').map(x=>x.ola).sort(),cands:['collado','leonel'],
+      val:Object.fromEntries(DATA.careos.filter(x=>x.rival==='leonel').map(x=>[x.ola,{collado:x.collado,leonel:x.rival_pct,nadie:x.otros}])),nota:'El resto hasta 100 no votaría por ninguno o no sabe.'},
+    careo_omar:{titulo:'Cara a cara: David Collado frente a Omar Fernández',desc:'Si solo estuvieran los dos, ¿por quién votaría? Porcentaje sobre el total de entrevistados.',
+      olas:DATA.careos.filter(x=>x.rival==='omar').map(x=>x.ola).sort(),cands:['collado','omar'],
+      val:Object.fromEntries(DATA.careos.filter(x=>x.rival==='omar').map(x=>[x.ola,{collado:x.collado,omar:x.rival_pct,nadie:x.otros}])),nota:'El resto hasta 100 no votaría por ninguno o no sabe.'}
+  };
+  let serie='ajustada', idx=1, timer=null;
+  function setSerie(s){if(timer){clearInterval(timer);timer=null;document.getElementById('ev-play').textContent='▶';} serie=s;const S=SERIES[s];idx=S.olas.length-1;document.querySelectorAll('#series-chips .chip').forEach(c=>c.classList.toggle('on',c.dataset.s===s));document.getElementById('serie-desc').textContent=S.desc;const r=document.getElementById('ev-range');r.max=S.olas.length-1;r.value=idx;pinta();}
+  function pinta(){
+    const narrow=window.innerWidth<600; const S=SERIES[serie], svg=document.getElementById('linea'), W=narrow?400:680,H=narrow?260:300,L=narrow?40:52,R=narrow?14:24,T=20,B=44; svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+    const n=S.olas.length, xs=i=>n===1?W/2:L+(W-L-R)*i/(n-1);
+    const maxv=Math.max(...S.olas.flatMap(o=>S.cands.map(c=>S.val[o][c]||0))); const top=Math.ceil((maxv+4)/10)*10;
+    const ys=v=>T+(H-T-B)*(1-v/top);
+    let g='';
+    for(let v=0;v<=top;v+=10){g+=`<line x1="${L}" x2="${W-R}" y1="${ys(v)}" y2="${ys(v)}" stroke="var(--linea)"/><text x="${L-8}" y="${ys(v)+4}" text-anchor="end" font-size="11" fill="var(--mut)">${v} %</text>`;}
+    S.olas.forEach((o,i)=>{g+=`<text x="${xs(i)}" y="${H-B+18}" text-anchor="middle" font-size="${n>8?10:11.5}" fill="${i===idx?'var(--ink)':'var(--mut)'}" font-weight="${i===idx?700:400}" transform="${n>8?`rotate(-35 ${xs(i)} ${H-B+18})`:''}">${nomCorto(o)}</text>`;});
+    g+=`<line x1="${xs(idx)}" x2="${xs(idx)}" y1="${T}" y2="${H-B}" stroke="var(--acc2)" stroke-dasharray="3 3"/>`;
+    S.cands.forEach(c=>{const pts=S.olas.map((o,i)=>[xs(i),ys(S.val[o][c]||0)]);const d=pts.map((p,i)=>(i?'L':'M')+p[0]+','+p[1]).join(' ');const yo=c==='collado';
+      g+=`<path d="${d}" fill="none" stroke="${C[c]}" stroke-width="${yo?4:2}" opacity="${yo?1:.75}"/>`;
+      pts.forEach((p,i)=>{g+=`<circle cx="${p[0]}" cy="${p[1]}" r="${i===idx?(yo?8:6):(yo?4.5:3.5)}" fill="${C[c]}" stroke="var(--panel)" stroke-width="1.5" data-c="${c}" data-i="${i}" class="pt"/>`;});
+    });
+    const labs=separar(S.cands.map(c=>({c,y:ys(S.val[S.olas[idx]][c]||0)})),15);
+    labs.forEach(l=>{g+=`<text x="${xs(idx)+(idx===n-1&&n>1?-12:12)}" y="${l.y+4}" text-anchor="${idx===n-1&&n>1?'end':'start'}" font-size="12.5" font-weight="600" fill="${C[l.c]}" font-family="Bodoni Moda,Georgia,serif">${(S.val[S.olas[idx]][l.c]||0).toLocaleString('es-ES',{minimumFractionDigits:1})}</text>`;});
+    svg.innerHTML=g;
+    document.getElementById('ev-ola').textContent=nomOla(S.olas[idx]);
+    document.getElementById('ev-range').value=idx;
+    // cuadro de la toma
+    const o=S.olas[idx], prev=idx>0?S.olas[idx-1]:null;
+    document.getElementById('toma-lab').textContent='Cuadro de la toma · '+nomOla(o)+' · '+S.titulo;
+    const orden=[...S.cands].sort((a,b)=>(S.val[o][b]||0)-(S.val[o][a]||0));
+    document.getElementById('toma').innerHTML=orden.map(c=>{const v=S.val[o][c]||0;const dv=prev?v-(S.val[prev][c]||0):null;return `<div class="c ${c==='collado'?'yo':''}">${foto(c,56)}<span class="nm">${CAND[c]}</span><span class="pc">${pct(v)}</span>${dv===null?'<span class="d mut">primera toma</span>':`<span class="d ${dv>0?'up':dv<0?'down':''}">${dv>0?'▲ +':dv<0?'▼ ':''}${dv.toLocaleString('es-ES',{minimumFractionDigits:1})} desde ${nomCorto(prev)}</span>`}</div>`}).join('')+(S.val[o].nadie!==undefined?`<div class="c"><span class="ini" style="width:56px;height:56px;font-size:22px;--c:var(--otros)">—</span><span class="nm">Ninguno / no sabe</span><span class="pc">${pct(S.val[o].nadie)}</span></div>`:'');
+    document.getElementById('toma-nota').textContent=S.nota;
+  }
+  const svgL=document.getElementById('linea'), tt=document.getElementById('tt');
+  svgL.addEventListener('mousemove',e=>{const p=e.target.closest('.pt'); if(!p){tt.style.display='none';return;} const S=SERIES[serie],c=p.dataset.c,i=+p.dataset.i; tt.textContent=CAND[c]+' · '+nomOla(S.olas[i])+' · '+pct(S.val[S.olas[i]][c]||0); const r=svgL.getBoundingClientRect(); tt.style.left=(e.clientX-r.left)+'px'; tt.style.top=(e.clientY-r.top)+'px'; tt.style.display='block';});
+  svgL.addEventListener('mouseleave',()=>tt.style.display='none');
+  svgL.addEventListener('click',e=>{const p=e.target.closest('.pt'); if(p){idx=+p.dataset.i;pinta();}});
+  document.getElementById('ev-prev').onclick=()=>{idx=Math.max(0,idx-1);pinta();};
+  document.getElementById('ev-next').onclick=()=>{idx=Math.min(SERIES[serie].olas.length-1,idx+1);pinta();};
+  document.getElementById('ev-range').oninput=e=>{idx=+e.target.value;pinta();};
+  document.getElementById('ev-play').onclick=function(){ if(timer){clearInterval(timer);timer=null;this.textContent='▶';return;} idx=0;pinta();this.textContent='❚❚'; timer=setInterval(()=>{ if(idx>=SERIES[serie].olas.length-1){clearInterval(timer);timer=null;document.getElementById('ev-play').textContent='▶';return;} idx++;pinta(); },900); };
+  setSerie('ajustada');
+
+  /* ---------- TRANSFERENCIAS ---------- */
+  const OLAS_T=Object.keys(DATA.transfer).sort(); let ti=OLAS_T.length-1, sel='collado', unidad='electores', ttimer=null;
+  const DESTS=['alofoke','leonel','collado','omar','carolina','gonzalo','abel','ramfis','otros','abst'];
+  const ORIS=['ABINADIER','LEONEL','ABEL','OT+BL','ABST+NUL','>18'];
+  function T(){return DATA.transfer[OLAS_T[ti]];}
+  function mat(d,o){const nm=Object.keys(KEY).find(k=>KEY[k]===d&&T().matriz[k]);return T().matriz[nm]?T().matriz[nm][o]:0;}
+  function sankey(){
+    const narrow=window.innerWidth<600; const t=T(), svg=document.getElementById('sankey'), W=narrow?420:680,H=narrow?620:700,NW=narrow?10:14,LX=narrow?96:150,RX=W-(narrow?128:160),pad=7; svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+    const totL=ORIS.reduce((a,o)=>a+t.total_origen[o],0);
+    const scale=(H-30-pad*(ORIS.length-1))/totL;
+    let y=15; const L={}; ORIS.forEach(o=>{const h=t.total_origen[o]*scale;L[o]={y,h};y+=h+pad;});
+    const dTot=DESTS.map(d=>ORIS.reduce((a,o)=>a+mat(d,o),0));
+    const totR=dTot.reduce((a,b)=>a+b,0); const scaleR=(H-30-pad*(DESTS.length-1))/totR;
+    y=15; const Rn={}; DESTS.forEach((d,i)=>{const h=dTot[i]*scaleR;Rn[d]={y,h,tot:dTot[i]};y+=h+pad;});
+    const offL={},offR={}; ORIS.forEach(o=>offL[o]=L[o].y); DESTS.forEach(d=>offR[d]=Rn[d].y);
+    let links='';
+    ORIS.forEach(o=>{DESTS.forEach(d=>{const v=mat(d,o); if(v<=0)return; const hL=v*scale, hR=v*scaleR; const y0=offL[o]+hL/2, y1=offR[d]+hR/2; offL[o]+=hL; offR[d]+=hR; const w=Math.max(.6,(hL+hR)/2);
+      const on=(sel===d)||(sel===ORI[o].k); const op=sel?(on?.85:.07):.38;
+      links+=`<path d="M${LX+NW},${y0} C${(LX+RX)/2},${y0} ${(LX+RX)/2},${y1} ${RX},${y1}" fill="none" stroke="${C[ORI[o].k]}" stroke-width="${w}" opacity="${op}" data-o="${o}" data-d="${d}" data-v="${v}" class="lk"/>`;});});
+    let nodes='';
+    ORIS.forEach(o=>{const k=ORI[o].k;nodes+=`<g class="nodo-btn" data-sel="${k}"><rect x="${LX}" y="${L[o].y}" width="${NW}" height="${Math.max(1,L[o].h)}" fill="${C[k]}" rx="2"/><text x="${LX-8}" y="${L[o].y+L[o].h/2+4}" text-anchor="end" font-size="12" font-weight="${sel===k?700:500}" fill="var(--ink)">${narrow?ORI[o].n.replace(' 2024','').replace('Nuevos votantes','Nuevos').replace('Otros y blancos','Otros/bl.'):ORI[o].n}</text><text x="${LX-8}" y="${L[o].y+L[o].h/2+17}" text-anchor="end" font-size="10.5" fill="var(--mut)">${fmt(t.total_origen[o])}</text></g>`;});
+    const labR=separar(DESTS.filter(d=>Rn[d].h>=1).map(d=>({d,y:Rn[d].y+Rn[d].h/2})),30);
+    labR.forEach(({d,y:ly})=>{const r=Rn[d]; const yo=d==='collado'; const cy=r.y+r.h/2; const conF=!!FOTOS[d]; const tx=RX+NW+(conF?44:10);
+      nodes+=`<g class="nodo-btn" data-sel="${d}"><rect x="${RX}" y="${r.y}" width="${NW}" height="${Math.max(1,r.h)}" fill="${C[d]}" rx="2"/>${Math.abs(ly-cy)>2?`<line x1="${RX+NW}" y1="${cy}" x2="${RX+NW+6}" y2="${ly}" stroke="var(--linea)"/>`:''}${conF?`<clipPath id="cp-${d}"><circle cx="${RX+NW+22}" cy="${ly}" r="14"/></clipPath><image href="${FOTOS[d]}" x="${RX+NW+8}" y="${ly-14}" width="28" height="28" clip-path="url(#cp-${d})"/>`:''}<text x="${tx}" y="${ly+4}" font-size="12" font-weight="${yo||sel===d?700:500}" fill="var(--ink)">${CORTO[d]}</text><text x="${tx}" y="${ly+17}" font-size="10.5" fill="var(--mut)">${narrow?(d!=='abst'?pct(100*r.tot/t.validos):fmt(r.tot)):fmt(r.tot)+(d!=='abst'&&t.validos?' · '+pct(100*r.tot/t.validos):'')}</text></g>`;});
+    svg.innerHTML=`<text x="${LX+NW}" y="9" text-anchor="end" font-size="10.5" letter-spacing="1.5" fill="var(--mut)">VOTÓ EN 2024</text><text x="${RX}" y="9" font-size="10.5" letter-spacing="1.5" fill="var(--mut)">VOTARÍA HOY</text>`+links+nodes;
+    document.getElementById('tr-ola').textContent=nomOla(OLAS_T[ti]);
+    document.getElementById('tr-nota').textContent=`${t.n.toLocaleString('es-ES')} entrevistas con recuerdo de voto · participación ${pct(t.participacion)}`;
+    flechas(); abinaderCard(); tabla();
+  }
+  const svgS=document.getElementById('sankey'), tt2=document.getElementById('tt2');
+  svgS.addEventListener('mousemove',e=>{const p=e.target.closest('.lk'); if(!p){tt2.style.display='none';return;} const o=p.dataset.o,d=p.dataset.d,v=+p.dataset.v; const t=T(); tt2.textContent=`${ORI[o].n} → ${CAND[d]} · ${fmt(v)} electores · ${pct(100*v/t.total_origen[o])} de ese origen`; const r=svgS.getBoundingClientRect(); tt2.style.left=(e.clientX-r.left)+'px'; tt2.style.top=(e.clientY-r.top)+'px'; tt2.style.display='block';});
+  svgS.addEventListener('mouseleave',()=>tt2.style.display='none');
+  svgS.addEventListener('click',e=>{const n=e.target.closest('[data-sel]'); if(n){sel=(sel===n.dataset.sel)?null:n.dataset.sel;sankey();}});
+  function flechas(){
+    const t=T(); const tot=ORIS.reduce((a,o)=>a+mat('collado',o),0);
+    const rows=ORIS.map(o=>({o,v:mat('collado',o)})).sort((a,b)=>b.v-a.v);
+    document.getElementById('flechas-lab').textContent=`De dónde viene el voto de David Collado · ${nomOla(OLAS_T[ti])} · ${fmt(tot)} electores`;
+    document.getElementById('flechas').innerHTML=rows.map(r=>`<div class="flecha"><span class="ini" style="width:40px;height:40px;font-size:15px;--c:${C[ORI[r.o].k]}">${ORI[r.o].n.charAt(0)}</span><div class="txt"><b>${ORI[r.o].n}</b> <span class="q">→ Collado</span><div class="bar" style="--cc:${C[ORI[r.o].k]};background:${C[ORI[r.o].k]};width:${Math.max(2,100*r.v/tot*0.85)}%"></div></div><div class="val"><b>${fmt(r.v)}</b><small>${pct(100*r.v/tot)} de su voto · ${pct(100*r.v/t.total_origen[r.o])} de ese origen</small></div></div>`).join('');
+  }
+  function abinaderCard(){
+    const t=T(); const tot=t.total_origen['ABINADIER'];
+    const rows=DESTS.map(d=>({d,v:mat(d,'ABINADIER')})).sort((a,b)=>b.v-a.v);
+    document.getElementById('abinader-lab').textContent=`Qué hacen hoy los 2.507.297 votantes de Abinader en 2024 · ${nomOla(OLAS_T[ti])}`;
+    document.getElementById('abinader').innerHTML=rows.map(r=>`<div class="flecha ${r.d==='collado'?'':''}">${foto(r.d,40)}<div class="txt"><b>${CAND[r.d]}</b>${r.d==='collado'?' <span class="lab" style="color:var(--acc2)">candidato</span>':''}<div class="bar" style="--cc:${C[r.d]};background:${C[r.d]};width:${Math.max(2,100*r.v/tot*0.85/0.5)}%;max-width:85%"></div></div><div class="val"><b>${pct(100*r.v/tot)}</b><small>${fmt(r.v)} electores</small></div></div>`).join('');
+  }
+  function tabla(){
+    const t=T(); const el=document.getElementById('matriz');
+    let h='<thead><tr><th>Votaría hoy ↓ · votó en 2024 →</th>'+ORIS.map(o=>`<th class="n">${ORI[o].n}</th>`).join('')+'<th class="n">Total</th><th class="n">% válidos</th></tr></thead><tbody>';
+    DESTS.forEach(d=>{const tot=ORIS.reduce((a,o)=>a+mat(d,o),0); if(tot<=0)return;
+      h+=`<tr class="${d==='collado'?'yo':''}"><td style="white-space:nowrap">${foto(d,26)} <span style="vertical-align:middle;margin-left:4px">${CAND[d]}</span></td>`+ORIS.map(o=>{const v=mat(d,o);const p=100*v/t.total_origen[o];const a=Math.min(.55,p/60);return `<td class="n"><span class="celda" style="background:rgba(217,130,43,${unidad==='pct'?a:0})">${unidad==='electores'?fmt(v):pct(p)}</span></td>`}).join('')+`<td class="n"><b>${fmt(tot)}</b></td><td class="n">${d==='abst'?'—':pct(100*tot/t.validos)}</td></tr>`;});
+    h+=`<tr><td class="mut">Total origen</td>`+ORIS.map(o=>`<td class="n mut">${unidad==='electores'?fmt(t.total_origen[o]):'100 %'}</td>`).join('')+`<td class="n mut">${fmt(8145548)}</td><td class="n mut">válidos ${fmt(t.validos)}</td></tr></tbody>`;
+    el.innerHTML=h;
+    document.getElementById('matriz-nota').textContent=`${nomOla(OLAS_T[ti])} · Electores tras el ajuste a los resultados oficiales de 2024 y el reparto de indecisos. Los votantes nuevos (cumplieron 18 desde 2024) se descuentan proporcionalmente de las columnas: el total sigue siendo el censo. En «% de cada origen», cada columna suma 100.`;
+  }
+  document.getElementById('tr-prev').onclick=()=>{ti=Math.max(0,ti-1);sankey();};
+  document.getElementById('tr-next').onclick=()=>{ti=Math.min(OLAS_T.length-1,ti+1);sankey();};
+  document.getElementById('tr-play').onclick=function(){ if(ttimer){clearInterval(ttimer);ttimer=null;this.textContent='▶';return;} ti=0;sankey();this.textContent='❚❚'; ttimer=setInterval(()=>{ if(ti>=OLAS_T.length-1){clearInterval(ttimer);ttimer=null;document.getElementById('tr-play').textContent='▶';return;} ti++;sankey(); },1600); };
+  sankey();
+  let rz; window.addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{pinta();sankey();},200);});
+
+  /* ---------- PÚBLICOS: fuga ---------- */
+  const FUGA=[['omar',212051,62.5],['carolina',204885,60.4],['abel',134573,39.7],['gonzalo',119871,35.3],['alofoke',119134,35.1],['raquel',109368,32.2]];
+  document.getElementById('fuga').innerHTML=FUGA.map(([k,v,p])=>`<div class="flecha">${foto(k,40)}<div class="txt"><b>${CAND[k]||'Raquel Peña'}</b><div class="bar" style="--cc:${C[k]||C.otros};background:${C[k]||C.otros};width:${p*0.85}%"></div></div><div class="val"><b>${pct(p)}</b><small>${fmt(v)} electores</small></div></div>`).join('');
+
+  /* ---------- cruce ---------- */
+  function cruce(){
+    const p=document.querySelector('#preg .chip.on').dataset.p, x=document.querySelector('#por .chip.on').dataset.x;
+    const tp=document.querySelector('#preg .chip.on').textContent, tx=document.querySelector('#por .chip.on').textContent.toLowerCase();
+    document.getElementById('cruce-titulo').textContent=tp+' · según '+tx;
+    const listo=(x==='publico'&&(p==='problema'||p==='origen'));
+    document.getElementById('cruce-problema').hidden=!(listo&&p==='problema');
+    document.getElementById('cruce-origen').hidden=!(listo&&p==='origen');
+    document.getElementById('cruce-pendiente').hidden=listo;
+  }
+  const pedir=document.getElementById('pedir');
+  pedir.addEventListener('click',()=>{document.getElementById('sol-nueva').hidden=false;pedir.textContent='Pedido · avisamos cuando esté';pedir.disabled=true;pedir.style.opacity=.6;});
+
+  /* ---------- DANTE ---------- */
+  const respuestas=[
+    [/baj|subi|mayo|cambi/i,'Entre mayo y junio David Collado pasó de 19,0 % a 17,2 %: −1,8 puntos, 793.200 electores. Leonel bajó 4,3 puntos; Alofoke subió 13,0 y es ahora primero. Con una sola ola de diferencia conviene esperar la de julio antes de leerlo como tendencia.','Encuestas de mayo y junio 2026 · ajustadas a los resultados de 2024',['Ver evolución','Pedir resumen ejecutivo']],
+    [/viene|de dónde|de donde|origen|abinader|transfer/i,'De los 794.300 electores que hoy votarían por David Collado, 701.700 votaron a Abinader en 2024 (88 %), 40.400 a Leonel, 26.200 no votaron y 10.100 son votantes nuevos. Visto desde el otro lado: de cada 100 votantes de Abinader en 2024, 29 votarían hoy por Collado, 20 por Alofoke y 11 por Leonel.','Matriz de transferencia · junio 2026 · 1.404 entrevistas con recuerdo de voto',['Ver transferencias']],
+    [/cara a cara|leonel|segunda vuelta|careo/i,'En un cara a cara con Leonel Fernández, en junio David Collado obtiene 38,6 % frente a 47,3 %, con 14,1 % que no votaría por ninguno. En agosto de 2024 ganaba ese careo 52,8 % a 32,5 %; la ventaja se perdió entre septiembre y noviembre de 2025.','Serie de encuestas nacionales agosto 2024 – junio 2026 · pregunta de segunda vuelta',['Ver evolución']],
+    [/omar/i,'Frente a Omar Fernández, en junio David Collado obtiene 34,5 % frente a 50,7 %. Nunca ha ganado ese careo en la serie: lo más cerca estuvo en septiembre de 2024 (44,6 % frente a 43,2 %).','Serie de encuestas nacionales agosto 2024 – junio 2026',['Ver evolución']],
+    [/segur|ir a votar|reten/i,'193.389 de sus votantes no están seguros de ir a votar: son el 57 % de su voto a retener (339.196). De ese grupo, 212.051 «votarían» también por Omar Fernández y 204.885 por Carolina Mejía. Su principal problema es la delincuencia (27,6 %).','Públicos objetivo · junio 2026 · 108 entrevistas',['Ver públicos','Pedir informe de públicos']],
+    [/dónde|donde|región|region|provinc/i,'Sus votantes están sobre todo en el Norte (294.209, 38 de cada 100) y en la Metropolitana (233.392). Por provincia: Santo Domingo 148.339, Distrito Nacional 85.053 y Santiago 84.147. El Este pesa más en él (17 %) que en los otros dos candidatos.','Encuesta de junio 2026 · 766.382 electores que hoy votan por el candidato',['Ver territorio']],
+    [/cruce|expl/i,'Su voto duro y su voto a retener coinciden en la delincuencia como problema del país (21,1 % y 27,6 %). La diferencia está en la economía: el voto a retener la señala más (17,0 % frente a 14,8 %) y el voto duro añade la inmigración haitiana (7,6 %).','Encuesta de junio 2026 · principal problema del país por público',['Añadir a un informe']],
+    [/conquist|moviliz/i,'David Collado puede conquistar 1.513.484 electores que hoy votan por otro sin ser voto duro de nadie: 419.228 votan hoy por Alofoke y 301.838 por Leonel; el 54 % votó a Abinader en 2024. Y puede movilizar 258.724 que hoy no votarían pero tienen afinidad con él.','Públicos objetivo · junio 2026',['Ver públicos']],
+    [/.*/,'Esa pregunta no puedo responderla con las encuestas disponibles. Puedo dar cualquier cifra del estudio, hacer un gráfico o pedir un informe. ¿Digo, por ejemplo, cómo ha evolucionado el cara a cara con Leonel?','',['Ver evolución']]
+  ];
+  const hilo=document.getElementById('hilo');
+  function preguntar(q){
+    document.getElementById('sug').hidden=true;
+    const yo=document.createElement('div');yo.className='msg yo';yo.textContent=q;hilo.appendChild(yo);
+    const r=respuestas.find(x=>x[0].test(q));
+    const d=document.createElement('div');d.className='msg d';d.textContent=r[1];
+    if(r[2]){const f=document.createElement('span');f.className='f';f.textContent='Fuente: '+r[2];d.appendChild(f);}
+    if(r[3].length){const a=document.createElement('div');a.className='acc';r[3].forEach(t=>{const b=document.createElement('button');b.textContent=t;
+      b.addEventListener('click',()=>{cerrar(); if(/territorio/i.test(t))ir('territorio'); else if(/evoluci/i.test(t))ir('evolucion'); else if(/transfer/i.test(t))ir('flujos'); else if(/públicos/i.test(t)&&/ver/i.test(t))ir('publicos'); else ir('informes');});a.appendChild(b)});d.appendChild(a);}
+    setTimeout(()=>{hilo.appendChild(d);hilo.scrollTop=hilo.scrollHeight;},350);
+    hilo.scrollTop=hilo.scrollHeight;
+  }
+  document.getElementById('form-dante').addEventListener('submit',e=>{e.preventDefault();const i=document.getElementById('dante-in');if(i.value.trim()){preguntar(i.value.trim());i.value='';}});
+})();
+</script>
+
+</body>
+</html>
