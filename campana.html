@@ -211,8 +211,13 @@ td .celda{display:inline-block;min-width:44px;padding:2px 6px;border-radius:5px}
   h1{font-size:32px}
 }
 @media (max-width:899px){aside.rail{display:none}}
+.idioma{display:inline-flex;align-items:center;gap:2px;vertical-align:middle}
+.idioma button{background:none;border:none;color:var(--mut);cursor:pointer;font:inherit;font-size:12px;font-weight:700;letter-spacing:.1em;padding:6px 5px;border-radius:6px;min-height:0}
+.idioma button.on{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
+.idioma i{font-style:normal;color:var(--mut);opacity:.5}
 @media (prefers-reduced-motion:no-preference){.pantalla.activa{animation:ap .18s ease-out}@keyframes ap{from{opacity:.5;transform:translateY(4px)}to{opacity:1;transform:none}}}
 </style>
+<script src="i18n.js" defer></script>
 </head>
 <body>
 
@@ -226,6 +231,7 @@ td .celda{display:inline-block;min-width:44px;padding:2px 6px;border-radius:5px}
     <button class="btn" type="submit" id="ab">Entrar</button>
     <div class="msg" id="amsg"></div>
     <div class="pie">Todo lo que consulte queda registrado a su nombre.</div>
+    <div class="pie" style="margin-top:8px"><span class="idioma" aria-label="Idioma / Language"><button type="button" data-idioma="es" lang="es">ES</button><i>·</i><button type="button" data-idioma="en" lang="en">EN</button></span></div>
   </form>
 </div>
 
@@ -248,7 +254,7 @@ td .celda{display:inline-block;min-width:44px;padding:2px 6px;border-radius:5px}
     <img class="foto b" width="52" height="52" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-foto="prm" alt="PRM">
     <div class="txt"><span class="lab">Mi campaña</span><h1 data-partido>PRM</h1><span class="sub" data-sub-sala>República Dominicana · Presidencial 2028 · país, regiones, provincias y municipios</span></div>
   </div>
-  <div style="display:flex;gap:8px;align-items:center;flex:0 0 auto"><button class="btn sec chico" data-hoja="ficha">Ficha técnica</button><button class="btn sec chico" id="salir" title="Cerrar sesión" hidden>Salir</button></div>
+  <div style="display:flex;gap:8px;align-items:center;flex:0 0 auto"><span class="idioma" aria-label="Idioma / Language"><button type="button" data-idioma="es" lang="es">ES</button><i>·</i><button type="button" data-idioma="en" lang="en">EN</button></span><button class="btn sec chico" data-hoja="ficha">Ficha técnica</button><button class="btn sec chico" id="salir" title="Cerrar sesión" hidden>Salir</button></div>
 </header>
 
 <main>
