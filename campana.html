@@ -404,14 +404,14 @@ td .celda{display:inline-block;min-width:44px;padding:2px 6px;border-radius:5px}
   <p class="mut small">Electores completos, ajustados a los resultados de 2024. Es el candidato del PRM mejor situado en la estimación.</p>
   <div class="grid2">
     <div class="publico" style="--c:var(--duro)"><span class="lab">Voto duro</span><div class="n">427.186</div><span class="q">Votan por David Collado y nadie puede quitárselos. 56 de cada 100 de sus votantes: la base más sólida de los tres primeros.</span><div class="sub"><span><span>Enterados del Plan Anti-Crisis, orgullosos de los Juegos</span><b>316.006</b></span><span><span>Menos enterados, menos interesados</span><b>111.180</b></span></div></div>
-    <div class="publico" style="--c:var(--retener)"><span class="lab">Voto a retener</span><div class="n">339.196</div><span class="q">Votan por él, pero algo falla: 57 % no está seguro de ir a votar. 63 % «votaría» también por Omar Fernández y 60 % por Carolina Mejía.</span><div class="sub"><span><span>Critican al gobierno («seguimos peor», salud)</span><b>178.925</b></span><span><span>Aprueban al gobierno, cercanos a Carolina Mejía</span><b>160.271</b></span></div></div>
+    <div class="publico" style="--c:var(--retener)"><span class="lab">Voto a retener</span><div class="n">339.196</div><span class="q">Votan por él, pero algo falla: 57 % no está seguro de ir a votar. 63 % «votaría» también por Omar Fernández y 60 % por Carolina Mejía (PRM).</span><div class="sub"><span><span>Critican al gobierno («seguimos peor», salud)</span><b>178.925</b></span><span><span>Aprueban al gobierno, cercanos a Carolina Mejía</span><b>160.271</b></span></div></div>
     <div class="publico" style="--c:var(--conquistar)"><span class="lab">Voto a conquistar</span><div class="n">1.513.484</div><span class="q">Hoy votan por otro (419.228 por Alofoke, 301.838 por Leonel), no son voto duro de nadie y tienen un rasgo cercano al candidato.</span><div class="sub"><span><span>Desaprueban al gobierno</span><b>805.778</b></span><span><span>Aprueban al gobierno</span><b>707.706</b></span></div></div>
     <div class="publico" style="--c:var(--movilizar)"><span class="lab">Voto a movilizar</span><div class="n">258.724</div><span class="q">Hoy en la abstención o indecisos, con afinidad hacia él. La mitad votó a Abinader en 2024; 64 % son mujeres.</span><div class="sub"><span><span>Desaprueban al gobierno (8 de cada 10, mujeres)</span><b>144.287</b></span><span><span>Aprueban al gobierno</span><b>114.438</b></span></div></div>
   </div>
   <div class="card">
-    <span class="lab">A quién podría irse su voto a retener</span>
+    <span class="lab">A quién podría irse su voto a retener · dentro y fuera del PRM</span>
     <div id="fuga" style="margin-top:8px"></div>
-    <p class="small mut" style="margin-top:10px">De los 339.196 electores del voto a retener, cuántos «votarían» también por cada uno de estos candidatos (pueden nombrar a varios).</p>
+    <p class="small mut" style="margin-top:10px">De los 339.196 electores del voto a retener, cuántos «votarían» también por cada uno de estos candidatos (pueden nombrar a varios). Carolina Mejía y Raquel Peña son figuras del PRM: ese voto no sale del partido, cambia de candidato dentro de él.</p>
   </div>
   <div class="card" style="display:flex;flex-direction:column;gap:12px">
     <h3>Cruzar una pregunta</h3>
@@ -825,7 +825,10 @@ const FOTOS={"leonel": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDA
 
   /* ---------- fuga y cruce (Collado, informe de junio) ---------- */
   const FUGA=[['omar',212051,62.5],['carolina',204885,60.4],['abel',134573,39.7],['gonzalo',119871,35.3],['alofoke',119134,35.1],['raquel',109368,32.2]];
-  document.getElementById('fuga').innerHTML=FUGA.map(([k,v,p])=>`<div class="flecha">${foto(k,40)}<div class="txt"><b>${CAND[k]}</b><div class="bar" style="--cc:${C[k]};background:${C[k]};width:${p*0.85}%"></div></div><div class="val"><b>${pct(p)}</b><small>${fmt(v)} electores</small></div></div>`).join('');
+  const filaFuga=([k,v,p])=>`<div class="flecha">${foto(k,40)}<div class="txt"><b>${CAND[k]}${PRMS.has(k)?' <span class="chip" style="font-size:10px;padding:1px 7px;margin-left:4px;background:var(--prm);color:#fff;border-color:var(--prm)">PRM</span>':''}</b><div class="bar" style="--cc:${C[k]};background:${C[k]};width:${p*0.85}%"></div></div><div class="val"><b>${pct(p)}</b><small>${fmt(v)} electores</small></div></div>`;
+  document.getElementById('fuga').innerHTML=
+    `<div class="small mut" style="margin:4px 0 6px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:11px">Se queda en el PRM · otra figura del partido</div>`+FUGA.filter(f=>PRMS.has(f[0])).map(filaFuga).join('')+
+    `<div class="small mut" style="margin:14px 0 6px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:11px">Sale del PRM · candidatos de otros partidos</div>`+FUGA.filter(f=>!PRMS.has(f[0])).map(filaFuga).join('');
   function cruce(){
     const p=document.querySelector('#preg .chip.on').dataset.p, x=document.querySelector('#por .chip.on').dataset.x;
     const tp=document.querySelector('#preg .chip.on').textContent, tx=document.querySelector('#por .chip.on').textContent.toLowerCase();
