@@ -724,6 +724,18 @@
     </div>
     <div id="vis-lamina" style="max-width:100%;overflow:auto;border:1px solid var(--borde-suave);border-radius:8px;background:#fff"></div>
   </div>
+  <div class="panel" style="margin-top:12px" id="sala-clientes">
+    <h3>Sala de clientes · «Mi campaña»</h3>
+    <p class="nota">Lo que ve el cliente en <a href="campana.html" target="_blank">campana.html</a> sale de aquí y solo de aquí: el motor genera un
+      borrador con las corridas y los diccionarios de todas las olas de este ámbito, la dirección lo revisa y lo aprueba. Nada se publica sin pasar
+      por esta sala.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+      <button class="mini-vis" onclick="salaGenerar()">1 · Generar borrador</button>
+      <button class="mini-vis" onclick="salaBorrador()">2 · Ver informe del borrador</button>
+      <button class="mini-vis" onclick="salaAprobar()">3 · Aprobar y publicar</button>
+    </div>
+    <div id="sala-estado" class="cod" style="font-size:13px;white-space:pre-wrap;line-height:1.5"></div>
+  </div>
 </section>
 
 <section id="ruta">
@@ -2107,6 +2119,34 @@ function toast(t){const el=$('toast');el.textContent=t;el.style.display='block';
   clearTimeout(toastT);toastT=setTimeout(()=>el.style.display='none',3600)}
 
 arrancar();
+
+/* ── Sala de clientes: generar → revisar → aprobar (norma: nada se publica sin pasar por la Sala de Control) ── */
+function salaAmbito(){return AMBITO||'dom';}
+async function salaGenerar(){
+  $('sala-estado').textContent='Generando el borrador con las corridas del motor… (alrededor de un minuto por cada 60 olas)';
+  try{const r=await api('/dv/campana/'+salaAmbito()+'/generar','POST');$('sala-estado').textContent=r.lectura+'\nPulse «2 · Ver informe del borrador» en un minuto.';}
+  catch(e){$('sala-estado').textContent='No se pudo generar: '+e.message;}
+}
+async function salaBorrador(){
+  try{
+    const b=await api('/dv/campana/'+salaAmbito()+'/borrador'); const inf=b.informe||{};
+    let t='Estado: '+b.estado+' · generado por '+(b.generado_por||'—')+' el '+b.cuando+'\n';
+    if(inf.lectura) t+=inf.lectura+'\n';
+    if(b.publicado) t+='Publicado ahora mismo para los clientes: versión '+b.publicado.version+' ('+b.publicado.cuando+', '+b.publicado.por+')\n';
+    if(inf.cobertura) t+='Cobertura por bloque (olas): '+Object.entries(inf.cobertura).map(([k,v])=>k+' '+v).join(' · ')+'\n';
+    if(inf.diccionario) t+='Preguntas del diccionario usadas: '+inf.diccionario.confirmadas+' confirmadas · '+inf.diccionario.propuestas+' propuestas por el sistema (sin confirmar)\n';
+    const faltas=(inf.por_ola||[]).filter(f=>f.falta&&f.falta.length);
+    if(faltas.length) t+='Olas con algo que revisar ('+faltas.length+'):\n'+faltas.map(f=>'  · '+f.ola+': '+f.falta.join('; ')).join('\n')+'\n';
+    if((inf.avisos||[]).length) t+='Avisos:\n'+inf.avisos.map(a=>'  · '+a).join('\n')+'\n';
+    if((inf.sin_reconocer||[]).length) t+='Fuera de la sala hasta que el cuaderno lo reconozca: '+inf.sin_reconocer.join('; ')+'\n';
+    $('sala-estado').textContent=t;
+  }catch(e){$('sala-estado').textContent='Sin borrador: '+e.message;}
+}
+async function salaAprobar(){
+  if(!confirm('¿Aprobar el borrador y publicarlo para los clientes de '+salaAmbito()+'? Sustituye la versión que ven ahora.')) return;
+  try{const r=await api('/dv/campana/'+salaAmbito()+'/aprobar','POST',{nota:'Aprobado desde la Sala de Control'});$('sala-estado').textContent=r.lectura;toast(r.lectura);}
+  catch(e){$('sala-estado').textContent='No se pudo aprobar: '+e.message;}
+}
 </script>
 </body>
 </html>

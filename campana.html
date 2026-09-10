@@ -253,17 +253,17 @@ td .celda{display:inline-block;min-width:44px;padding:2px 6px;border-radius:5px}
       <div class="dual" id="hoy-aprob-dual"></div>
       <p class="small mut" id="hoy-aprob-txt" style="margin-top:8px"></p>
       <svg class="spark" id="spark-aprob" viewBox="0 0 320 70"></svg>
-      <p class="small mut">Serie completa desde mayo de 2021. <button class="enlace" data-ir="evolucion" data-serie="aprob">Ver la evolución</button></p>
+      <p class="small mut"><span id="hoy-aprob-desde">Serie completa. </span><button class="enlace" data-ir="evolucion" data-serie="aprob">Ver la evolución</button></p>
     </div>
     <div class="card">
-      <span class="lab">Preferencia de partido para 2028 · <span id="hoy-ola-p"></span></span>
+      <span class="lab"><span id="hoy-partido-lab">Preferencia de partido</span> · <span id="hoy-ola-p"></span></span>
       <div id="hoy-partido" style="margin-top:6px"></div>
       <p class="small mut" id="hoy-partido-txt" style="margin-top:8px"></p>
     </div>
   </div>
 
   <div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:12px"><span class="lab">Estimación de voto · <span id="hoy-ola-e"></span></span><span class="small mut">Ajustada a los resultados reales de 2024 · % sobre votos válidos</span></div>
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:12px"><span class="lab">Estimación de voto · <span id="hoy-ola-e"></span></span><span class="small mut" id="hoy-e-urna">Ajustada a los resultados reales · % sobre votos válidos</span></div>
     <div class="voto" id="hoy-voto"></div>
     <p class="small mut" id="hoy-voto-txt" style="margin-top:12px"></p>
   </div>
@@ -277,8 +277,14 @@ td .celda{display:inline-block;min-width:44px;padding:2px 6px;border-radius:5px}
     <div class="card">
       <span class="lab">Cara a cara · segunda vuelta · <span id="hoy-ola-c"></span></span>
       <div id="hoy-careos" style="margin-top:8px;display:flex;flex-direction:column;gap:14px"></div>
-      <p class="small mut" style="margin-top:10px">Respuesta declarada sobre el total de entrevistados. <button class="enlace" data-ir="evolucion" data-serie="careo">Ver la serie desde 2021</button></p>
+      <p class="small mut" style="margin-top:10px"><span id="hoy-careos-nota">Respuesta declarada sobre el total de entrevistados.</span> <button class="enlace" data-ir="evolucion" data-serie="careo">Ver la serie completa</button></p>
     </div>
+  </div>
+
+  <div class="card" id="hoy-clima" hidden>
+    <span class="lab">Clima de opinión</span>
+    <div class="grid2" id="hoy-clima-cuerpo" style="margin-top:8px"></div>
+    <p class="small mut" style="margin-top:10px">Rumbo del país, economía familiar, emoción ante el futuro y principal problema personal, sobre el total de entrevistados. <button class="enlace" data-ir="evolucion" data-serie="rumbo">Ver la evolución</button></p>
   </div>
 
   <div class="card" style="display:flex;flex-direction:column;gap:14px">
@@ -301,6 +307,9 @@ td .celda{display:inline-block;min-width:44px;padding:2px 6px;border-radius:5px}
     <button class="chip" data-s="partido">Partidos</button>
     <button class="chip" data-s="internas">Internas PRM</button>
     <button class="chip" data-s="imagen">Imagen de figuras</button>
+    <button class="chip" data-s="eval">Evaluación del gobierno</button>
+    <button class="chip" data-s="rumbo">Rumbo del país</button>
+    <button class="chip" data-s="econ">Economía familiar</button>
   </div>
   <div class="chips" id="sub-chips" hidden></div>
   <div class="card">
@@ -586,10 +595,17 @@ let TOK=null,YO=null;
   const p1=n=>n.toLocaleString('es-ES',{minimumFractionDigits:1,maximumFractionDigits:1});
   const foto=(k,s)=>FOTOS[k]?`<img class="foto" width="${s}" height="${s}" src="${FOTOS[k]}" alt="">`:`<span class="ini" style="width:${s}px;height:${s}px;font-size:${Math.round(s*.4)}px;--c:${C[k]||C.otros}">${(CORTO[k]||'?').charAt(0)}</span>`;
   function separar(items,gap){items.sort((a,b)=>a.y-b.y);for(let i=1;i<items.length;i++){if(items[i].y-items[i-1].y<gap)items[i].y=items[i-1].y+gap;}return items;}
-  const OLAS=DATA.olas; const ULT=OLAS[OLAS.length-1];
-  const prmDe=o=>o<'2024-05'?'abinader':'collado';
-  const ultimo=obj=>{const ks=Object.keys(obj).sort();return ks[ks.length-1];};
+  for(const k of ['aprob','eval','rumbo','econ','emocion','problema','intencion','ajustada','careos','partido','internas','imagen','territorio']) if(!DATA[k]) DATA[k]={};
+  const vacio=obj=>!obj||!Object.keys(obj).length;
+  const seguro=(nombre,fn)=>{try{fn()}catch(e){console.warn('bloque '+nombre+' sin datos:',e.message)}};
+  const ultimo=obj=>{if(!obj) return undefined; const ks=Object.keys(obj).sort();return ks[ks.length-1];};
   const anterior=(obj,o)=>{const ks=Object.keys(obj).sort().filter(k=>k<o);return ks[ks.length-1];};
+  const OLAS=DATA.olas; const ULT=OLAS[OLAS.length-1];
+  const PARES=Object.keys(DATA.careos).filter(k=>k.split('|').some(x=>PRMS.has(x))).sort((a,b)=>ultimo(DATA.careos[b]).localeCompare(ultimo(DATA.careos[a]))||Object.keys(DATA.careos[b]).length-Object.keys(DATA.careos[a]).length);
+  const PAR=PARES[0]||Object.keys(DATA.careos)[0];
+  const candPRM=(()=>{const oe=ultimo(DATA.ajustada); if(!oe) return 'collado'; const e=Object.entries(DATA.ajustada[oe].pct).filter(([k,v])=>PRMS.has(k)&&v!=null).sort((a,b)=>b[1]-a[1]); return e.length?e[0][0]:'collado';})();
+  const tipoPartido=t=>t==='deberia'?'«¿De qué partido debería ser el presidente en 2028?»':t==='simpatia'?'«¿Por cuál partido siente mayor simpatía?»':'Voto por partido';
+  const prmDe=o=>o<'2024-05'?'abinader':candPRM;
   document.getElementById('ficha-serie').textContent=`${OLAS.length} encuestas nacionales mensuales de 1.500 entrevistas, de ${nomOla(OLAS[0]).toLowerCase()} a ${nomOla(ULT).toLowerCase()}. Cada serie indica en qué encuestas existe la pregunta.`;
 
   /* ---------- navegación ---------- */
@@ -623,56 +639,82 @@ let TOK=null,YO=null;
 
   /* ---------- HOY ---------- */
   (function hoy(){
-    const oa=ultimo(DATA.aprob), pa=anterior(DATA.aprob,oa), A=DATA.aprob[oa], Ap=DATA.aprob[pa];
+   seguro('aprobación',()=>{
+    // si no hay pregunta de aprobación aprobada, la tarjeta usa la evaluación (bien / mal)
+    let AP=DATA.aprob, etq='aprueba', etd='desaprueba';
+    if(vacio(AP)){AP={};Object.entries(DATA.eval).forEach(([o,v])=>AP[o]={a:v.b,d:v.m});etq='evalúa bien';etd='evalúa mal';document.querySelector('#p-hoy .lab').firstChild.textContent='Evaluación del gobierno · ';}
+    const oa=ultimo(AP), pa=anterior(AP,oa), A=AP[oa], Ap=AP[pa]||A;
     document.getElementById('hoy-ola-a').textContent=nomOla(oa).toLowerCase();
-    document.getElementById('hoy-aprob').innerHTML=p1(A.a)+'<small style="font-size:22px;color:var(--mut)"> % aprueba</small>';
+    document.getElementById('hoy-aprob').innerHTML=p1(A.a)+'<small style="font-size:22px;color:var(--mut)"> % '+etq+'</small>';
     const dv=A.a-Ap.a; document.getElementById('hoy-aprob-delta').innerHTML=`<span class="delta ${dv>0?'up':dv<0?'down':''}">${dv>0?'▲ +':dv<0?'▼ ':''}${p1(dv)} puntos desde ${nomCorto(pa)}</span>`;
     document.getElementById('hoy-aprob-dual').innerHTML=`<i style="width:${A.a}%;background:var(--ok)"></i><i style="width:${100-A.a-A.d}%;background:var(--chip)"></i><i style="width:${A.d}%;background:var(--acc2)"></i>`;
-    const max=Object.entries(DATA.aprob).sort((a,b)=>b[1].a-a[1].a)[0];
-    document.getElementById('hoy-aprob-txt').textContent=`${p1(A.d)} % desaprueba. El máximo de la serie fue ${p1(max[1].a)} % en ${nomOla(max[0]).toLowerCase()}.`;
+    const max=Object.entries(AP).sort((a,b)=>b[1].a-a[1].a)[0];
+    document.getElementById('hoy-aprob-txt').textContent=`${p1(A.d)} % ${etd}. El máximo de la serie fue ${p1(max[1].a)} % en ${nomOla(max[0]).toLowerCase()}.`;
     // sparkline
-    const ks=Object.keys(DATA.aprob).sort(); const W=320,H=70; const xs=i=>8+(W-16)*i/(ks.length-1); const ys=v=>H-8-(H-20)*(v-30)/50;
+    const ks=Object.keys(AP).sort(); const W=320,H=70; const xs=i=>8+(W-16)*i/(ks.length-1); const ys=v=>H-8-(H-20)*(v-30)/50;
     let g=`<line x1="8" x2="${W-8}" y1="${ys(50)}" y2="${ys(50)}" stroke="var(--linea)" stroke-dasharray="3 3"/><text x="${W-8}" y="${ys(50)-3}" text-anchor="end" font-size="9" fill="var(--mut)">50 %</text>`;
-    g+=`<path d="${ks.map((k,i)=>(i?'L':'M')+xs(i)+','+ys(DATA.aprob[k].a)).join(' ')}" fill="none" stroke="var(--prm)" stroke-width="2"/>`;
+    g+=`<path d="${ks.map((k,i)=>(i?'L':'M')+xs(i)+','+ys(AP[k].a)).join(' ')}" fill="none" stroke="var(--prm)" stroke-width="2"/>`;
     g+=`<circle cx="${xs(ks.length-1)}" cy="${ys(A.a)}" r="4" fill="var(--prm)"/><text x="8" y="${H-1}" font-size="9" fill="var(--mut)">${nomCorto(ks[0])}</text><text x="${W-8}" y="${H-1}" text-anchor="end" font-size="9" fill="var(--mut)">${nomCorto(ks[ks.length-1])}</text>`;
     document.getElementById('spark-aprob').innerHTML=g;
-    // partido
+    document.getElementById('hoy-aprob-desde').textContent='Serie completa desde '+nomOla(ks[0]).toLowerCase()+'. ';
+   });
+   seguro('clima',()=>{
+    const bloques=[];
+    const or=ultimo(DATA.rumbo); if(or){const R=DATA.rumbo[or];bloques.push(`<div><span class="lab">Rumbo del país · ${nomCorto(or)}</span><div class="num" style="font-size:28px;margin-top:2px">${pct(R.c)}<small style="font-size:13px;color:var(--mut);font-family:Montserrat"> camino correcto</small></div><div class="dual" style="height:8px"><i style="width:${R.c}%;background:var(--ok)"></i><i style="width:${Math.max(0,100-R.c-R.e)}%;background:var(--chip)"></i><i style="width:${R.e}%;background:var(--acc2)"></i></div><div class="small mut">${pct(R.e)} camino equivocado</div></div>`);}
+    const oc=ultimo(DATA.econ); if(oc){const Ec=DATA.econ[oc];bloques.push(`<div><span class="lab">Economía familiar · ${nomCorto(oc)}</span><div class="num" style="font-size:28px;margin-top:2px">${pct(Ec.b)}<small style="font-size:13px;color:var(--mut);font-family:Montserrat"> buena</small></div><div class="dual" style="height:8px"><i style="width:${Ec.b}%;background:var(--ok)"></i><i style="width:${Math.max(0,100-Ec.b-Ec.m)}%;background:var(--chip)"></i><i style="width:${Ec.m}%;background:var(--acc2)"></i></div><div class="small mut">${pct(Ec.m)} mala</div></div>`);}
+    const om=ultimo(DATA.emocion); if(om){const M=Object.entries(DATA.emocion[om]).sort((a,b)=>b[1]-a[1]).slice(0,3);bloques.push(`<div><span class="lab">Emoción ante el futuro · ${nomCorto(om)}</span>${M.map(([k,v])=>`<div class="fila" style="padding:5px 0"><span>${k}</span><span class="n" style="font-size:16px">${pct(v)}</span></div>`).join('')}</div>`);}
+    const opb=ultimo(DATA.problema); if(opb){const Pb=Object.entries(DATA.problema[opb]).filter(([k])=>!/^ninguno/i.test(k)).sort((a,b)=>b[1]-a[1]).slice(0,3);bloques.push(`<div><span class="lab">Principal problema personal · ${nomCorto(opb)}</span>${Pb.map(([k,v])=>`<div class="fila" style="padding:5px 0"><span>${k}</span><span class="n" style="font-size:16px">${pct(v)}</span></div>`).join('')}</div>`);}
+    const card=document.getElementById('hoy-clima'); if(bloques.length){card.hidden=false;document.getElementById('hoy-clima-cuerpo').innerHTML=bloques.join('');} else card.hidden=true;
+   });
+   seguro('partido',()=>{
     const op=ultimo(DATA.partido), P=DATA.partido[op]; document.getElementById('hoy-ola-p').textContent=nomOla(op).toLowerCase();
+    document.getElementById('hoy-partido-lab').textContent=P.tipo==='simpatia'?'Simpatía de partido':P.tipo==='deberia'?'Preferencia de partido para 2028':'Voto por partido';
     const ordP=Object.entries(P.pct).filter(([k])=>k!=='otros').sort((a,b)=>b[1]-a[1]);
     document.getElementById('hoy-partido').innerHTML=ordP.map(([k,v])=>{const kk=k.toLowerCase();return `<div class="fila" style="flex-direction:column;align-items:stretch;gap:2px"><div style="display:flex;justify-content:space-between;align-items:center"><span style="display:flex;align-items:center;gap:8px">${kk==='prm'?foto('prm',28):`<i style="width:12px;height:12px;border-radius:50%;background:${C[kk]||C.otros};display:inline-block"></i>`}<b>${CAND[kk]||k}</b></span><span class="n">${pct(v)}</span></div><div class="barra-h"><i style="width:${100*v/ordP[0][1]}%;background:${C[kk]||C.otros}"></i></div></div>`}).join('');
     const pa2=anterior(DATA.partido,op); const pmax=Object.entries(DATA.partido).filter(([k,v])=>v.pct.PRM!=null).sort((a,b)=>b[1].pct.PRM-a[1].pct.PRM)[0];
-    document.getElementById('hoy-partido-txt').textContent=`${P.tipo==='deberia'?'«¿De qué partido debería ser el presidente en 2028?»':'Voto por partido'} · sobre el total de entrevistados${pa2?` · el PRM tenía ${p1(DATA.partido[pa2].pct.PRM)} % en ${nomCorto(pa2)}`:''}${pmax?` · máximo del PRM: ${p1(pmax[1].pct.PRM)} % en ${nomCorto(pmax[0])}`:''}.`;
-    // estimación
+    document.getElementById('hoy-partido-txt').textContent=`${tipoPartido(P.tipo)} · sobre el total de entrevistados${pa2?` · el PRM tenía ${p1(DATA.partido[pa2].pct.PRM)} % en ${nomCorto(pa2)}`:''}${pmax?` · máximo del PRM: ${p1(pmax[1].pct.PRM)} % en ${nomCorto(pmax[0])}`:''}.`;
+   });
+   seguro('estimación',()=>{
     const oe=ultimo(DATA.ajustada), E=DATA.ajustada[oe], pe=anterior(DATA.ajustada,oe); document.getElementById('hoy-ola-e').textContent=nomOla(oe).toLowerCase();
+    document.getElementById('hoy-e-urna').textContent='Ajustada a los resultados reales de '+(E.urna||'2024')+' · % sobre votos válidos';
     const ordE=Object.entries(E.pct).filter(([k,v])=>v!=null&&k!=='otros').sort((a,b)=>b[1]-a[1]).slice(0,3);
     document.getElementById('hoy-voto').innerHTML=ordE.map(([k,v],i)=>{const prev=pe&&DATA.ajustada[pe].pct[k];return `<div class="cand ${PRMS.has(k)?'yo':''}"><span class="pos">${i+1}</span>${PRMS.has(k)?'<span class="tu">PRM</span>':''}${foto(k,56)}<div class="info"><span class="nombre">${CAND[k]}</span><span class="pc">${pct(v)}</span><span class="e">${fmt(E.tot[k])} electores${prev!=null?' · en '+nomCorto(pe)+' '+pct(prev):''}</span></div></div>`}).join('');
-    const col=E.pct.collado, pos=ordE.findIndex(([k])=>k==='collado')+1;
-    document.getElementById('hoy-voto-txt').innerHTML=`David Collado, candidato del PRM mejor situado, obtiene ${pct(col)} y ocupa el ${pos===1?'primer':pos===2?'segundo':'tercer'} lugar. Irían a votar ${Math.round(E.tp)} de cada 100 electores. <button class="enlace" data-ir="flujos">Ver de dónde viene cada voto</button>`;
-    // internas
-    const oi=ultimo(DATA.internas), I=DATA.internas[oi], pi=anterior(DATA.internas,oi); document.getElementById('hoy-ola-i').textContent=nomOla(oi).toLowerCase();
+    const col=E.pct[candPRM], todos=Object.entries(E.pct).filter(([k,v])=>v!=null&&k!=='otros'&&k!=='abst').sort((a,b)=>b[1]-a[1]), pos=todos.findIndex(([k])=>k===candPRM)+1;
+    document.getElementById('hoy-voto-txt').innerHTML=`${CAND[candPRM]}, candidato del PRM mejor situado, obtiene ${pct(col)} y ocupa el ${['','primer','segundo','tercer','cuarto','quinto'][pos]||pos+'º'} lugar.${E.tp?` Irían a votar ${Math.round(E.tp)} de cada 100 electores.`:''} <button class="enlace" data-ir="flujos">Ver de dónde viene cada voto</button>`;
+   });
+   seguro('internas',()=>{
+    const oi=ultimo(DATA.internas); if(!oi){document.getElementById('hoy-internas').parentElement.hidden=true;return;}
+    const I=DATA.internas[oi], pi=anterior(DATA.internas,oi); document.getElementById('hoy-ola-i').textContent=nomOla(oi).toLowerCase();
     const ordI=Object.entries(I).filter(([k])=>k!=='otros').sort((a,b)=>b[1]-a[1]).slice(0,5);
     document.getElementById('hoy-internas').innerHTML=ordI.map(([k,v])=>`<div class="flecha">${foto(k,40)}<div class="txt"><b>${CAND[k]||k}</b><div class="bar" style="--cc:${C[k]||C.otros};background:${C[k]||C.otros};width:${Math.max(3,85*v/ordI[0][1])}%"></div></div><div class="val"><b>${pct(v)}</b>${pi&&DATA.internas[pi][k]!=null?`<small>${nomCorto(pi)}: ${pct(DATA.internas[pi][k])}</small>`:''}</div></div>`).join('');
     const nadieI=Math.round(100-Object.values(I).reduce((a,b)=>a+b,0));
     document.getElementById('hoy-internas-txt').textContent=`«¿Quién debería ser el candidato presidencial del PRM?» · sobre el total de entrevistados; ${nadieI} de cada 100 no eligen a nadie o no saben.`;
-    // careos
+   });
+   seguro('careos',()=>{
     const cc=[];
-    for(const key of ['collado|leonel','collado|omar']){const o=ultimo(DATA.careos[key]); const v=DATA.careos[key][o]; const [a,b]=key.split('|'); cc.push({o,a,b,v});}
+    for(const key of PARES.slice(0,2)){const o=ultimo(DATA.careos[key]); const v=DATA.careos[key][o]; let [a,b]=key.split('|'); if(PRMS.has(b)&&!PRMS.has(a)){[a,b]=[b,a];} cc.push({o,a,b,v:{...v,nadie:v.nadie!=null?v.nadie:Math.max(0,Math.round(10*(100-(v[a]||0)-(v[b]||0)))/10)}});}
+    if(!cc.length){document.getElementById('hoy-careos').parentElement.hidden=true;return;}
     document.getElementById('hoy-ola-c').textContent=nomOla(cc[0].o).toLowerCase();
-    document.getElementById('hoy-careos').innerHTML=cc.map(({a,b,v})=>`<div><div style="display:flex;align-items:center;gap:10px;justify-content:space-between"><div style="display:flex;align-items:center;gap:8px">${foto(a,40)}<b class="num" style="font-size:22px">${pct(v[a])}</b></div><span class="lab">frente a</span><div style="display:flex;align-items:center;gap:8px"><b class="num" style="font-size:22px">${pct(v[b])}</b>${foto(b,40)}</div></div><div class="dual" style="height:10px"><i style="width:${v[a]}%;background:${C[a]}"></i><i style="width:${v.nadie}%;background:var(--chip)"></i><i style="width:${v[b]}%;background:${C[b]}"></i></div><div class="small mut" style="margin-top:4px">${CAND[a]} frente a ${CAND[b]} · ${pct(v.nadie)} ninguno o no sabe</div></div>`).join('');
-    // hallazgos
-    const T=DATA.ajustada[oe]; const kAb=T.cols.find(c=>/ABINAD/.test(c)); const colTot=T.orig[kAb]; const abRows=Object.entries(T.matriz).map(([k,m])=>[k,m[kAb]||0]).sort((a,b)=>b[1]-a[1]);
-    const colladoTot=T.tot.collado, deAb=T.matriz.collado[kAb];
-    const aprobJun24=DATA.aprob['2024-06'], prmMar24=DATA.partido['2024-03'];
-    const cl=DATA.careos['collado|leonel']; const clKs=Object.keys(cl).sort(); const primeroPierde=clKs.find(k=>cl[k].leonel>cl[k].collado);
-    const HH=[
-      [`El gobierno ha perdido ${p1(aprobJun24.a-A.a)} puntos de aprobación desde junio de 2024`,`Tras la reelección la aprobación llegó a ${p1(aprobJun24.a)} %. En ${nomOla(oa).toLowerCase()} aprueban ${p1(A.a)} % y desaprueban ${p1(A.d)} %.`,`Serie de aprobación · 2021–2026`],
-      [`El voto de Abinader de 2024 se reparte hoy: ${p1(100*abRows[0][1]/colTot)} % a ${CORTO[abRows[0][0]]}, ${p1(100*abRows[1][1]/colTot)} % a ${CORTO[abRows[1][0]]}, ${p1(100*abRows[2][1]/colTot)} % a ${CORTO[abRows[2][0]]}`,`De los 2.507.297 electores que votaron a Abinader, hoy ${fmt(abRows[0][1])} votarían por ${CAND[abRows[0][0]]}. El PRM retiene con Collado ${p1(100*deAb/colTot)} % de su electorado de 2024.`,`Matriz de transferencia · ${nomOla(oe).toLowerCase()}`],
-      [`El voto de Collado es el voto de Abinader`,`De cada 100 electores que hoy votarían por David Collado, ${Math.round(100*deAb/colladoTot)} votaron a Abinader en 2024. Casi no recibe voto de ningún otro origen: su techo hoy es el electorado del gobierno.`,`Matriz de transferencia · ${nomOla(oe).toLowerCase()}`],
-      [`La preferencia por el PRM pasó de ${p1(prmMar24.pct.PRM)} % a ${p1(P.pct.PRM)} %`,`En marzo de 2024, ${p1(prmMar24.pct.PRM)} % votaría por el PRM como partido. En ${nomOla(op).toLowerCase()}, ${p1(P.pct.PRM)} % cree que el presidente de 2028 debería ser del PRM, frente a ${p1(P.pct.PLD)} % del PLD y ${p1(P.pct.FP)} % de la Fuerza del Pueblo.`,`Voto por partido (2022–2024) y partido que debería gobernar (2024–2026)`],
-      [`Collado ganaba el cara a cara a Leonel y lo pierde desde ${nomOla(primeroPierde).toLowerCase()}`,`En ${nomOla(clKs[0]).toLowerCase()} ganaba ${p1(cl[clKs[0]].collado)} % a ${p1(cl[clKs[0]].leonel)} %. En ${nomOla(cc[0].o).toLowerCase()} pierde ${p1(cc[0].v.collado)} % a ${p1(cc[0].v.leonel)} %.`,`Pregunta de segunda vuelta · ${clKs.length} encuestas`],
-      [`Dentro del PRM, Collado es el favorito con ${pct(ordI[0][1])}`,`Le siguen ${CAND[ordI[1][0]]} (${pct(ordI[1][1])}) y ${CAND[ordI[2][0]]} (${pct(ordI[2][1])}). La ventaja se mantiene desde que se pregunta, en ${nomOla(Object.keys(DATA.internas).sort()[0]).toLowerCase()}.`,`Internas del PRM · ${nomOla(oi).toLowerCase()}`]
-    ];
+    document.getElementById('hoy-careos').innerHTML=cc.map(({a,b,v})=>`<div><div style="display:flex;align-items:center;gap:10px;justify-content:space-between"><div style="display:flex;align-items:center;gap:8px">${foto(a,40)}<b class="num" style="font-size:22px">${pct(v[a])}</b></div><span class="lab">frente a</span><div style="display:flex;align-items:center;gap:8px"><b class="num" style="font-size:22px">${pct(v[b])}</b>${foto(b,40)}</div></div><div class="dual" style="height:10px"><i style="width:${v[a]}%;background:${C[a]}"></i><i style="width:${v.nadie}%;background:var(--chip)"></i><i style="width:${v[b]}%;background:${C[b]}"></i></div><div class="small mut" style="margin-top:4px">${CAND[a]} frente a ${CAND[b]}${v.nadie>0?' · '+pct(v.nadie)+' ninguno o no sabe':''}</div></div>`).join('');
+    document.getElementById('hoy-careos-nota').textContent=cc.some(x=>x.v.nadie>0)?'Respuesta declarada sobre el total de entrevistados.':'Estimación ajustada al voto real de la última elección (método Vote-Transfer) · % sobre votos válidos.';
+   });
+   seguro('hallazgos',()=>{
+    const HH=[];
+    const add=fn=>{try{const h=fn(); if(h) HH.push(h);}catch(e){}};
+    add(()=>{const AP=vacio(DATA.aprob)?null:DATA.aprob; if(!AP) return null; const oa=ultimo(AP),A=AP[oa]; const mx=Object.entries(AP).sort((a,b)=>b[1].a-a[1].a)[0]; if(mx[0]===oa) return [`La aprobación del gobierno está en su máximo: ${p1(A.a)} %`,`En ${nomOla(oa).toLowerCase()} aprueban ${p1(A.a)} % y desaprueban ${p1(A.d)} %.`,`Serie de aprobación · ${Object.keys(AP).length} encuestas`];
+      return [`El gobierno ha perdido ${p1(mx[1].a-A.a)} puntos de aprobación desde ${nomOla(mx[0]).toLowerCase()}`,`Entonces aprobaba ${p1(mx[1].a)} %. En ${nomOla(oa).toLowerCase()} aprueban ${p1(A.a)} % y desaprueban ${p1(A.d)} %.`,`Serie de aprobación · ${nomOla(Object.keys(AP).sort()[0]).toLowerCase()} – ${nomOla(oa).toLowerCase()}`];});
+    add(()=>{const oe=ultimo(DATA.ajustada); const T=DATA.ajustada[oe]; const kAb=T.cols.find(c=>/ABINAD/.test(c)); const colTot=T.orig[kAb]; const abRows=Object.entries(T.matriz).map(([k,m])=>[k,m[kAb]||0]).sort((a,b)=>b[1]-a[1]);
+      return [`El voto de ${ORI[kAb].n} se reparte hoy: ${p1(100*abRows[0][1]/colTot)} % a ${CORTO[abRows[0][0]]}, ${p1(100*abRows[1][1]/colTot)} % a ${CORTO[abRows[1][0]]}, ${p1(100*abRows[2][1]/colTot)} % a ${CORTO[abRows[2][0]]}`,`De los ${fmt(colTot)} electores de ${ORI[kAb].n} con voto declarado, hoy ${fmt(abRows[0][1])} votarían por ${CAND[abRows[0][0]]}. El PRM retiene con ${CAND[candPRM]} ${p1(100*(T.matriz[candPRM]||{})[kAb]/colTot)} % de ese electorado.`,`Matriz de transferencia · ${nomOla(oe).toLowerCase()}`];});
+    add(()=>{const oe=ultimo(DATA.ajustada); const T=DATA.ajustada[oe]; const kAb=T.cols.find(c=>/ABINAD/.test(c)); const tot=T.tot[candPRM], deAb=(T.matriz[candPRM]||{})[kAb]; if(!tot||candPRM==='abinader') return null; const r=Math.round(100*deAb/tot);
+      return [r>=70?`El voto de ${CORTO[candPRM]} es el voto de Abinader`:`${r} de cada 100 votos de ${CORTO[candPRM]} vienen de Abinader`,`De cada 100 electores que hoy votarían por ${CAND[candPRM]}, ${r} votaron a Abinader en ${T.urna||'2024'}.${r>=70?' Casi no recibe voto de ningún otro origen: su techo hoy es el electorado del gobierno.':''}`,`Matriz de transferencia · ${nomOla(oe).toLowerCase()}`];});
+    add(()=>{const op=ultimo(DATA.partido),P=DATA.partido[op]; const mx=Object.entries(DATA.partido).filter(([k,v])=>v.pct.PRM!=null).sort((a,b)=>b[1].pct.PRM-a[1].pct.PRM)[0]; if(mx[0]===op) return null;
+      return [`El PRM pasó de ${p1(mx[1].pct.PRM)} % a ${p1(P.pct.PRM)} % como partido`,`En ${nomOla(mx[0]).toLowerCase()}, ${p1(mx[1].pct.PRM)} % (${tipoPartido(DATA.partido[mx[0]].tipo).toLowerCase()}). En ${nomOla(op).toLowerCase()}, ${p1(P.pct.PRM)} %, frente a ${p1(P.pct.PLD)} % del PLD y ${p1(P.pct.FP)} % de la Fuerza del Pueblo.`,`${Object.keys(DATA.partido).length} encuestas · ${tipoPartido(P.tipo)}`];});
+    add(()=>{if(!PAR) return null; const cl=DATA.careos[PAR]; let [a,b]=PAR.split('|'); if(PRMS.has(b)&&!PRMS.has(a)){[a,b]=[b,a];} const ks=Object.keys(cl).sort(); const u=ks[ks.length-1]; const pierde=ks.find(k=>cl[k][b]>cl[k][a]); const ganaHoy=cl[u][a]>=cl[u][b];
+      return [ganaHoy?`${CORTO[a]} gana el cara a cara a ${CORTO[b]}: ${p1(cl[u][a])} % frente a ${p1(cl[u][b])} %`:`${CORTO[a]} pierde el cara a cara con ${CORTO[b]}${pierde&&pierde!==ks[0]?' desde '+nomOla(pierde).toLowerCase():''}`,`En ${nomOla(ks[0]).toLowerCase()} el resultado era ${p1(cl[ks[0]][a])} % a ${p1(cl[ks[0]][b])} %. En ${nomOla(u).toLowerCase()}, ${p1(cl[u][a])} % a ${p1(cl[u][b])} %.`,`Cara a cara · ${ks.length} encuesta${ks.length>1?'s':''}`];});
+    add(()=>{const oi=ultimo(DATA.internas); const I=Object.entries(DATA.internas[oi]).filter(([k])=>k!=='otros').sort((a,b)=>b[1]-a[1]); return [`Dentro del PRM, ${CORTO[I[0][0]]||I[0][0]} es el favorito con ${pct(I[0][1])}`,`Le siguen ${CAND[I[1][0]]||I[1][0]} (${pct(I[1][1])})${I[2]?` y ${CAND[I[2][0]]||I[2][0]} (${pct(I[2][1])})`:''}. La pregunta existe desde ${nomOla(Object.keys(DATA.internas).sort()[0]).toLowerCase()}.`,`Internas del PRM · ${nomOla(oi).toLowerCase()}`];});
+    add(()=>{const or=ultimo(DATA.rumbo),R=DATA.rumbo[or]; const ks=Object.keys(DATA.rumbo).sort(); const f=DATA.rumbo[ks[0]]; return [`${p1(R.c)} % cree que el país va por el camino correcto`,`En ${nomOla(ks[0]).toLowerCase()} lo creía ${p1(f.c)} %. En ${nomOla(or).toLowerCase()}, ${p1(R.c)} % frente a ${p1(R.e)} % que lo ve equivocado.`,`Rumbo del país · ${ks.length} encuestas`];});
     document.getElementById('hallazgos').innerHTML=HH.map(([t,p,g])=>`<div class="hallazgo" style="margin-bottom:12px"><b>${t}</b><p>${p}</p><span class="g">${g}</span></div>`).join('');
+   });
   })();
 
   /* ---------- EVOLUCIÓN ---------- */
@@ -684,16 +726,24 @@ let TOK=null,YO=null;
     careo:'Si solo estuvieran los dos, ¿por quién votaría? Porcentaje sobre el total de entrevistados.',
     partido:'Hasta septiembre de 2024: «si tuviera que votar por un partido, ¿por cuál votaría?». Desde noviembre de 2024: «¿de qué partido debería ser el presidente en 2028?». Porcentaje sobre el total de entrevistados.',
     internas:'«¿Quién debería ser el candidato presidencial del PRM?» Porcentaje sobre el total de entrevistados (incluye a quienes no eligen a nadie).',
-    imagen:'Imagen positiva de cada figura: entre quienes la conocen, porcentaje que dice tener una imagen positiva o que le gusta. Solo se pregunta desde 2024.'
+    imagen:'Imagen positiva de cada figura: entre quienes la conocen, porcentaje que dice tener una imagen positiva o que le gusta. Solo se pregunta desde 2024.',
+    eval:'«¿Cómo evaluaría la gestión del gobierno?» Bien y muy bien frente a mal y muy mal, sobre el total de entrevistados. Es la pregunta más antigua de la serie.',
+    rumbo:'«¿Las cosas en el país van por el camino correcto o por el camino equivocado?» Porcentaje sobre el total de entrevistados.',
+    econ:'«¿Cómo evalúa la situación económica actual de su familia?» Buena y muy buena frente a mala y muy mala, sobre el total de entrevistados.'
   };
-  const SUBS={careo:[['collado|leonel','Collado – Leonel'],['collado|omar','Collado – Omar'],['abinader|leonel','Abinader – Leonel'],['abel|abinader','Abinader – Abel']],imagen:[['prm','Figuras del PRM'],['todos','Todas las figuras']]};
+  const SUBS={careo:Object.keys(DATA.careos).sort((a,b)=>Object.keys(DATA.careos[b]).length-Object.keys(DATA.careos[a]).length).map(k=>{let [a,b]=k.split('|'); if(PRMS.has(b)&&!PRMS.has(a)){[a,b]=[b,a];} return [k,(CORTO[a]||a)+' – '+(CORTO[b]||b)]}),imagen:[['prm','Figuras del PRM'],['todos','Todas las figuras']]};
+  // series sin datos aprobados: la pestaña no se muestra
+  document.querySelectorAll('#series-chips .chip').forEach(b=>{const k=b.dataset.s; const fuente={aprob:DATA.aprob,ajustada:DATA.ajustada,declarada:DATA.intencion,careo:DATA.careos,partido:DATA.partido,internas:DATA.internas,imagen:DATA.imagen,eval:DATA.eval,rumbo:DATA.rumbo,econ:DATA.econ}[k]; if(vacio(fuente)) b.hidden=true;});
   function prepara(){
     const s=serie; let olas=[],lineas=[],val={},titulo='',nota='',unidad='%';
     if(s==='aprob'){olas=Object.keys(DATA.aprob).sort();lineas=['aprueba','desaprueba'];olas.forEach(o=>val[o]={aprueba:DATA.aprob[o].a,desaprueba:DATA.aprob[o].d});titulo='Aprobación del gobierno';nota='El resto hasta 100 no sabe o no responde.';}
     else if(s==='ajustada'){olas=Object.keys(DATA.ajustada).sort();const cnt={};olas.forEach(o=>Object.entries(DATA.ajustada[o].pct).forEach(([k,v])=>{if(v!=null&&k!=='otros'&&k!=='abst')cnt[k]=Math.max(cnt[k]||0,v)}));lineas=Object.entries(cnt).filter(([k,v])=>v>=3).sort((a,b)=>b[1]-a[1]).map(x=>x[0]);olas.forEach(o=>{val[o]={};lineas.forEach(k=>{const v=DATA.ajustada[o].pct[k];if(v!=null)val[o][k]=v})});titulo='Estimación ajustada';nota='Solo las encuestas que preguntan el voto anterior. Hasta abril de 2024 se ajusta a la presidencial de 2020; desde junio de 2024, a la de 2024.';}
     else if(s==='declarada'){olas=Object.keys(DATA.intencion).sort();const cnt={};olas.forEach(o=>Object.entries(DATA.intencion[o].pct).forEach(([k,v])=>{if(k!=='otros')cnt[k]=Math.max(cnt[k]||0,v)}));lineas=Object.entries(cnt).filter(([k,v])=>v>=5).sort((a,b)=>b[1]-a[1]).map(x=>x[0]);olas.forEach(o=>{val[o]={};lineas.forEach(k=>{const v=DATA.intencion[o].pct[k];if(v!=null)val[o][k]=v});val[o].nadie=DATA.intencion[o].nadie});titulo='Intención de voto declarada';nota='Incluye en el total a quienes no votarían por nadie o no saben. Un candidato solo aparece cuando estaba en la lista de esa encuesta.';}
-    else if(s==='careo'){sub=sub||'collado|leonel';const cd=DATA.careos[sub];olas=Object.keys(cd).sort();lineas=sub.split('|');olas.forEach(o=>val[o]={...cd[o]});titulo='Cara a cara: '+lineas.map(k=>CAND[k]).join(' frente a ');nota='El resto hasta 100 no votaría por ninguno o no sabe.';}
-    else if(s==='partido'){olas=Object.keys(DATA.partido).sort();lineas=['PRM','PLD','FP','PRSC'];olas.forEach(o=>{val[o]={};lineas.forEach(k=>{const v=DATA.partido[o].pct[k];if(v!=null)val[o][k]=v})});titulo='Partidos';nota='Dos preguntas distintas: voto por partido hasta 2024 y partido que debería gobernar en 2028 desde noviembre de 2024. La línea vertical de puntos marca el cambio.';}
+    else if(s==='careo'){sub=(sub&&DATA.careos[sub])?sub:PAR;const cd=DATA.careos[sub]||{};olas=Object.keys(cd).sort();lineas=sub.split('|');olas.forEach(o=>val[o]={...cd[o]});titulo='Cara a cara: '+lineas.map(k=>CAND[k]).join(' frente a ');nota='El resto hasta 100 no votaría por ninguno o no sabe.';}
+    else if(s==='partido'){olas=Object.keys(DATA.partido).sort();lineas=['PRM','PLD','FP','PRSC'];olas.forEach(o=>{val[o]={};lineas.forEach(k=>{const v=DATA.partido[o].pct[k];if(v!=null)val[o][k]=v})});titulo='Partidos';const tipos=[...new Set(olas.map(o=>DATA.partido[o].tipo))];nota=tipos.length>1?'Dos preguntas distintas: voto por partido hasta 2024 y partido que debería gobernar en 2028 desde noviembre de 2024. La línea vertical de puntos marca el cambio.':tipoPartido(tipos[0])+' · sobre el total de entrevistados.';}
+    else if(s==='eval'){olas=Object.keys(DATA.eval).sort();lineas=['bien','mal'];olas.forEach(o=>val[o]={bien:DATA.eval[o].b,mal:DATA.eval[o].m});titulo='Evaluación del gobierno';nota='«¿Cómo evaluaría la gestión del gobierno?» · bien y muy bien frente a mal y muy mal; el resto, regular o no sabe.';}
+    else if(s==='rumbo'){olas=Object.keys(DATA.rumbo).sort();lineas=['correcto','equivocado'];olas.forEach(o=>val[o]={correcto:DATA.rumbo[o].c,equivocado:DATA.rumbo[o].e});titulo='Rumbo del país';nota='«¿El país va por el camino correcto o equivocado?» · el resto no sabe.';}
+    else if(s==='econ'){olas=Object.keys(DATA.econ).sort();lineas=['buena','mala'];olas.forEach(o=>val[o]={buena:DATA.econ[o].b,mala:DATA.econ[o].m});titulo='Economía familiar';nota='«¿Cómo evalúa la situación económica de su familia?» · buena y muy buena frente a mala y muy mala.';}
     else if(s==='internas'){olas=Object.keys(DATA.internas).sort();const cnt={};olas.forEach(o=>Object.entries(DATA.internas[o]).forEach(([k,v])=>{if(k!=='otros')cnt[k]=Math.max(cnt[k]||0,v)}));lineas=Object.entries(cnt).filter(([k,v])=>v>=2).sort((a,b)=>b[1]-a[1]).map(x=>x[0]);olas.forEach(o=>{val[o]={};lineas.forEach(k=>{const v=DATA.internas[o][k];if(v!=null)val[o][k]=v})});titulo='Internas del PRM';nota='Sobre el total de entrevistados.';}
     else if(s==='imagen'){sub=sub||'prm';olas=Object.keys(DATA.imagen).sort();const cnt={};olas.forEach(o=>Object.entries(DATA.imagen[o]).forEach(([k,v])=>{cnt[k]=Math.max(cnt[k]||0,v.p)}));lineas=Object.keys(cnt).filter(k=>sub==='todos'||PRMS.has(k)).sort((a,b)=>cnt[b]-cnt[a]).slice(0,sub==='todos'?10:6);olas.forEach(o=>{val[o]={};lineas.forEach(k=>{const v=DATA.imagen[o][k];if(v)val[o][k]=v.p})});titulo='Imagen positiva';nota='Porcentaje con imagen positiva sobre el total de entrevistados.';}
     S={olas,lineas,val,titulo,nota};
@@ -703,8 +753,10 @@ let TOK=null,YO=null;
     const r=document.getElementById('ev-range'); r.max=olas.length-1; if(idx>olas.length-1||idx<0)idx=olas.length-1; r.value=idx;
   }
   function setSerie(s){if(timer){clearInterval(timer);timer=null;document.getElementById('ev-play').textContent='▶';} if(s!==serie){sub=null;ocultas=new Set();} serie=s;document.querySelectorAll('#series-chips .chip').forEach(c=>c.classList.toggle('on',c.dataset.s===s));prepara();idx=S.olas.length-1;document.getElementById('ev-range').value=idx;pinta();}
-  const colorDe=k=>{const kk=k.toLowerCase();return kk==='aprueba'?'var(--ok)':kk==='desaprueba'?'var(--acc2)':(C[kk]||C.otros)};
-  const gruesa=k=>{const kk=k.toLowerCase();return kk==='aprueba'||kk==='prm'||PRMS.has(kk)};
+  const POS=new Set(['aprueba','bien','correcto','buena']), NEG=new Set(['desaprueba','mal','equivocado','mala']);
+  const colorDe=k=>{const kk=k.toLowerCase();return POS.has(kk)?'var(--ok)':NEG.has(kk)?'var(--acc2)':(C[kk]||C.otros)};
+  const gruesa=k=>{const kk=k.toLowerCase();return POS.has(kk)||kk==='prm'||PRMS.has(kk)};
+  const nomLinea=k=>{const kk=k.toLowerCase();return POS.has(kk)||NEG.has(kk)?kk.charAt(0).toUpperCase()+kk.slice(1):(CAND[kk]||k)};
   function pinta(){
     const narrow=window.innerWidth<600; const svg=document.getElementById('linea'), W=narrow?400:680,H=narrow?260:300,L=narrow?40:52,R=narrow?14:24,T=20,B=narrow?52:44; svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
     const olas=S.olas, n=olas.length, lineas=S.lineas.filter(k=>!ocultas.has(k)), xs=i=>n===1?W/2:L+(W-L-R)*i/(n-1);
@@ -732,8 +784,8 @@ let TOK=null,YO=null;
     document.getElementById('toma-lab').textContent='Cuadro de la toma · '+nomOla(o)+' · '+S.titulo;
     const orden=S.lineas.filter(k=>S.val[o][k]!=null).sort((a,b)=>(S.val[o][b]||0)-(S.val[o][a]||0));
     document.getElementById('toma').innerHTML=orden.map(k=>{const v=S.val[o][k];const pv=prev?S.val[prev][k]:null;const dv=pv!=null?v-pv:null;const kk=k.toLowerCase();const esP=gruesa(k);
-      const cab=(kk==='aprueba'||kk==='desaprueba')?`<span class="ini" style="width:56px;height:56px;font-size:20px;--c:${colorDe(k)}">${kk==='aprueba'?'✓':'✕'}</span>`:(kk==='prm'?foto('prm',56):(['pld','fp','prsc','prd'].includes(kk)?`<span class="ini" style="width:56px;height:56px;font-size:16px;--c:${C[kk]}">${k}</span>`:foto(kk,56)));
-      return `<div class="c ${esP?'yo':''}">${cab}<span class="nm">${kk==='aprueba'?'Aprueba':kk==='desaprueba'?'Desaprueba':(CAND[kk]||k)}</span><span class="pc">${pct(v)}</span>${dv===null?'<span class="d mut">'+(prev?'no estaba':'primera toma')+'</span>':`<span class="d ${dv>0?'up':dv<0?'down':''}">${dv>0?'▲ +':dv<0?'▼ ':''}${p1(dv)} desde ${nomCorto(prev)}</span>`}</div>`}).join('')+(S.val[o].nadie!=null&&serie!=='aprob'?`<div class="c"><span class="ini" style="width:56px;height:56px;font-size:22px;--c:var(--otros)">—</span><span class="nm">Ninguno / no sabe</span><span class="pc">${pct(S.val[o].nadie)}</span></div>`:'');
+      const cab=(POS.has(kk)||NEG.has(kk))?`<span class="ini" style="width:56px;height:56px;font-size:20px;--c:${colorDe(k)}">${POS.has(kk)?'✓':'✕'}</span>`:(kk==='prm'?foto('prm',56):(['pld','fp','prsc','prd'].includes(kk)?`<span class="ini" style="width:56px;height:56px;font-size:16px;--c:${C[kk]}">${k}</span>`:foto(kk,56)));
+      return `<div class="c ${esP?'yo':''}">${cab}<span class="nm">${nomLinea(k)}</span><span class="pc">${pct(v)}</span>${dv===null?'<span class="d mut">'+(prev?'no estaba':'primera toma')+'</span>':`<span class="d ${dv>0?'up':dv<0?'down':''}">${dv>0?'▲ +':dv<0?'▼ ':''}${p1(dv)} desde ${nomCorto(prev)}</span>`}</div>`}).join('')+(S.val[o].nadie!=null&&!['aprob','eval','rumbo','econ'].includes(serie)?`<div class="c"><span class="ini" style="width:56px;height:56px;font-size:22px;--c:var(--otros)">—</span><span class="nm">Ninguno / no sabe</span><span class="pc">${pct(S.val[o].nadie)}</span></div>`:'');
     document.getElementById('toma-nota').textContent=S.nota+(DATA.intencion[o]&&serie==='declarada'?` Esta encuesta ofrecía ${DATA.intencion[o].k} nombres.`:'');
   }
   const svgL=document.getElementById('linea'), tt=document.getElementById('tt');
@@ -792,7 +844,7 @@ let TOK=null,YO=null;
   function abinaderCard(){
     const t=T(); const kAb=t.cols.find(c=>/ABINAD/.test(c)); const tot=t.orig[kAb];
     const rows=destinos().map(d=>({d,v:mat(d,kAb)})).sort((a,b)=>b.v-a.v);
-    document.getElementById('abinader-lab').textContent=`Qué hacen hoy los ${fmt(t.urna===2024?2507297:2154876)} votantes de Abinader en ${t.urna} · ${nomOla(OLAS_T[ti])}`;
+    document.getElementById('abinader-lab').textContent=`Qué hacen hoy los ${fmt(String(t.urna)==='2024'?2507297:2154876)} votantes de Abinader en ${t.urna} · ${nomOla(OLAS_T[ti])}`;
     document.getElementById('abinader').innerHTML=rows.map(r=>`<div class="flecha">${foto(r.d,40)}<div class="txt"><b>${CAND[r.d]||r.d}</b>${PRMS.has(r.d)?' <span class="lab" style="color:var(--prm)">PRM</span>':''}<div class="bar" style="--cc:${C[r.d]||C.otros};background:${C[r.d]||C.otros};width:${Math.max(2,Math.min(85,100*r.v/tot*1.4))}%"></div></div><div class="val"><b>${pct(100*r.v/tot)}</b><small>${fmt(r.v)} electores</small></div></div>`).join('');
   }
   function tabla(){
@@ -815,8 +867,9 @@ let TOK=null,YO=null;
   function territorio(){
     const o=OLAS_Z[zi], Z=DATA.territorio[o][nivel]||{}; const I=DATA.intencion[o];
     const cands=I?Object.entries(I.pct).filter(([k,v])=>k!=='otros'&&v>=3).sort((a,b)=>b[1]-a[1]).slice(0,6).map(x=>x[0]):[];
-    const mets=[['aprob','Aprobación del gobierno'],['prm','Preferencia PRM']].concat(cands.map(k=>[k,CORTO[k]||k]));
-    if(!mets.find(m=>m[0]===metrica)) metrica='aprob';
+    const hayA=Object.values(Z).some(e=>e.a!=null), hayP=Object.values(Z).some(e=>e.prm!=null);
+    const mets=(hayA?[['aprob','Aprobación del gobierno']]:[]).concat(hayP?[['prm',(DATA.partido[o]||{}).tipo==='simpatia'?'Simpatía PRM':'Preferencia PRM']]:[]).concat(cands.map(k=>[k,CORTO[k]||k]));
+    if(!mets.find(m=>m[0]===metrica)) metrica=mets.length?mets[0][0]:'aprob';
     document.getElementById('terr-metrica').innerHTML=mets.map(([k,n])=>`<button class="chip ${k===metrica?'on':''}" data-m="${k}">${k==='aprob'||k==='prm'?'':`<i style="background:${C[k]||C.otros}"></i>`}${n}</button>`).join('');
     const rows=Object.entries(Z).map(([z,e])=>{const v=metrica==='aprob'?e.a:metrica==='prm'?e.prm:(e.i[metrica]||0); return {z,v,n:e.n}}).filter(r=>r.v!=null).sort((a,b)=>b.v-a.v);
     const nac=metrica==='aprob'?(DATA.aprob[o]||{}).a:metrica==='prm'?(DATA.partido[o]||{pct:{}}).pct.PRM:(I?I.pct[metrica]:null);
@@ -824,7 +877,7 @@ let TOK=null,YO=null;
     const maxv=Math.max(1,...rows.map(r=>r.v));
     document.getElementById('terr-lista').innerHTML=(nac!=null?`<div class="fila" style="flex-direction:column;align-items:stretch;gap:2px;background:var(--bg2);margin:0 -18px;padding:10px 18px"><div style="display:flex;justify-content:space-between"><b>País (toda la encuesta)</b><span class="n">${pct(nac)}</span></div><div class="barra-h"><i style="width:${100*nac/maxv}%;background:${col}"></i></div></div>`:'')+rows.map(r=>`<div class="fila" style="flex-direction:column;align-items:stretch;gap:2px"><div style="display:flex;justify-content:space-between;gap:10px"><span>${r.z}${r.n<60?' <span class="small mut">· pocas entrevistas ('+r.n+')</span>':''}</span><span class="n">${pct(r.v)}</span></div><div class="barra-h"><i style="width:${100*r.v/maxv}%;background:${col};opacity:${r.n<60?.5:1}"></i></div></div>`).join('');
     document.getElementById('te-ola').textContent=nomOla(o); document.getElementById('te-range').max=OLAS_Z.length-1; document.getElementById('te-range').value=zi;
-    document.getElementById('terr-nota').textContent=`${rows.length} ${nivel==='region'?'regiones':nivel==='provincia'?'provincias':'municipios'} con al menos 30 entrevistas en ${nomOla(o).toLowerCase()} · ${metrica==='aprob'?'porcentaje que aprueba el gobierno':metrica==='prm'?(DATA.partido[o]&&DATA.partido[o].tipo==='deberia'?'porcentaje que cree que el presidente de 2028 debería ser del PRM':'porcentaje que votaría por el PRM'):'intención de voto declarada por '+(CAND[metrica]||metrica)} · las zonas con menos de 60 entrevistas se muestran atenuadas.`;
+    document.getElementById('terr-nota').textContent=`${rows.length} ${nivel==='region'?'regiones':nivel==='provincia'?'provincias':'municipios'} con al menos 30 entrevistas en ${nomOla(o).toLowerCase()} · ${metrica==='aprob'?'porcentaje que aprueba el gobierno':metrica==='prm'?(DATA.partido[o]&&DATA.partido[o].tipo==='deberia'?'porcentaje que cree que el presidente de 2028 debería ser del PRM':DATA.partido[o]&&DATA.partido[o].tipo==='simpatia'?'porcentaje que simpatiza con el PRM':'porcentaje que votaría por el PRM'):'intención de voto declarada por '+(CAND[metrica]||metrica)} · las zonas con menos de 60 entrevistas se muestran atenuadas.`;
   }
   document.getElementById('te-prev').onclick=()=>{zi=Math.max(0,zi-1);territorio();};
   document.getElementById('te-next').onclick=()=>{zi=Math.min(OLAS_Z.length-1,zi+1);territorio();};
@@ -832,7 +885,7 @@ let TOK=null,YO=null;
   territorio();
 
   /* ---------- EL PARTIDO ---------- */
-  (function partido(){
+  seguro('el partido',()=>{
     const olas=Object.keys(DATA.internas).sort(); const W=680,H=220,L=44,R=20,T=16,B=40; const xs=i=>L+(W-L-R)*i/(olas.length-1); const top=60; const ys=v=>T+(H-T-B)*(1-v/top);
     const cnt={}; olas.forEach(o=>Object.entries(DATA.internas[o]).forEach(([k,v])=>{if(k!=='otros')cnt[k]=Math.max(cnt[k]||0,v)}));
     const lineas=Object.entries(cnt).filter(([k,v])=>v>=3).sort((a,b)=>b[1]-a[1]).map(x=>x[0]);
@@ -841,11 +894,19 @@ let TOK=null,YO=null;
     lineas.forEach(k=>{const pts=olas.map((o,i)=>[xs(i),ys(DATA.internas[o][k]||0)]); g+=`<path d="${pts.map((p,i)=>(i?'L':'M')+p[0]+','+p[1]).join(' ')}" fill="none" stroke="${C[k]||C.otros}" stroke-width="${k==='collado'?3.5:2}"/>`; const l=pts[pts.length-1]; g+=`<text x="${l[0]+6}" y="${l[1]+4}" font-size="11" font-weight="600" fill="${C[k]||C.otros}">${CORTO[k]||k} ${p1(DATA.internas[olas[olas.length-1]][k]||0)}</text>`;});
     document.getElementById('linea-internas').innerHTML=g;
     // figuras: imagen última ola disponible por figura
-    const oi=ultimo(DATA.imagen); const ks=['collado','carolina','raquel','abinader','guido','wellington'].filter(k=>DATA.imagen[oi][k]);
     const oI=ultimo(DATA.internas);
+    const oi=ultimo(DATA.imagen);
+    if(!oi){
+      const ks=oI?Object.entries(DATA.internas[oI]).filter(([k,v])=>k!=='otros'&&v>=1).sort((a,b)=>b[1]-a[1]).slice(0,6).map(x=>x[0]):[];
+      document.getElementById('figuras').innerHTML=ks.map(k=>{const ol=Object.keys(DATA.internas).sort().filter(o=>DATA.internas[o][k]!=null); const first=DATA.internas[ol[0]][k];
+        return `<div class="card" style="display:flex;flex-direction:column;gap:8px"><div style="display:flex;align-items:center;gap:10px">${foto(k,52)}<div><b>${CAND[k]||k}</b><div class="small mut">${CARGO[k]||'PRM'}</div></div></div><div><span class="lab">Internas PRM · ${nomCorto(oI)}</span><div class="num" style="font-size:30px">${pct(DATA.internas[oI][k])}</div><div class="small mut">en ${nomCorto(ol[0])} tenía ${pct(first)}</div></div></div>`}).join('')+
+        `<div class="card small mut" style="display:flex;align-items:center">La imagen positiva y negativa de cada figura se incorporará cuando la Sala de Control apruebe esa pregunta en el cuaderno.</div>`;
+      return;
+    }
+    const ks=['collado','carolina','raquel','abinader','guido','wellington'].filter(k=>DATA.imagen[oi][k]);
     document.getElementById('figuras').innerHTML=ks.map(k=>{const im=DATA.imagen[oi][k]; const ol=Object.keys(DATA.imagen).sort().filter(o=>DATA.imagen[o][k]); const first=DATA.imagen[ol[0]][k];
       return `<div class="card" style="display:flex;flex-direction:column;gap:8px"><div style="display:flex;align-items:center;gap:10px">${foto(k,52)}<div><b>${CAND[k]}</b><div class="small mut">${CARGO[k]||'PRM'}</div></div></div><div><span class="lab">Imagen positiva · ${nomCorto(oi)}</span><div class="num" style="font-size:30px">${pct(im.p)}</div><div class="dual" style="height:8px"><i style="width:${im.p}%;background:var(--ok)"></i><i style="width:${Math.max(0,100-im.p-im.n)}%;background:var(--chip)"></i><i style="width:${im.n}%;background:var(--acc2)"></i></div><div class="small mut">${pct(im.n)} negativa · en ${nomCorto(ol[0])} tenía ${pct(first.p)} positiva</div></div>${DATA.internas[oI][k]!=null?`<div class="small"><span class="lab">Internas PRM</span> <b>${pct(DATA.internas[oI][k])}</b></div>`:''}</div>`}).join('');
-  })();
+  });
 
   /* ---------- fuga y cruce (Collado, informe de junio) ---------- */
   const FUGA=[['omar',212051,62.5],['carolina',204885,60.4],['abel',134573,39.7],['gonzalo',119871,35.3],['alofoke',119134,35.1],['raquel',109368,32.2]];
@@ -889,18 +950,16 @@ let TOK=null,YO=null;
   pintaSolicitudes();
 
   /* ---------- DANTE ---------- */
-  const oa=ultimo(DATA.aprob), A=DATA.aprob[oa], amax=Object.entries(DATA.aprob).sort((a,b)=>b[1].a-a[1].a)[0], amin=Object.entries(DATA.aprob).sort((a,b)=>a[1].a-b[1].a)[0];
-  const oe=ultimo(DATA.ajustada), E=DATA.ajustada[oe], kAb=E.cols.find(c=>/ABINAD/.test(c)); const abRows=Object.entries(E.matriz).map(([k,m])=>[k,m[kAb]||0]).sort((a,b)=>b[1]-a[1]);
-  const oi=ultimo(DATA.internas), I=Object.entries(DATA.internas[oi]).filter(([k])=>k!=='otros').sort((a,b)=>b[1]-a[1]);
+  const R=(rx,fn,fuente,acc)=>[rx,(()=>{try{return fn()}catch(e){return null}})(),fuente,acc||[]];
   const respuestas=[
-    [/aprob|gobierno|abinader/i,`La aprobación del gobierno en ${nomOla(oa).toLowerCase()} es ${p1(A.a)} % (desaprueba ${p1(A.d)} %). El máximo de la serie fue ${p1(amax[1].a)} % en ${nomOla(amax[0]).toLowerCase()} y el mínimo ${p1(amin[1].a)} % en ${nomOla(amin[0]).toLowerCase()}. Desde junio de 2024 la caída es de ${p1(DATA.aprob['2024-06'].a-A.a)} puntos.`,`Serie de ${Object.keys(DATA.aprob).length} encuestas nacionales · 2021–2026`,['Ver evolución']],
-    [/votantes de abinader|qué hacen|que hacen|2024|transfer|viene/i,`De cada 100 electores que votaron a Abinader en 2024, hoy ${p1(100*abRows[0][1]/E.orig[kAb])} votarían por ${CAND[abRows[0][0]]}, ${p1(100*abRows[1][1]/E.orig[kAb])} por ${CAND[abRows[1][0]]} y ${p1(100*abRows[2][1]/E.orig[kAb])} por ${CAND[abRows[2][0]]}. El PRM retiene con Collado ${fmt(E.matriz.collado[kAb])} de esos ${fmt(E.orig[kAb])} electores.`,`Matriz de transferencia · ${nomOla(oe).toLowerCase()} · ${fmt(E.n)} entrevistas con voto anterior`,['Ver transferencias']],
-    [/candidato del prm|internas|quién debería|quien deberia/i,`En ${nomOla(oi).toLowerCase()}, ${CAND[I[0][0]]} es el favorito para ser candidato del PRM con ${pct(I[0][1])}; le siguen ${CAND[I[1][0]]} (${pct(I[1][1])}) y ${CAND[I[2][0]]} (${pct(I[2][1])}). La ventaja de Collado se mantiene desde ${nomOla(Object.keys(DATA.internas).sort()[0]).toLowerCase()}.`,`Internas del PRM · ${Object.keys(DATA.internas).length} encuestas`,['Ver el partido']],
-    [/collado|leonel|cara a cara|segunda vuelta/i,(()=>{const cl=DATA.careos['collado|leonel'];const ks=Object.keys(cl).sort();const u=ks[ks.length-1];return `En un cara a cara con Leonel Fernández, en ${nomOla(u).toLowerCase()} David Collado obtiene ${pct(cl[u].collado)} frente a ${pct(cl[u].leonel)}. En ${nomOla(ks[0]).toLowerCase()} ganaba ${pct(cl[ks[0]].collado)} a ${pct(cl[ks[0]].leonel)}. En la estimación ajustada de ${nomOla(oe).toLowerCase()} Collado tiene ${pct(E.pct.collado)}, tercero tras Alofoke y Leonel.`})(),`Serie de encuestas nacionales · pregunta de segunda vuelta`,['Ver evolución']],
-    [/partido|pld|fuerza del pueblo/i,(()=>{const op=ultimo(DATA.partido),P=DATA.partido[op];return `En ${nomOla(op).toLowerCase()}, ${pct(P.pct.PRM)} cree que el presidente de 2028 debería ser del PRM, ${pct(P.pct.PLD)} del PLD y ${pct(P.pct.FP)} de la Fuerza del Pueblo. En marzo de 2024, ${pct(DATA.partido['2024-03'].pct.PRM)} votaría por el PRM como partido.`})(),`Voto por partido y partido que debería gobernar · 2022–2026`,['Ver evolución']],
-    [/dónde|donde|región|region|provinc|municip/i,(()=>{const o=ultimo(DATA.territorio);const Z=DATA.territorio[o].region;const r=Object.entries(Z).sort((a,b)=>b[1].a-a[1].a);return `La aprobación del gobierno en ${nomOla(o).toLowerCase()} es más alta en la región ${r[0][0]} (${pct(r[0][1].a)}) y más baja en ${r[r.length-1][0]} (${pct(r[r.length-1][1].a)}). En Territorio puede verse por provincia y municipio, y para cada candidato.`})(),`Encuesta nacional · respuesta declarada por zona`,['Ver territorio']],
+    R(/aprob|gobierno|abinader/i,()=>{const AP=vacio(DATA.aprob)?null:DATA.aprob; const oa=ultimo(AP),A=AP[oa],amax=Object.entries(AP).sort((a,b)=>b[1].a-a[1].a)[0],amin=Object.entries(AP).sort((a,b)=>a[1].a-b[1].a)[0]; return `La aprobación del gobierno en ${nomOla(oa).toLowerCase()} es ${p1(A.a)} % (desaprueba ${p1(A.d)} %). El máximo de la serie fue ${p1(amax[1].a)} % en ${nomOla(amax[0]).toLowerCase()} y el mínimo ${p1(amin[1].a)} % en ${nomOla(amin[0]).toLowerCase()}.`},`Serie de ${Object.keys(DATA.aprob).length} encuestas nacionales`,['Ver evolución']),
+    R(/votantes de abinader|qué hacen|que hacen|2024|transfer|viene/i,()=>{const oe=ultimo(DATA.ajustada),E=DATA.ajustada[oe],kAb=E.cols.find(c=>/ABINAD/.test(c));const abRows=Object.entries(E.matriz).map(([k,m])=>[k,m[kAb]||0]).sort((a,b)=>b[1]-a[1]); return `De cada 100 electores de ${ORI[kAb].n} con voto declarado, hoy ${p1(100*abRows[0][1]/E.orig[kAb])} votarían por ${CAND[abRows[0][0]]}, ${p1(100*abRows[1][1]/E.orig[kAb])} por ${CAND[abRows[1][0]]} y ${p1(100*abRows[2][1]/E.orig[kAb])} por ${CAND[abRows[2][0]]}. El PRM retiene con ${CAND[candPRM]} ${fmt((E.matriz[candPRM]||{})[kAb]||0)} de esos ${fmt(E.orig[kAb])} electores.`},`Matriz de transferencia · última encuesta con voto anterior`,['Ver transferencias']),
+    R(/candidato del prm|internas|quién debería|quien deberia/i,()=>{const oi=ultimo(DATA.internas),I=Object.entries(DATA.internas[oi]).filter(([k])=>k!=='otros').sort((a,b)=>b[1]-a[1]); return `En ${nomOla(oi).toLowerCase()}, ${CAND[I[0][0]]||I[0][0]} es el favorito para ser candidato del PRM con ${pct(I[0][1])}; le siguen ${CAND[I[1][0]]||I[1][0]} (${pct(I[1][1])})${I[2]?` y ${CAND[I[2][0]]||I[2][0]} (${pct(I[2][1])})`:''}.`},`Internas del PRM · ${Object.keys(DATA.internas).length} encuestas`,['Ver el partido']),
+    R(/collado|leonel|cara a cara|segunda vuelta/i,()=>{const cl=DATA.careos[PAR];let [a,b]=PAR.split('|');if(PRMS.has(b)&&!PRMS.has(a)){[a,b]=[b,a];}const ks=Object.keys(cl).sort();const u=ks[ks.length-1];return `En un cara a cara con ${CAND[b]}, en ${nomOla(u).toLowerCase()} ${CAND[a]} obtiene ${pct(cl[u][a])} frente a ${pct(cl[u][b])}. En ${nomOla(ks[0]).toLowerCase()} el resultado era ${pct(cl[ks[0]][a])} a ${pct(cl[ks[0]][b])}.`},`Serie de encuestas nacionales · cara a cara`,['Ver evolución']),
+    R(/partido|pld|fuerza del pueblo/i,()=>{const op=ultimo(DATA.partido),P=DATA.partido[op];return `En ${nomOla(op).toLowerCase()}, ${pct(P.pct.PRM)} para el PRM, ${pct(P.pct.PLD)} para el PLD y ${pct(P.pct.FP)} para la Fuerza del Pueblo (${tipoPartido(P.tipo).toLowerCase()}, sobre el total de entrevistados).`},`${Object.keys(DATA.partido).length} encuestas`,['Ver evolución']),
+    R(/dónde|donde|región|region|provinc|municip/i,()=>{const o=ultimo(DATA.territorio);const Z=DATA.territorio[o].region;const m=Object.values(Z).some(e=>e.a!=null)?'a':'prm';const r=Object.entries(Z).filter(([z,e])=>e[m]!=null).sort((a,b)=>b[1][m]-a[1][m]);return `${m==='a'?'La aprobación del gobierno':'La simpatía por el PRM'} en ${nomOla(o).toLowerCase()} es más alta en la región ${r[0][0]} (${pct(r[0][1][m])}) y más baja en ${r[r.length-1][0]} (${pct(r[r.length-1][1][m])}). En Territorio puede verse por provincia y municipio, y para cada candidato.`},`Encuesta nacional · respuesta declarada por zona`,['Ver territorio']),
     [/.*/,'Esa pregunta no puedo responderla con las encuestas disponibles. Puedo dar cualquier cifra del estudio, hacer un gráfico o pedir un informe. ¿Digo, por ejemplo, cómo ha evolucionado la aprobación del gobierno?','',['Ver evolución']]
-  ];
+  ].filter(r=>r[1]);
   const hilo=document.getElementById('hilo');
   function pintaRespuesta(texto,fuente,acciones){
     const d=document.createElement('div');d.className='msg d';d.textContent=texto;
