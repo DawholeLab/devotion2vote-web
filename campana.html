@@ -7,13 +7,6 @@
 <meta name="theme-color" content="#FBF8F4">
 <title>Mi campaña PRM · Devotion2Vote</title>
 <link rel="icon" href="assets/favicon.png">
-<!-- Instalable como app en el móvil («Añadir a pantalla de inicio»): abre a pantalla completa, sin barras del navegador -->
-<link rel="manifest" href="manifest-campana.webmanifest">
-<link rel="apple-touch-icon" href="assets/icono-apple.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Mi campaña">
 <style>[hidden]{display:none!important}</style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Montserrat:wght@400;500;600;700;800&display=swap">
 <style>
@@ -50,10 +43,10 @@ main{padding:18px 16px 96px;max-width:860px;width:100%;min-width:0;margin:0 auto
 .pantalla{display:none;flex-direction:column;gap:18px}
 .pantalla.activa{display:flex}
 nav.barra{position:fixed;bottom:0;left:0;right:0;background:var(--panel);border-top:1px solid var(--linea);display:flex;justify-content:space-around;padding:6px 2px calc(6px + env(safe-area-inset-bottom));z-index:6}
-nav.barra button{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;font-weight:600;color:var(--mut);min-width:50px;min-height:44px;padding:4px 3px;border-radius:10px}
+nav.barra button{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;font-weight:600;color:var(--mut);min-width:44px;min-height:44px;padding:4px 3px;border-radius:10px}
 nav.barra button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 nav.barra button.on{color:var(--acc2)}
-.fab{position:fixed;right:16px;bottom:104px;z-index:2147483001;background:var(--acc);color:#fff;border-radius:999px;padding:12px 18px;font-weight:600;font-size:15px;box-shadow:var(--sombra);display:flex;align-items:center;gap:8px;min-height:44px}
+.fab{position:fixed;right:16px;bottom:104px;z-index:7;background:var(--acc);color:#fff;border-radius:999px;padding:12px 18px;font-weight:600;font-size:15px;box-shadow:var(--sombra);display:flex;align-items:center;gap:8px;min-height:44px}
 .fab .p{width:9px;height:9px;border-radius:50%;background:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.35)}
 .card{background:var(--panel);border:1px solid var(--linea);border-radius:14px;padding:16px 18px;min-width:0}
 .cifra{display:flex;gap:16px;align-items:center}
@@ -157,10 +150,9 @@ td .celda{display:inline-block;min-width:44px;padding:2px 6px;border-radius:5px}
 .nodo-btn{cursor:pointer}
 .spark{width:100%;height:auto;display:block}
 .dual{display:flex;height:12px;border-radius:6px;overflow:hidden;margin-top:6px}
-.velo{position:fixed;inset:0;background:rgba(40,40,39,.35);z-index:2147482999;display:none}
+.velo{position:fixed;inset:0;background:rgba(40,40,39,.35);z-index:20;display:none}
 .velo.on{display:block}
-/* Las hojas (DANTE, perfiles, ficha) van por encima de la insignia «Powered by Netlify», que se inyecta abajo a la derecha */
-.hoja{position:fixed;left:0;right:0;bottom:0;z-index:2147483000;background:var(--panel);border-radius:20px 20px 0 0;max-height:88vh;display:none;flex-direction:column;box-shadow:var(--sombra)}
+.hoja{position:fixed;left:0;right:0;bottom:0;z-index:21;background:var(--panel);border-radius:20px 20px 0 0;max-height:88vh;display:none;flex-direction:column;box-shadow:var(--sombra)}
 .hoja.on{display:flex}
 .hoja .asa{width:40px;height:4px;border-radius:2px;background:var(--linea);margin:10px auto 0}
 .hoja .cabh{display:flex;justify-content:space-between;align-items:center;padding:10px 18px 10px;border-bottom:1px solid var(--linea)}
@@ -176,7 +168,7 @@ td .celda{display:inline-block;min-width:44px;padding:2px 6px;border-radius:5px}
 .sug{display:flex;flex-direction:column;gap:6px}
 .sug button{text-align:left;border:1px solid var(--linea);border-radius:12px;padding:10px 14px;font-size:14.5px;min-height:44px;background:var(--panel)}
 .sug button:hover{border-color:var(--acc2)}
-.entrada{display:flex;gap:8px;padding:10px 18px calc(66px + env(safe-area-inset-bottom));border-top:1px solid var(--linea)}
+.entrada{display:flex;gap:8px;padding:10px 18px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--linea)}
 .entrada input{flex:1;font:inherit;font-size:15px;padding:10px 14px;border-radius:999px;border:1px solid var(--linea);background:var(--bg);color:var(--ink);min-height:44px}
 .entrada button{background:var(--acc);color:#fff;border-radius:999px;width:44px;height:44px;font-weight:700}
 .ctx{font-size:12.5px;color:var(--mut);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
@@ -211,13 +203,8 @@ td .celda{display:inline-block;min-width:44px;padding:2px 6px;border-radius:5px}
   h1{font-size:32px}
 }
 @media (max-width:899px){aside.rail{display:none}}
-.idioma{display:inline-flex;align-items:center;gap:2px;vertical-align:middle}
-.idioma button{background:none;border:none;color:var(--mut);cursor:pointer;font:inherit;font-size:12px;font-weight:700;letter-spacing:.1em;padding:6px 5px;border-radius:6px;min-height:0}
-.idioma button.on{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
-.idioma i{font-style:normal;color:var(--mut);opacity:.5}
 @media (prefers-reduced-motion:no-preference){.pantalla.activa{animation:ap .18s ease-out}@keyframes ap{from{opacity:.5;transform:translateY(4px)}to{opacity:1;transform:none}}}
 </style>
-<script src="i18n.js" defer></script>
 </head>
 <body>
 
@@ -231,7 +218,6 @@ td .celda{display:inline-block;min-width:44px;padding:2px 6px;border-radius:5px}
     <button class="btn" type="submit" id="ab">Entrar</button>
     <div class="msg" id="amsg"></div>
     <div class="pie">Todo lo que consulte queda registrado a su nombre.</div>
-    <div class="pie" style="margin-top:8px"><span class="idioma" aria-label="Idioma / Language"><button type="button" data-idioma="es" lang="es">ES</button><i>·</i><button type="button" data-idioma="en" lang="en">EN</button></span></div>
   </form>
 </div>
 
@@ -245,6 +231,7 @@ td .celda{display:inline-block;min-width:44px;padding:2px 6px;border-radius:5px}
   <button data-ir="flujos"><svg viewBox="0 0 24 24"><path d="M3 6h5c4 0 4 6 8 6h5M3 18h5c4 0 4-6 8-6h5M3 12h5"/></svg>Transferencias</button>
   <button data-ir="territorio"><svg viewBox="0 0 24 24"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2zM9 4v14M15 6v14"/></svg>Territorio</button>
   <button data-ir="partido"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><circle cx="17" cy="10" r="2.5"/><path d="M3 19c0-3.3 2.7-5 6-5s6 1.7 6 5M15 15c2.8 0 5 1.5 5 4"/></svg>El partido</button>
+  <button data-ir="segmentacion"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg>Segmentación</button>
   <button data-ir="informes"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6zM15 3v4h4M9 12h6M9 16h6"/></svg>Informes</button>
   <div class="pie">Sesión del <b>equipo del PRM</b><br>Solo ve su campaña. Todo lo que pide queda registrado a su nombre.</div>
 </aside>
@@ -254,7 +241,7 @@ td .celda{display:inline-block;min-width:44px;padding:2px 6px;border-radius:5px}
     <img class="foto b" width="52" height="52" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-foto="prm" alt="PRM">
     <div class="txt"><span class="lab">Mi campaña</span><h1 data-partido>PRM</h1><span class="sub" data-sub-sala>República Dominicana · Presidencial 2028 · país, regiones, provincias y municipios</span></div>
   </div>
-  <div style="display:flex;gap:8px;align-items:center;flex:0 0 auto"><span class="idioma" aria-label="Idioma / Language"><button type="button" data-idioma="es" lang="es">ES</button><i>·</i><button type="button" data-idioma="en" lang="en">EN</button></span><button class="btn sec chico" data-hoja="ficha">Ficha técnica</button><button class="btn sec chico" id="salir" title="Cerrar sesión" hidden>Salir</button></div>
+  <div style="display:flex;gap:8px;align-items:center;flex:0 0 auto"><button class="btn sec chico" data-hoja="ficha">Ficha técnica</button><button class="btn sec chico" id="salir" title="Cerrar sesión" hidden>Salir</button></div>
 </header>
 
 <main>
@@ -425,6 +412,7 @@ td .celda{display:inline-block;min-width:44px;padding:2px 6px;border-radius:5px}
   </div>
   <div class="grid3" id="figuras"></div>
 
+  <div id="publicos-estaticos">
   <h3 style="margin-top:6px">Los cuatro públicos de David Collado · junio 2026</h3>
   <p class="mut small">Electores completos, ajustados a los resultados de 2024. Es el candidato del PRM mejor situado en la estimación.</p>
   <div class="grid2">
@@ -468,6 +456,22 @@ td .celda{display:inline-block;min-width:44px;padding:2px 6px;border-radius:5px}
     <div class="vacio" id="cruce-pendiente" hidden>Este cruce se calcula al momento cuando el servicio de cruces esté conectado (fase 2). En la demostración solo están listos «Principal problema» y «De dónde vienen» según los públicos de Collado.</div>
     <div class="acciones" style="margin-top:14px"><button class="btn chico" data-dante="Explique este cruce">Que DANTE lo explique</button><button class="btn sec chico" data-ir="informes">Añadir a un informe</button></div>
   </div>
+  </div><!-- /publicos-estaticos -->
+  <div class="card" id="publicos-enlace" hidden><span class="lab">Públicos y segmentos</span><p class="small mut" style="margin-top:6px">Los cuatro públicos del candidato, sus subsegmentos y los perfiles ahora viven en la pantalla <b>Segmentación</b>, generada y aprobada en la Sala de Control.</p><div class="acciones" style="margin-top:8px"><button class="btn sec chico" data-ir="segmentacion">Ir a Segmentación</button></div></div>
+</section>
+
+<!-- ============ SEGMENTACIÓN ============ -->
+<section class="pantalla" id="p-segmentacion">
+  <div><h2>Segmentación</h2><p class="mut small" style="margin-top:4px">Cuatro niveles, del más ancho al más fino: segmentos (los públicos del candidato), subsegmentos (grupos dentro de cada público), microsegmentos (por territorio) y nanosegmentos (por colegio electoral). Cada nivel se genera en el motor y solo aparece aquí cuando la Sala de Control lo ha aprobado.</p></div>
+  <div class="card" id="seg-vacio" hidden><span class="lab">Segmentación</span><p class="small mut" style="margin-top:6px">La Sala de Control todavía no ha aprobado la segmentación de esta campaña. En cuanto lo haga, aparece aquí.</p></div>
+  <div id="seg-cuerpo" hidden>
+    <div class="card" style="display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center"><span class="lab">Candidato · <span id="seg-ola"></span></span><div class="chips" id="seg-cands"></div></div>
+      <div class="seg" id="seg-niveles"><button data-n="segmentos" class="on">Segmentos</button><button data-n="subsegmentos">Subsegmentos</button><button data-n="microsegmentos">Micro</button><button data-n="nanosegmentos">Nano</button></div>
+      <p class="small mut" id="seg-nota"></p>
+    </div>
+    <div id="seg-nivel"></div>
+  </div>
 </section>
 
 <!-- ============ INFORMES ============ -->
@@ -499,6 +503,7 @@ td .celda{display:inline-block;min-width:44px;padding:2px 6px;border-radius:5px}
   <button data-ir="flujos"><svg viewBox="0 0 24 24"><path d="M3 6h5c4 0 4 6 8 6h5M3 18h5c4 0 4-6 8-6h5M3 12h5"/></svg>Flujos</button>
   <button data-ir="territorio"><svg viewBox="0 0 24 24"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2zM9 4v14M15 6v14"/></svg>Territorio</button>
   <button data-ir="partido"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><circle cx="17" cy="10" r="2.5"/><path d="M3 19c0-3.3 2.7-5 6-5s6 1.7 6 5M15 15c2.8 0 5 1.5 5 4"/></svg>Partido</button>
+  <button data-ir="segmentacion"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg>Segmentos</button>
   <button data-ir="informes"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6zM15 3v4h4M9 12h6M9 16h6"/></svg>Informes</button>
 </nav>
 
@@ -622,7 +627,7 @@ let TOK=null,YO=null;
   const p1=n=>n.toLocaleString('es-ES',{minimumFractionDigits:1,maximumFractionDigits:1});
   const foto=(k,s)=>FOTOS[k]?`<img class="foto" width="${s}" height="${s}" src="${FOTOS[k]}" alt="">`:`<span class="ini" style="width:${s}px;height:${s}px;font-size:${Math.round(s*.4)}px;--c:${C[k]||C.otros}">${(CORTO[k]||'?').charAt(0)}</span>`;
   function separar(items,gap){items.sort((a,b)=>a.y-b.y);for(let i=1;i<items.length;i++){if(items[i].y-items[i-1].y<gap)items[i].y=items[i-1].y+gap;}return items;}
-  for(const k of ['aprob','eval','rumbo','econ','emocion','problema','intencion','ajustada','careos','partido','internas','imagen','territorio']) if(!DATA[k]) DATA[k]={};
+  for(const k of ['aprob','eval','rumbo','econ','emocion','problema','intencion','ajustada','careos','partido','internas','imagen','territorio','serie','segmentacion']) if(!DATA[k]) DATA[k]={};
   const vacio=obj=>!obj||!Object.keys(obj).length;
   const seguro=(nombre,fn)=>{try{fn()}catch(e){console.warn('bloque '+nombre+' sin datos:',e.message)}};
   const ultimo=obj=>{if(!obj) return undefined; const ks=Object.keys(obj).sort();return ks[ks.length-1];};
@@ -636,7 +641,7 @@ let TOK=null,YO=null;
   document.getElementById('ficha-serie').textContent=`${OLAS.length} encuestas nacionales mensuales de 1.500 entrevistas, de ${nomOla(OLAS[0]).toLowerCase()} a ${nomOla(ULT).toLowerCase()}. Cada serie indica en qué encuestas existe la pregunta.`;
 
   /* ---------- navegación ---------- */
-  const nombres={hoy:'Hoy',evolucion:'Evolución',flujos:'Transferencias',territorio:'Territorio',partido:'El partido',informes:'Informes'};
+  const nombres={hoy:'Hoy',evolucion:'Evolución',flujos:'Transferencias',territorio:'Territorio',partido:'El partido',segmentacion:'Segmentación',informes:'Informes'};
   function ir(id){
     document.querySelectorAll('.pantalla').forEach(s=>s.classList.toggle('activa',s.id==='p-'+id));
     document.querySelectorAll('[data-ir]').forEach(b=>{if(b.closest('nav,aside'))b.classList.toggle('on',b.dataset.ir===id)});
@@ -976,6 +981,68 @@ let TOK=null,YO=null;
     if(!cont.querySelector('.solicitud:not([hidden])')){const d=document.createElement('div');d.className='small mut sin-sol';d.textContent='Nada en preparación.';cont.appendChild(d);}
   }
   pintaSolicitudes();
+
+  /* ---------- SEGMENTACIÓN (p08 públicos + p09 subgrupos, aprobados) ---------- */
+  seguro('segmentación',()=>{
+    const SG=DATA.segmentacion; const hay=SG&&SG.candidatos&&Object.keys(SG.candidatos).length;
+    if(hay){const pe=document.getElementById('publicos-estaticos'); if(pe) pe.hidden=true; const pl=document.getElementById('publicos-enlace'); if(pl) pl.hidden=false;}
+    document.getElementById('seg-vacio').hidden=!!hay; document.getElementById('seg-cuerpo').hidden=!hay;
+    if(!hay) return;
+    const PUB={duro:['Voto duro','var(--duro)','Votan por él y ninguna señal de fidelidad falla: es la base, no se conquista ni se pierde fácilmente.'],retener:['Voto a retener','var(--retener)','Votan por él pero alguna señal de fidelidad falla: podrían irse a otro candidato.'],conquistar:['Voto a conquistar','var(--conquistar)','Hoy votan por otro, no son voto duro de nadie y tienen algún rasgo cercano al candidato.'],movilizar:['Voto a movilizar','var(--movilizar)','Hoy en la abstención o indecisos, con afinidad hacia el candidato.']};
+    const cands=Object.keys(SG.candidatos).sort((a,b)=>(PRMS.has(b)?1:0)-(PRMS.has(a)?1:0)||(SG.candidatos[b].votantes_hoy||0)-(SG.candidatos[a].votantes_hoy||0));
+    let cand=cands.find(k=>PRMS.has(k))||cands[0], nivel='segmentos';
+    document.getElementById('seg-ola').textContent=nomOla(SG.ola);
+    const sc=document.getElementById('seg-cands'); sc.innerHTML=cands.map(k=>`<button class="chip ${k===cand?'on':''}" data-c="${k}">${foto(k,22)} ${CORTO[k]||k}${PRMS.has(k)?' · PRM':''}</button>`).join('');
+    sc.addEventListener('click',e=>{const b=e.target.closest('[data-c]'); if(!b) return; cand=b.dataset.c; sc.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x.dataset.c===cand)); pinta();});
+    const sn=document.getElementById('seg-niveles'); sn.addEventListener('click',e=>{const b=e.target.closest('[data-n]'); if(!b) return; nivel=b.dataset.n; sn.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.n===nivel)); pinta();});
+    const lista=(arr,fmtV)=>(arr||[]).map(x=>`<div class="fila" style="padding:5px 0;gap:8px"><span style="min-width:0">${x.e}</span><span class="n" style="font-size:15px;white-space:nowrap">${fmtV(x)}</span></div>`).join('');
+    const nomRec=e=>{const k=String(e).toUpperCase().trim(); return k==='>18'?'Nuevos votantes':k==='NULOS'?'Nulos':k==='ABSTENCION'||k==='ABST+NUL'?'No votó':k==='OT+BL'?'Otros y blancos':(CAND[canonRec(k)]||e)};
+    const canonRec=k=>{const n=k.toLowerCase(); if(/abinader/.test(n))return 'abinader'; if(/leonel|fernandez$/.test(n))return 'leonel'; if(/abel/.test(n))return 'abel'; if(/castillo/.test(n))return 'castillo'; if(/moreno/.test(n))return 'moreno'; return '';};
+    const pctN=x=>`${p1(x.pct)} %${x.n!=null?' <small style="color:var(--mut);font-weight:500">· '+fmt(x.n)+'</small>':''}`;
+    const indice=x=>x.i!=null?`<span class="small mut" style="font-weight:500"> ${x.i>=115?'▲ más que el país':x.i<=85?'▼ menos que el país':'≈ país'}</span>`:'';
+    function pinta(){
+      const C0=SG.candidatos[cand]; const cont=document.getElementById('seg-nivel'); const estado=SG.niveles[nivel];
+      document.getElementById('seg-nota').textContent=nivel==='segmentos'?`${CAND[cand]}: ${fmt(C0.votantes_hoy)} electores votarían hoy por él (${p1(C0.estimacion_pct)} % de los válidos). Los cuatro públicos salen de la estimación anclada y de las señales de fidelidad; electores completos.`:nivel==='subsegmentos'?'Cada público se parte en grupos por sus respuestas a toda la encuesta. El nombre de cada subsegmento son las respuestas que más lo distinguen.':nivel==='microsegmentos'?'Subsegmento × territorio (provincia y municipios propios): dónde está cada grupo y cuánto pesa allí.':'Microsegmento × colegio electoral, con perfil por sexo y edad: la unidad mínima para dirigirse a electores concretos.';
+      if(estado!=='aprobado'){
+        cont.innerHTML=`<div class="card" style="display:flex;flex-direction:column;gap:10px"><span class="lab">${nivel==='microsegmentos'?'Microsegmentos':'Nanosegmentos'} · en preparación en la Sala de Control</span><p class="small mut">${nivel==='microsegmentos'?'Los microsegmentos cruzan cada subsegmento con el territorio (provincia y municipios propios) sobre la urna real de cada demarcación; exigen al menos 500 electores y el 1 % del territorio.':'Los nanosegmentos bajan al colegio electoral (mínimo 200 electores) con perfil por sexo y edad, y se ordenan por tamaño, elasticidad y accesibilidad.'} Este nivel se activa cuando la Sala de Control aprueba su paso del método${SITIO&&SALA&&SALA.modulos&&!SALA.modulos.cruzada?' y el plan de la campaña lo incluye':''}.</p><div class="acciones"><button class="btn chico" id="seg-pedir">Pedir ${nivel} de ${CORTO[cand]||cand}</button><span class="small mut" id="seg-pedir-msg" style="align-self:center"></span></div></div>`;
+        document.getElementById('seg-pedir').addEventListener('click',async e=>{const b=e.currentTarget; b.disabled=true; b.style.opacity=.6; const m=document.getElementById('seg-pedir-msg');
+          if(SITIO&&TOK){try{const r=await fetch(API+'/dv/campana/solicitudes',{method:'POST',headers:{'Authorization':'Bearer '+TOK,'Content-Type':'application/json'},body:JSON.stringify({tipo:'segmentacion',titulo:nivel.charAt(0).toUpperCase()+nivel.slice(1)+' · '+(CAND[cand]||cand)+' · '+nomOla(SG.ola),detalle:{nivel,candidato:cand,ola:SG.ola}})}); if(!r.ok) throw new Error(); const j=await r.json(); SALA.solicitudes=j.solicitudes; if(typeof pintaSolicitudes==='function') pintaSolicitudes(); m.textContent='Pedido registrado. Avisamos cuando esté aprobado.';}catch(x){b.disabled=false;b.style.opacity=1;m.textContent='No se pudo enviar. Vuelva a intentarlo.';}} else m.textContent='Pedido registrado (demostración).';});
+        return;
+      }
+      if(nivel==='segmentos'){
+        const P=C0.publicos; const tot=Object.values(P).reduce((a,x)=>a+(x.electores||0),0);
+        cont.innerHTML=`<div class="grid2">`+Object.entries(PUB).filter(([k])=>P[k]).map(([k,[t,col,que]])=>{const x=P[k];
+          return `<div class="publico" style="--c:${col}"><span class="lab">${t}</span><div class="n">${fmt(x.electores)}</div><span class="q">${que} ${x.pct_censo!=null?`Son el ${p1(x.pct_censo)} % del censo.`:''}${x.pct_votantes!=null&&k!=='conquistar'&&k!=='movilizar'?` ${p1(x.pct_votantes)} % de sus votantes.`:''}</span>
+            <div class="sub"><span><span>Dónde pesa más</span><b>${(x.region||[]).slice().sort((a,b)=>(b.i||0)-(a.i||0)).slice(0,2).map(r=>r.e.charAt(0)+r.e.slice(1).toLowerCase()+' ('+p1(r.pct)+' %)').join(' · ')||'—'}</b></span>
+            <span><span>Edad</span><b>${(x.edad||[]).slice(0,2).map(r=>r.e+' '+p1(r.pct)+' %').join(' · ')||'—'}</b></span>
+            <span><span>Sexo</span><b>${(x.sexo||[]).map(r=>r.e.charAt(0)+r.e.slice(1).toLowerCase()+' '+p1(r.pct)+' %').join(' · ')||'—'}</b></span>
+            <span><span>Qué les mueve</span><b>${(x.mueve||[]).slice(0,2).map(r=>r.e).join(' · ')||'—'}</b></span>
+            <span><span>Emoción</span><b>${(x.emocion||[]).slice(0,2).map(r=>r.e+' '+p1(r.pct)+' %').join(' · ')||'—'}</b></span>
+            ${k==='retener'&&(x.fugas||[]).length?`<span><span>Podría irse a</span><b>${x.fugas.slice(0,3).map(r=>{const c=Object.keys(CAND).find(kk=>CAND[kk]===r.e)||'';return (CORTO[c]||r.e)+' '+p1(r.pct)+' %'}).join(' · ')}</b></span>`:''}
+            ${k==='conquistar'&&(x.recuerdo||[]).length?`<span><span>Votaron en la anterior a</span><b>${x.recuerdo.slice(0,3).map(r=>nomRec(r.e)+' '+p1(r.pct)+' %').join(' · ')}</b></span>`:''}
+            </div><button class="enlace" data-seg-detalle="${k}" style="align-self:flex-start;margin-top:6px">Ver el perfil completo</button></div>`}).join('')+`</div>
+          <p class="small mut" style="margin-top:8px">${SG.nota||''}</p><div id="seg-detalle"></div>`;
+        cont.querySelectorAll('[data-seg-detalle]').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.segDetalle; const x=P[k]; const [t,col]=PUB[k];
+          const bloque=(tit,arr,f)=>arr&&arr.length?`<div class="card"><span class="lab">${tit}</span>${lista(arr,f||pctN)}</div>`:'';
+          document.getElementById('seg-detalle').innerHTML=`<h3 style="margin:16px 0 8px;color:${col}">${t} de ${CAND[cand]} · ${fmt(x.electores)} electores</h3><div class="grid2">`+
+            bloque('Región',x.region,r=>pctN(r)+indice(r))+bloque('Provincias donde más se distingue',x.provincias,r=>pctN(r)+indice(r))+bloque('Edad',x.edad,r=>pctN(r)+indice(r))+bloque('Clase social',x.clase,r=>pctN(r)+indice(r))+
+            Object.entries(x.motivaciones||{}).map(([dim,arr])=>bloque({rumbo:'Rumbo del país',eje_gob_opos:'Gobierno u oposición',partido_2028:'De qué partido debería ser el presidente'}[dim]||dim.replace(/_/g,' '),arr,r=>pctN(r)+indice(r))).join('')+
+            bloque('Qué les mueve',x.mueve,r=>pctN(r)+indice(r))+bloque('Cómo se sienten',x.emocion,r=>pctN(r)+indice(r))+bloque('A quién votaron en la elección anterior',(x.recuerdo||[]).map(r=>({...r,e:nomRec(r.e)})),r=>pctN(r)+indice(r))+
+            (k==='retener'?bloque('A quién podría irse este voto',x.fugas,r=>pctN(r)):'')+
+            (x.diverge&&Object.keys(x.diverge).length?`<div class="card"><span class="lab">Qué señal de fidelidad falla</span>${Object.values(x.diverge).map(v=>`<div class="fila" style="padding:5px 0"><span>${v.que}</span><span class="n" style="font-size:15px">${p1(v.pct)} %</span></div>`).join('')}</div>`:'')+
+            `</div>`; document.getElementById('seg-detalle').scrollIntoView({behavior:'smooth',block:'start'});}));
+      } else if(nivel==='subsegmentos'){
+        const S=C0.subsegmentos;
+        cont.innerHTML=Object.entries(PUB).filter(([k])=>S[k]).map(([k,[t,col]])=>{const g=S[k];
+          return `<div class="card" style="margin-bottom:12px;border-top:4px solid ${col}"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline"><h3>${t} · ${g.k} subsegmentos</h3><span class="small mut">${fmt(g.electores)} electores</span></div>
+            <div class="grid2" style="margin-top:10px">${g.grupos.map(sg=>`<div class="card" style="background:var(--bg2)"><span class="lab">Subsegmento ${sg.n} · ${p1(sg.pct)} % del público</span><div class="num" style="font-size:24px;margin:2px 0">${fmt(sg.electores)}<small style="font-size:12px;color:var(--mut);font-family:Montserrat"> electores</small></div>
+              <div class="small" style="margin-top:4px"><b>Lo que lo distingue</b>${(sg.claves||[]).map(c=>`<div class="fila" style="padding:4px 0;gap:8px"><span style="min-width:0">${c.e}</span><span class="n" style="font-size:14px;white-space:nowrap">${p1(c.sub)} % <small style="color:var(--mut);font-weight:500">vs ${p1(c.pub)} %</small></span></div>`).join('')}</div>
+              <div class="small mut" style="margin-top:6px">${['Edad','Sexo','Región','Clase social','Ingresos','Ocupación'].filter(d=>sg.perfil&&sg.perfil[d]&&sg.perfil[d].length).map(d=>`<b style="color:var(--ink)">${d}:</b> ${sg.perfil[d].map(r=>r.e.charAt(0)+r.e.slice(1).toLowerCase()+' '+p1(r.pct)+' %').join(', ')}`).join(' · ')}</div></div>`).join('')}</div></div>`}).join('')+
+          `<p class="small mut">Cada grupo se caracteriza frente al resto de su público: el porcentaje del grupo frente al porcentaje del público. DANTE renombra los subsegmentos en el informe.</p>`;
+      }
+    }
+    pinta();
+  });
 
   /* ---------- perfiles electorales ---------- */
   seguro('perfiles',()=>{
