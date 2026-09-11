@@ -183,6 +183,12 @@ td .celda{display:inline-block;min-width:44px;padding:2px 6px;border-radius:5px}
 #acceso input{font:inherit;font-size:16px;padding:11px 14px;border-radius:10px;border:1px solid var(--linea);background:var(--bg);color:var(--ink);min-height:44px;width:100%}
 #acceso .btn{width:100%;margin-top:4px}
 #acceso .msg{font-size:13.5px;color:var(--acc2);min-height:20px}
+#acceso .paises{display:flex;flex-direction:column;gap:8px}
+#acceso .pais{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--linea);border-radius:12px;background:var(--bg);color:var(--ink);font:inherit;font-size:16px;font-weight:600;cursor:pointer;text-align:left;min-height:52px}
+#acceso .pais:hover{border-color:var(--acc)}
+#acceso .pais .b{font-size:26px;line-height:1}
+#acceso .pais small{display:block;font-weight:400;color:var(--mut);font-size:12.5px}
+#acceso .volver{background:none;border:0;color:var(--acc);font:inherit;font-size:13px;cursor:pointer;padding:0;text-decoration:underline;align-self:flex-start}
 #acceso .pie{font-size:12.5px;color:var(--mut);text-align:center;margin-top:6px}
 @media (min-width:900px){
   .app{grid-template-columns:230px minmax(0,1fr);grid-template-rows:auto auto 1fr;align-content:start}
@@ -210,8 +216,18 @@ td .celda{display:inline-block;min-width:44px;padding:2px 6px;border-radius:5px}
 
 
 <div id="acceso" hidden>
+  <div class="caja" id="portal" hidden>
+    <div class="marca"><span>Mi campaña</span><small>Devotion2Vote · Sala de clientes</small></div>
+    <p class="small mut" id="portal-txt">Elija el país de su campaña.</p>
+    <div class="paises" id="paises"></div>
+    <button class="pais" id="multi" type="button"><span class="b">🌍</span><span>Cliente multinacional<small>varios países en una misma sesión</small></span></button>
+    <div class="msg" id="pmsg"></div>
+    <div class="pie">Todo lo que consulte queda registrado a su nombre.</div>
+  </div>
   <form class="caja" id="form-acceso" autocomplete="on">
-    <div class="marca"><img class="foto" width="64" height="64" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-foto="cliente" alt="" style="margin-bottom:10px"><span data-nombre-sala>Mi campaña PRM</span><small>Devotion2Vote · Sala de clientes</small></div>
+    <div class="marca"><img class="foto" width="64" height="64" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-foto="cliente" alt="" style="margin-bottom:10px" hidden><span data-nombre-sala>Mi campaña</span><small>Devotion2Vote · Sala de clientes</small></div>
+    <p class="small mut" id="acc-pais" hidden></p>
+    <button class="volver" type="button" id="acc-volver" hidden>← Elegir otro país</button>
     <p class="small mut">Entre con el usuario y la clave que le facilitó su consultor.</p>
     <label>Usuario<input id="au" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required></label>
     <label>Clave<input id="ap" name="password" type="password" autocomplete="current-password" required></label>
@@ -241,7 +257,7 @@ td .celda{display:inline-block;min-width:44px;padding:2px 6px;border-radius:5px}
     <img class="foto b" width="52" height="52" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-foto="cliente" alt="">
     <div class="txt"><span class="lab">Mi campaña</span><h1 data-partido>PRM</h1><span class="sub" data-sub-sala>República Dominicana · Presidencial 2028 · país, regiones, provincias y municipios</span></div>
   </div>
-  <div style="display:flex;gap:8px;align-items:center;flex:0 0 auto"><button class="btn sec chico" data-hoja="ficha">Ficha técnica</button><button class="btn sec chico" id="salir" title="Cerrar sesión" hidden>Salir</button></div>
+  <div style="display:flex;gap:8px;align-items:center;flex:0 0 auto"><button class="btn sec chico" id="cambiar-pais" hidden>Cambiar país</button><button class="btn sec chico" data-hoja="ficha">Ficha técnica</button><button class="btn sec chico" id="salir" title="Cerrar sesión" hidden>Salir</button></div>
 </header>
 
 <main>
@@ -566,15 +582,50 @@ let TOK=null,YO=null;
   /* ---------- acceso (solo en el sitio) ---------- */
   const acc=document.getElementById('acceso'), app=document.getElementById('app'), msg=document.getElementById('amsg');
   if(SITIO){
-    try{TOK=sessionStorage.getItem('d2v_ctok');YO=JSON.parse(sessionStorage.getItem('d2v_cyo')||'null')}catch(e){}
+    let AMB=null; try{TOK=sessionStorage.getItem('d2v_ctok');YO=JSON.parse(sessionStorage.getItem('d2v_cyo')||'null');AMB=sessionStorage.getItem('d2v_amb')||null}catch(e){}
     document.getElementById('salir').hidden=false;
+    const portal=document.getElementById('portal'), form=document.getElementById('form-acceso'), pmsg=document.getElementById('pmsg');
+    let PAISES=[];
+    const nomPais=a=>{const p=PAISES.find(x=>x.ambito===a); return p?((p.bandera?p.bandera+' ':'')+p.nombre):a;};
+    function pintaPortal(lista,txt){
+      PAISES=lista.length?lista:PAISES;
+      document.getElementById('portal-txt').textContent=txt||'Elija el país de su campaña.';
+      document.getElementById('paises').innerHTML=lista.map(p=>`<button class="pais" type="button" data-amb="${p.ambito}"><span class="b">${p.bandera||'🏳️'}</span><span>${p.nombre}<small>Sala de clientes · ${p.ambito.toUpperCase()}</small></span></button>`).join('')||'<p class="small mut">Todavía no hay salas publicadas.</p>';
+      document.getElementById('multi').hidden=!!TOK;
+      portal.hidden=false; form.hidden=true;
+    }
+    async function cargarPaises(){
+      try{const r=await fetch(API+'/dv/campana/paises',{cache:'no-store'}); const j=await r.json(); PAISES=j.paises||[];}catch(e){PAISES=[];}
+      return PAISES;
+    }
+    function elegir(amb){   // el visitante eligió país (o multinacional) → formulario de acceso
+      AMB=amb; try{sessionStorage.setItem('d2v_amb',amb)}catch(e){}
+      if(TOK){dentro();return;}
+      const ap=document.getElementById('acc-pais'); ap.hidden=false; ap.innerHTML=amb==='*'?'<b>Cliente multinacional</b> · elegirá el país al entrar':'Sala de <b>'+nomPais(amb)+'</b>';
+      document.getElementById('acc-volver').hidden=false; portal.hidden=true; form.hidden=false; document.getElementById('au').focus();
+    }
+    document.getElementById('paises').addEventListener('click',e=>{const b=e.target.closest('[data-amb]'); if(b) elegir(b.dataset.amb);});
+    document.getElementById('multi').addEventListener('click',()=>elegir('*'));
+    document.getElementById('acc-volver').addEventListener('click',()=>{AMB=null; try{sessionStorage.removeItem('d2v_amb')}catch(e){} pintaPortal(PAISES);});
+    document.getElementById('cambiar-pais').addEventListener('click',()=>{try{sessionStorage.removeItem('d2v_amb')}catch(e){} location.reload();});
     async function dentro(){
       msg.textContent='Cargando su sala…';
       try{
-        const r=await fetch(API+'/dv/campana',{headers:{'Authorization':'Bearer '+TOK},cache:'no-store'});
+        const q=(AMB&&AMB!=='*')?'?ambito='+encodeURIComponent(AMB):'';
+        let r=await fetch(API+'/dv/campana'+q,{headers:{'Authorization':'Bearer '+TOK},cache:'no-store'});
         if(r.status===401){fuera();msg.textContent='Su sesión caducó. Vuelva a entrar.';return;}
         let j=null; try{j=await r.json()}catch(x){}
+        if(r.status===403&&/acceso a esa sala/i.test((j&&j.detail)||'')){   // eligió un país que no es el suyo: se le lleva a su sala
+          AMB=null; try{sessionStorage.removeItem('d2v_amb')}catch(e){}
+          r=await fetch(API+'/dv/campana',{headers:{'Authorization':'Bearer '+TOK},cache:'no-store'}); try{j=await r.json()}catch(x){}
+        }
         if(!r.ok) throw new Error((j&&j.detail)||('HTTP '+r.status));
+        const salas=j.ambitos||[];
+        if(salas.length>1&&(!AMB||AMB==='*'||!salas.some(x=>x.ambito===AMB))){   // multinacional: que elija entre sus salas
+          msg.textContent=''; acc.hidden=false; app.hidden=true; pintaPortal(salas,'Su usuario tiene acceso a varias salas. Elija el país.'); return;
+        }
+        AMB=j.ambito; try{sessionStorage.setItem('d2v_amb',AMB)}catch(e){}
+        document.getElementById('cambiar-pais').hidden=salas.length<=1;
         SALA=j; DATA=j.datos; FOTOS=j.fotos||{};
         document.querySelectorAll('[data-foto]').forEach(im=>{const k=im.dataset.foto; if(FOTOS[k]) im.src=FOTOS[k]; else im.hidden=true;});
         const f=j.ficha||{}; const sigla=(f.partido&&/\(([^)]+)\)/.test(f.partido))?f.partido.match(/\(([^)]+)\)/)[1]:(f.nombre||'').split('·')[0].trim();
@@ -589,8 +640,9 @@ let TOK=null,YO=null;
       if(!window.__arrancada){window.__arrancada=true; arrancar();}
       window.dispatchEvent(new Event('resize'));
     }
-    function fuera(){TOK=null;YO=null;try{sessionStorage.removeItem('d2v_ctok');sessionStorage.removeItem('d2v_cyo')}catch(e){} if(window.__arrancada){location.reload();return;} app.hidden=true;acc.hidden=false;}
-    if(TOK&&YO){dentro();} else {app.hidden=true;acc.hidden=false;}
+    function fuera(){TOK=null;YO=null;try{sessionStorage.removeItem('d2v_ctok');sessionStorage.removeItem('d2v_cyo');sessionStorage.removeItem('d2v_amb')}catch(e){} if(window.__arrancada){location.reload();return;} app.hidden=true;acc.hidden=false;}
+    app.hidden=true; acc.hidden=false;
+    if(TOK&&YO){dentro();} else {form.hidden=true; cargarPaises().then(l=>pintaPortal(l));}
     document.getElementById('form-acceso').addEventListener('submit',async e=>{
       e.preventDefault(); const b=document.getElementById('ab'); b.disabled=true; msg.textContent='Comprobando…';
       try{
@@ -1042,7 +1094,7 @@ let TOK=null,YO=null;
     pedir.disabled=true;pedir.style.opacity=.6;pedir.textContent='Enviando…';
     if(SITIO&&TOK){
       try{
-        const r=await fetch(API+'/dv/campana/solicitudes',{method:'POST',headers:{'Authorization':'Bearer '+TOK,'Content-Type':'application/json'},body:JSON.stringify({tipo:'informe',titulo:que+' · '+nomOla(ULT),detalle:{ola:ULT,informe:que}})});
+        const r=await fetch(API+'/dv/campana/solicitudes',{method:'POST',headers:{'Authorization':'Bearer '+TOK,'Content-Type':'application/json'},body:JSON.stringify({ambito:SALA&&SALA.ambito,tipo:'informe',titulo:que+' · '+nomOla(ULT),detalle:{ola:ULT,informe:que}})});
         if(!r.ok) throw new Error('HTTP '+r.status);
         const j=await r.json(); SALA.solicitudes=j.solicitudes; pintaSolicitudes();
       }catch(e){pedir.disabled=false;pedir.style.opacity=1;pedir.textContent='No se pudo enviar. Vuelva a intentarlo';return;}
@@ -1086,7 +1138,7 @@ let TOK=null,YO=null;
       if(estado!=='aprobado'){
         cont.innerHTML=`<div class="card" style="display:flex;flex-direction:column;gap:10px"><span class="lab">${nivel==='microsegmentos'?'Microsegmentos':'Nanosegmentos'} · en preparación en la Sala de Control</span><p class="small mut">${nivel==='microsegmentos'?'Los microsegmentos cruzan cada subsegmento con el territorio (provincia y municipios propios) sobre la urna real de cada demarcación; exigen al menos 500 electores y el 1 % del territorio.':'Los nanosegmentos bajan al colegio electoral (mínimo 200 electores) con perfil por sexo y edad, y se ordenan por tamaño, elasticidad y accesibilidad.'} Este nivel se activa cuando la Sala de Control aprueba su paso del método${SITIO&&SALA&&SALA.modulos&&!SALA.modulos.cruzada?' y el plan de la campaña lo incluye':''}.</p><div class="acciones"><button class="btn chico" id="seg-pedir">Pedir ${nivel} de ${CORTO[cand]||cand}</button><span class="small mut" id="seg-pedir-msg" style="align-self:center"></span></div></div>`;
         document.getElementById('seg-pedir').addEventListener('click',async e=>{const b=e.currentTarget; b.disabled=true; b.style.opacity=.6; const m=document.getElementById('seg-pedir-msg');
-          if(SITIO&&TOK){try{const r=await fetch(API+'/dv/campana/solicitudes',{method:'POST',headers:{'Authorization':'Bearer '+TOK,'Content-Type':'application/json'},body:JSON.stringify({tipo:'segmentacion',titulo:nivel.charAt(0).toUpperCase()+nivel.slice(1)+' · '+(CAND[cand]||cand)+' · '+nomOla(SG.ola),detalle:{nivel,candidato:cand,ola:SG.ola}})}); if(!r.ok) throw new Error(); const j=await r.json(); SALA.solicitudes=j.solicitudes; if(typeof pintaSolicitudes==='function') pintaSolicitudes(); m.textContent='Pedido registrado. Avisamos cuando esté aprobado.';}catch(x){b.disabled=false;b.style.opacity=1;m.textContent='No se pudo enviar. Vuelva a intentarlo.';}} else m.textContent='Pedido registrado (demostración).';});
+          if(SITIO&&TOK){try{const r=await fetch(API+'/dv/campana/solicitudes',{method:'POST',headers:{'Authorization':'Bearer '+TOK,'Content-Type':'application/json'},body:JSON.stringify({ambito:SALA&&SALA.ambito,tipo:'segmentacion',titulo:nivel.charAt(0).toUpperCase()+nivel.slice(1)+' · '+(CAND[cand]||cand)+' · '+nomOla(SG.ola),detalle:{nivel,candidato:cand,ola:SG.ola}})}); if(!r.ok) throw new Error(); const j=await r.json(); SALA.solicitudes=j.solicitudes; if(typeof pintaSolicitudes==='function') pintaSolicitudes(); m.textContent='Pedido registrado. Avisamos cuando esté aprobado.';}catch(x){b.disabled=false;b.style.opacity=1;m.textContent='No se pudo enviar. Vuelva a intentarlo.';}} else m.textContent='Pedido registrado (demostración).';});
         return;
       }
       if(nivel==='segmentos'){
@@ -1136,7 +1188,7 @@ let TOK=null,YO=null;
       b.disabled=true;b.style.opacity=.6;
       const msg=document.getElementById('perfiles-msg');
       if(SITIO&&TOK){
-        try{const r=await fetch(API+'/dv/campana/solicitudes',{method:'POST',headers:{'Authorization':'Bearer '+TOK,'Content-Type':'application/json'},body:JSON.stringify({tipo:'segmentacion',titulo:'Perfiles electorales · '+nomOla(oe),detalle:{ola:oe,candidato:candMio}})});
+        try{const r=await fetch(API+'/dv/campana/solicitudes',{method:'POST',headers:{'Authorization':'Bearer '+TOK,'Content-Type':'application/json'},body:JSON.stringify({ambito:SALA&&SALA.ambito,tipo:'segmentacion',titulo:'Perfiles electorales · '+nomOla(oe),detalle:{ola:oe,candidato:candMio}})});
           if(!r.ok) throw new Error('HTTP '+r.status); const j=await r.json(); SALA.solicitudes=j.solicitudes; if(typeof pintaSolicitudes==='function') pintaSolicitudes();
           msg.textContent='Pedido registrado. La dirección lo prepara y avisa cuando esté en Informes.';
         }catch(e){b.disabled=false;b.style.opacity=1;msg.textContent='No se pudo enviar. Vuelva a intentarlo.';}
@@ -1166,7 +1218,7 @@ let TOK=null,YO=null;
   async function preguntarMotor(q){
     const esp=document.createElement('div');esp.className='msg d mut';esp.textContent='DANTE está mirando los datos…';hilo.appendChild(esp);hilo.scrollTop=hilo.scrollHeight;
     try{
-      const r=await fetch(API+'/dv/campana/dante',{method:'POST',headers:{'Authorization':'Bearer '+TOK,'Content-Type':'application/json'},body:JSON.stringify({pregunta:q,contexto:document.getElementById('dante-ctx').textContent})});
+      const r=await fetch(API+'/dv/campana/dante',{method:'POST',headers:{'Authorization':'Bearer '+TOK,'Content-Type':'application/json'},body:JSON.stringify({ambito:SALA&&SALA.ambito,pregunta:q,contexto:document.getElementById('dante-ctx').textContent})});
       let j=null; try{j=await r.json()}catch(x){}
       esp.remove();
       if(r.status===429){pintaRespuesta((j&&j.detail)||'Se agotaron las preguntas del mes.',null,[]);return;}
