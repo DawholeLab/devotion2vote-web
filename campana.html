@@ -392,15 +392,18 @@ td .celda{display:inline-block;min-width:44px;padding:2px 6px;border-radius:5px}
     <h2>¿Dónde?</h2>
     <p class="mut small" style="margin-top:4px">Las demarcaciones de la encuesta. Respuesta declarada, sin ajustar; las zonas con pocas entrevistas se indican y deben leerse con cautela.</p>
   </div>
-  <div class="seg" role="tablist" id="terr-nivel"><button class="on" data-niv="region" id="terr-niv-region">Regiones</button><button data-niv="provincia">Provincias</button><button data-niv="municipio" id="terr-niv-municipio">Municipios</button></div>
-  <div class="chips" id="terr-metrica"></div>
-  <div class="card">
-    <div class="ctrl" style="margin-bottom:8px">
+  <!-- la línea de tiempo va arriba, en posición fija: los chips de abajo cambian de número según la ola y moverían los botones -->
+  <div class="card" style="padding:12px 16px">
+    <div class="ctrl">
       <button class="rb" id="te-prev" aria-label="Toma anterior">◀</button>
       <button class="rb" id="te-next" aria-label="Toma siguiente">▶</button>
       <input type="range" id="te-range" min="0" max="1" value="1" aria-label="Toma">
       <span class="ola-txt" id="te-ola"></span>
     </div>
+  </div>
+  <div class="seg" role="tablist" id="terr-nivel"><button class="on" data-niv="region" id="terr-niv-region">Regiones</button><button data-niv="provincia">Provincias</button><button data-niv="municipio" id="terr-niv-municipio">Municipios</button></div>
+  <div class="chips" id="terr-metrica"></div>
+  <div class="card" style="min-height:60vh">
     <div id="terr-lista"></div>
     <p class="small mut" id="terr-nota" style="margin-top:10px"></p>
   </div>
@@ -1028,7 +1031,9 @@ let TOK=null,YO=null;
   sankey();
 
   /* ---------- TERRITORIO ---------- */
-  const OLAS_Z=Object.keys(DATA.territorio).sort(); let zi=OLAS_Z.length-1, nivel='region', metrica='aprob';
+  // solo las olas que traen algún dato territorial (en España el CIS pregunta intención y confianza solo en algunos barómetros)
+  const conDato=o=>Object.values(DATA.territorio[o]||{}).some(N=>Object.values(N||{}).some(e=>e&&(e.a!=null||e.pc!=null||e.prm!=null||(e.i&&Object.keys(e.i).length))));
+  const OLAS_Z=Object.keys(DATA.territorio).filter(conDato).sort(); let zi=OLAS_Z.length-1, nivel='region', metrica='aprob';
   function territorio(){
     const o=OLAS_Z[zi], Z=DATA.territorio[o][nivel]||{}; const I=DATA.intencion[o];
     const cands=I?Object.entries(I.pct).filter(([k,v])=>k!=='otros'&&v>=3).sort((a,b)=>b[1]-a[1]).slice(0,6).map(x=>x[0]):[];
