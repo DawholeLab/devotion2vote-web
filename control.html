@@ -672,9 +672,14 @@
 
 <section id="biblio">
   <div class="cabecera-zona"><h2>Biblioteca</h2><span>todo lo que el proyecto sabe, ordenado por lo que es</span></div>
+  <div class="panel apartado" style="margin-bottom:12px" id="bib-fuentes-panel">
+    <h3>Fuentes de datos</h3><span class="cuenta" id="bib-fuentes-n">lo que sostiene cada cifra del país: encuestas, resultados oficiales y registros territoriales · es lo mismo que el cliente ve en «Fuentes de datos»</span>
+    <div id="bib-fuentes" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px"></div>
+  </div>
   <div class="biblio-grid">
-    <div class="panel apartado">
+    <div class="panel apartado" style="grid-column:span 2">
       <h3>Bases de datos</h3><span class="cuenta" id="bib-bases-n"></span>
+      <input id="bib-buscar" placeholder="Buscar ola, título o pregunta…" style="width:100%;box-sizing:border-box;margin:0 0 8px;padding:7px 10px;border:1px solid var(--borde);border-radius:6px;background:var(--fondo);color:var(--tinta);font:inherit;font-size:13px" oninput="pintarBiblio()">
       <div class="lista-scroll" id="bib-bases"></div>
     </div>
     <div class="panel apartado">
@@ -1709,11 +1714,46 @@ const CATS=[['General','tramo en construcción',null],
   ['Estimación y tracking','foto por ola y serie',['p07']],
   ['Eje gobierno/oposición','identidad contra voto',['p03']],
   ['Techos de potencial','crecimiento posible',['p04']]];
+let FUENTES=null, FUENTES_AMB=null;
+async function cargarFuentes(){
+  if(FUENTES&&FUENTES_AMB===AMBITO)return FUENTES;
+  try{FUENTES=await api('/dv/campana/'+AMBITO+'/fuentes');FUENTES_AMB=AMBITO}catch(e){FUENTES=null}
+  pintarBiblio();return FUENTES;
+}
+function pintarFuentes(){
+  const F=FUENTES; const el=$('bib-fuentes'); if(!el)return;
+  if(!F){el.innerHTML='<div class="doc-fila">Cargando las fuentes del país…</div>';return}
+  const r=F.resumen||{};
+  const NIV={provincia:'provincias',municipio:'municipios',colegio:'colegios',comunidad:'comunidades',region:'regiones',distrito_municipal:'distritos municipales'};
+  const urnas=(F.urnas||[]).slice().reverse().map(u=>{const bl=Object.entries(u.bloques||{}).sort((a,b)=>(b[1].votos||0)-(a[1].votos||0));
+    return '<details style="padding:6px 0;border-bottom:1px solid var(--borde-suave)"><summary style="cursor:pointer;font-size:13px">🗳️ <b>'+esc(u.eleccion)+'</b> <span class="cod">'+esc(u.clave)+(u.censo?' · censo '+fmt(u.censo):'')+(u.participacion_real?' · participación '+u.participacion_real+' %':'')+'</span></summary>'
+      +bl.map(([k,v])=>'<div class="doc-fila" style="padding:3px 0"><span>'+esc(k)+'</span><span class="cod" style="margin-left:auto">'+fmt(v.votos)+(v.pct!=null?' · '+v.pct+' %':'')+'</span></div>').join('')
+      +'<div class="cod" style="padding:4px 0">'+esc(u.fuente||'')+(u.vigente_desde?' · vigente desde '+u.vigente_desde:'')+'</div></details>'}).join('')||'<div class="doc-fila">Sin urnas oficiales cargadas (parámetros P.URNA.*).</div>';
+  const terr=(F.territorio||[]).map(t=>'<div class="doc-fila">🗺️ <b>'+esc(t.eleccion)+'</b><span class="cod" style="margin-left:auto">'+Object.entries(t.niveles).map(([n,c])=>fmt(c)+' '+(NIV[n]||n)).join(' · ')+'</span></div>').join('')
+    ||'<div class="doc-fila">Sin resultados por demarcación: súbelos en el país → Territorio (Excel oficial por colegio).</div>';
+  const cat=Object.entries(F.catalogo||{}).sort((a,b)=>a[1].familia.localeCompare(b[1].familia)||a[0].localeCompare(b[0]));
+  const nBases=(F.encuestas||[]).length, cuenta={}; (F.encuestas||[]).forEach(e=>Object.keys(e.indice||{}).forEach(k=>cuenta[k]=(cuenta[k]||0)+1));
+  const preguntas=cat.map(([k,v])=>'<div class="doc-fila" style="padding:3px 0"><span title="'+esc(v.pregunta)+'">'+esc(k)+'</span><span class="cod" style="margin-left:auto">'+esc(v.familia)+' · '+(cuenta[k]||0)+' de '+nBases+' olas</span></div>').join('');
+  el.innerHTML='<div><div class="cod" style="margin-bottom:6px"><b style="color:var(--tinta)">'+r.encuestas+'</b> encuestas · <b style="color:var(--tinta)">'+fmt(r.entrevistas||0)+'</b> entrevistas · <b style="color:var(--tinta)">'+r.preguntas_reconocidas+'</b> reconocimientos pregunta × ola</div><div class="cod" style="margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">Preguntas del método</div><div class="lista-scroll" style="max-height:260px">'+preguntas+'</div></div>'
+    +'<div><div class="cod" style="margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">Resultados oficiales (urnas)</div><div class="lista-scroll" style="max-height:300px">'+urnas+'</div></div>'
+    +'<div><div class="cod" style="margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">Registros territoriales</div>'+terr+(F.documentos&&F.documentos.length?'<div class="cod" style="margin:10px 0 4px;text-transform:uppercase;letter-spacing:.06em">Documentos</div>'+F.documentos.map(d=>'<div class="doc-fila">📚 '+esc(d.titulo)+'<span class="cod" style="margin-left:auto">'+esc(d.tipo)+' · '+(d.fecha||'')+'</span></div>').join(''):'')+'</div>';
+}
+function indiceBase(b){
+  const F=(FUENTES&&FUENTES_AMB===AMBITO)?FUENTES:null; if(!F)return '';
+  const e=(F.encuestas||[]).find(x=>x.codigo===b.codigo); if(!e)return '';
+  const idx=Object.entries(e.indice||{}); const cat=F.catalogo||{};
+  return '<details style="margin:2px 0 4px 22px"><summary class="cod" style="cursor:pointer">índice · '+idx.length+' preguntas reconocidas'+(e.variables?' · '+e.variables+' variables':'')+'</summary>'
+    +idx.map(([k,v])=>'<div class="doc-fila" style="padding:2px 0"><span>'+esc((cat[k]||{}).pregunta||k)+'</span><span class="cod" style="margin-left:auto;white-space:nowrap">'+esc(v.replace(/ \?$/,''))+(/ \?$/.test(v)?' · propuesta':'')+'</span></div>').join('')+'</details>';
+}
 function pintarBiblio(){
   $('bib-bases-n').textContent=BASES.length+' olas · '+Object.keys(infoDe(AMBITO).elecciones||{}).length+' elección(es) con urna territorial';
-  const olas=[...BASES].sort((a,b)=>String(b.fecha_campo_ini||'').localeCompare(String(a.fecha_campo_ini||'')));
-  $('bib-bases').innerHTML=olas.map(b=>'<div class="doc-fila">📊 <b>'+esc(b.codigo)+'</b>'
-    +'<span class="cod">'+fmt(b.n_registros)+' casos · <a style="cursor:pointer" onclick="abrirMonitor('+b.id+')">abrir</a></span></div>').join('');
+  pintarFuentes();
+  const q=(($('bib-buscar')||{}).value||'').trim().toLowerCase();
+  const F=(FUENTES&&FUENTES_AMB===AMBITO)?FUENTES:null;
+  const texto=b=>{const e=F&&(F.encuestas||[]).find(x=>x.codigo===b.codigo); return [b.codigo,b.titulo,b.fecha_campo_ini,...(e?Object.keys(e.indice||{}).map(k=>((F.catalogo||{})[k]||{}).pregunta||k):[])].join(' ').toLowerCase()};
+  const olas=[...BASES].filter(b=>!q||texto(b).includes(q)).sort((a,b)=>String(b.fecha_campo_ini||'').localeCompare(String(a.fecha_campo_ini||'')));
+  $('bib-bases').innerHTML=olas.map(b=>'<div class="doc-fila">📊 <b>'+esc(b.codigo)+'</b> <span class="cod">'+esc(b.titulo||'')+'</span>'
+    +'<span class="cod" style="margin-left:auto;white-space:nowrap">'+fmt(b.n_registros)+' casos · <a style="cursor:pointer" onclick="abrirMonitor('+b.id+')">abrir</a></span></div>'+indiceBase(b)).join('')||'<div class="doc-fila">Ninguna ola coincide.</div>';
   const todas=[...P05,...P07];
   $('bib-reportes').innerHTML=CATS.map(([n,d,pasos],i)=>{
     const cnt=pasos?todas.filter(c=>c.ok&&pasos.some(p=>c.paso_clave.startsWith(p))).length:0;
@@ -2119,6 +2159,7 @@ function ver(id,desdeHistorial){
   document.querySelectorAll('.nav-ctx').forEach(b=>b.style.display=enPais?'':'none');
   document.querySelectorAll('.nav-inv').forEach(b=>b.style.display=enInv?'':'none');
   if(id==='visual'&&!$('vis-ola').options.length)pintarVisOlas();
+  if(id==='biblio')cargarFuentes();
   if(!desdeHistorial&&location.hash!=='#'+id)history.pushState(null,'','#'+id);
 }
 function atras(){history.back()}

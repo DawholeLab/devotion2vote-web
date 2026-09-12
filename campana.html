@@ -72,6 +72,8 @@ nav.barra button.on{color:var(--acc2)}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 @media (max-width:560px){.grid2,.grid3{grid-template-columns:1fr}}
+#fu-resumen{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}@media (max-width:560px){#fu-resumen{grid-template-columns:1fr 1fr;gap:8px}}
+.fu-enc summary::-webkit-details-marker{display:none}
 .chips{display:flex;gap:8px;flex-wrap:wrap}
 .chip{background:var(--chip);border-radius:999px;padding:7px 14px;font-size:14px;font-weight:500;min-height:36px;display:inline-flex;align-items:center;gap:6px;border:1px solid transparent}
 .chip.on{background:var(--ink);color:var(--bg)}
@@ -249,6 +251,7 @@ td .celda{display:inline-block;min-width:44px;padding:2px 6px;border-radius:5px}
   <button data-ir="partido"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><circle cx="17" cy="10" r="2.5"/><path d="M3 19c0-3.3 2.7-5 6-5s6 1.7 6 5M15 15c2.8 0 5 1.5 5 4"/></svg>El partido</button>
   <button data-ir="segmentacion"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg>Segmentación</button>
   <button data-ir="informes"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6zM15 3v4h4M9 12h6M9 16h6"/></svg>Informes</button>
+  <button data-ir="fuentes"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>Fuentes de datos</button>
   <div class="pie">Sesión del <b data-equipo>equipo del PRM</b><br>Solo ve su campaña. Todo lo que pide queda registrado a su nombre.</div>
 </aside>
 
@@ -514,6 +517,27 @@ td .celda{display:inline-block;min-width:44px;padding:2px 6px;border-radius:5px}
   </div>
 </section>
 
+<!-- ============ FUENTES DE DATOS ============ -->
+<section class="pantalla" id="p-fuentes">
+  <div>
+    <h2>Fuentes de datos</h2>
+    <p class="mut small" style="margin-top:4px">Todo lo que sostiene las cifras de esta sala: cada encuesta con su índice de preguntas, los resultados oficiales que anclan las estimaciones y los registros territoriales. Nada se muestra aquí que no esté cargado en el motor y aprobado en la Sala de Control.</p>
+  </div>
+  <div id="fu-resumen"></div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+      <span class="lab">Encuestas</span>
+      <input id="fu-buscar" placeholder="Buscar por mes, título o pregunta…" aria-label="Buscar encuesta" style="flex:1;min-width:200px;max-width:380px;padding:9px 12px;border:1px solid var(--linea);border-radius:10px;background:var(--bg2);font:inherit;font-size:14px">
+    </div>
+    <p class="small mut" id="fu-enc-nota" style="margin:8px 0 4px"></p>
+    <div id="fu-encuestas"></div>
+  </div>
+  <div class="card"><span class="lab">Resultados oficiales</span><p class="small mut" style="margin:6px 0 4px">Las urnas con las que el método ancla cada estimación. Cada encuesta usa la elección anterior a su fecha de campo.</p><div id="fu-urnas"></div></div>
+  <div class="card"><span class="lab">Registros territoriales</span><p class="small mut" style="margin:6px 0 4px">Resultados oficiales por demarcación cargados en el motor; son la base de los niveles finos de segmentación.</p><div id="fu-territorio"></div></div>
+  <div class="card" id="fu-docs-card" hidden><span class="lab">Documentos</span><div id="fu-docs"></div></div>
+  <div class="vacio" id="fu-vacio" hidden>Las fuentes de datos se listan cuando la sala se vuelva a publicar desde la Sala de Control.</div>
+</section>
+
 </main>
 
 <nav class="barra" aria-label="Secciones">
@@ -524,6 +548,7 @@ td .celda{display:inline-block;min-width:44px;padding:2px 6px;border-radius:5px}
   <button data-ir="partido"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><circle cx="17" cy="10" r="2.5"/><path d="M3 19c0-3.3 2.7-5 6-5s6 1.7 6 5M15 15c2.8 0 5 1.5 5 4"/></svg>Partido</button>
   <button data-ir="segmentacion"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg>Segmentos</button>
   <button data-ir="informes"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6zM15 3v4h4M9 12h6M9 16h6"/></svg>Informes</button>
+  <button data-ir="fuentes"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>Fuentes</button>
 </nav>
 
 <button class="fab" data-hoja="dante" aria-label="Abrir DANTE"><span class="p"></span>DANTE</button>
@@ -784,7 +809,7 @@ let TOK=null,YO=null;
   document.getElementById('ficha-serie').textContent=`${OLAS.length} ${ID.fuente}, de ${nomOla(OLAS[0]).toLowerCase()} a ${nomOla(ULT).toLowerCase()}. Cada serie indica en qué encuestas existe la pregunta.`;
 
   /* ---------- navegación ---------- */
-  const nombres={hoy:'Hoy',evolucion:'Evolución',flujos:'Transferencias',territorio:'Territorio',partido:'El partido',segmentacion:'Segmentación',informes:'Informes'};
+  const nombres={hoy:'Hoy',evolucion:'Evolución',flujos:'Transferencias',territorio:'Territorio',partido:'El partido',segmentacion:'Segmentación',informes:'Informes',fuentes:'Fuentes de datos'};
   function ir(id){
     document.querySelectorAll('.pantalla').forEach(s=>s.classList.toggle('activa',s.id==='p-'+id));
     document.querySelectorAll('[data-ir]').forEach(b=>{if(b.closest('nav,aside'))b.classList.toggle('on',b.dataset.ir===id)});
@@ -1029,6 +1054,41 @@ let TOK=null,YO=null;
   document.getElementById('tr-range').oninput=e=>{ti=+e.target.value;destSel=null;sankey();};
   document.getElementById('tr-play').onclick=function(){ if(ttimer){clearInterval(ttimer);ttimer=null;this.textContent='▶';return;} ti=0;destSel=null;sankey();this.textContent='❚❚'; ttimer=setInterval(()=>{ if(ti>=OLAS_T.length-1){clearInterval(ttimer);ttimer=null;document.getElementById('tr-play').textContent='▶';return;} ti++;destSel=null;sankey(); },1400); };
   sankey();
+
+  /* ---------- FUENTES DE DATOS ---------- */
+  const FU=DATA.fuentes||null;
+  const escT=x=>String(x==null?'':x).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const FAM={transferencia:'Transferencia de voto',intencion:'Intención de voto',identidad:'Identidad política',clima:'Clima de opinión',problematica:'Problemas',emocion:'Emociones',sociodemo:'Perfil sociodemográfico',territorio:'Territorio',otro:'Otras'};
+  function fuentes(filtro){
+    const vac=document.getElementById('fu-vacio');
+    if(!FU||!FU.encuestas){vac.hidden=false;return;} vac.hidden=true;
+    const r=FU.resumen||{}, cat=FU.catalogo||{};
+    document.getElementById('fu-resumen').innerHTML=[[r.encuestas,'encuestas'],[fmt(r.entrevistas||0),'entrevistas'],[Object.keys(cat).length,'preguntas del método reconocidas'],[r.urnas,'elecciones de referencia'],[(FU.territorio||[]).reduce((a,t)=>a+(t.niveles.municipio||t.niveles.provincia||0),0),'demarcaciones con resultados oficiales'],[r.preguntas_reconocidas,'cruces pregunta × encuesta']]
+      .map(([n,t])=>`<div class="card" style="padding:12px 16px"><div class="num" style="font-size:24px">${n==null?'—':n}</div><div class="small mut">${t}</div></div>`).join('');
+    const q=(filtro||'').trim().toLowerCase();
+    const enc=[...FU.encuestas].sort((a,b)=>String(b.campo||'').localeCompare(String(a.campo||'')));
+    const lista=enc.filter(e=>!q||[e.titulo,e.codigo,nomOla(e.ola),...Object.keys(e.indice||{}).map(k=>(cat[k]||{}).pregunta||k)].join(' ').toLowerCase().includes(q));
+    document.getElementById('fu-enc-nota').textContent=q?`${lista.length} de ${enc.length} encuestas coinciden con «${filtro.trim()}».`:`${enc.length} encuestas, de la más reciente a la más antigua. Toque una para ver su índice: las preguntas que el sistema reconoció y usa en la sala.`;
+    document.getElementById('fu-encuestas').innerHTML=lista.map((e,i)=>{
+      const idx=Object.entries(e.indice||{}); const pend=idx.filter(([,v])=>/ \?$/.test(v)).length;
+      const grupos={}; idx.forEach(([k,v])=>{const f=(cat[k]||{}).familia||'otro';(grupos[f]=grupos[f]||[]).push([k,v])});
+      const cuerpo=Object.entries(grupos).map(([f,xs])=>`<div style="margin-top:8px"><b class="small">${FAM[f]||f}</b>${xs.map(([k,v])=>`<div class="fila" style="padding:4px 0;gap:10px"><span class="small">${escT((cat[k]||{}).pregunta||k)}</span><span class="small mut" style="white-space:nowrap">${escT(v.replace(/ \?$/,''))}</span></div>`).join('')}</div>`).join('');
+      return `<details class="fu-enc" style="border-top:1px solid var(--linea);padding:8px 0"><summary style="cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:10px;align-items:baseline"><span><b>${nomOla(e.ola)}</b> <span class="small mut">· ${escT(e.titulo)}</span></span><span class="small mut" style="white-space:nowrap">${e.n?fmt(e.n)+' entrevistas':''}${e.variables?' · '+e.variables+' variables':''} · ${idx.length} preguntas reconocidas</span></summary>
+        <div class="small mut" style="margin-top:6px">Origen: ${escT(e.origen)} · archivo ${escT(e.archivo)} · campo desde ${e.campo||'—'} · ponderación ${escT(e.ponderacion)}${pend?` · ${pend} reconocimientos pendientes de confirmar en la Sala de Control`:''}</div>${cuerpo||'<div class="small mut" style="margin-top:6px">Sin preguntas reconocidas todavía.</div>'}</details>`;
+    }).join('')||'<div class="vacio">Ninguna encuesta coincide.</div>';
+    document.getElementById('fu-urnas').innerHTML=(FU.urnas||[]).slice().reverse().map(u=>{
+      const bl=Object.entries(u.bloques||{}).sort((a,b)=>(b[1].votos||0)-(a[1].votos||0));
+      return `<details style="border-top:1px solid var(--linea);padding:8px 0"><summary style="cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:10px"><span><b>${escT(u.eleccion)}</b> <span class="small mut">· ${escT(u.fuente||'')}</span></span><span class="small mut" style="white-space:nowrap">${u.censo?'censo '+fmt(u.censo):''}${u.participacion_real?' · participación '+p1(u.participacion_real)+' %':''}</span></summary>
+        ${bl.map(([k,v])=>`<div class="fila" style="padding:4px 0"><span class="small">${escT(CAND[k.toLowerCase()]||CORTO[k.toLowerCase()]||k)}</span><span class="small" style="white-space:nowrap">${fmt(v.votos)} · ${v.pct!=null?p1(v.pct)+' %':''}</span></div>`).join('')}
+        <div class="small mut" style="margin-top:6px">Vigente para las encuestas con campo desde ${u.vigente_desde||'—'}.${u.nota?' '+escT(u.nota):''}</div></details>`;
+    }).join('')||'<div class="small mut">Sin urnas cargadas.</div>';
+    const NIV={provincia:'provincias',municipio:'municipios',colegio:'colegios electorales',comunidad:'comunidades',region:'regiones',distrito_municipal:'distritos municipales'};
+    document.getElementById('fu-territorio').innerHTML=(FU.territorio||[]).map(t=>`<div class="fila" style="padding:6px 0;gap:10px"><span><b>${escT(t.eleccion)}</b> <span class="small mut">· ${escT(t.fuente||'')}</span></span><span class="small" style="white-space:nowrap">${Object.entries(t.niveles).map(([n,c])=>fmt(c)+' '+(NIV[n]||n)).join(' · ')}</span></div>`).join('')||'<div class="small mut">Todavía no hay resultados por demarcación cargados para este país.</div>';
+    const docs=FU.documentos||[]; document.getElementById('fu-docs-card').hidden=!docs.length;
+    document.getElementById('fu-docs').innerHTML=docs.map(d=>`<div class="fila" style="padding:6px 0"><span>${escT(d.titulo)} <span class="small mut">· ${escT(d.tipo)}</span></span><span class="small mut">${d.fecha||''}</span></div>`).join('');
+  }
+  document.getElementById('fu-buscar').addEventListener('input',e=>fuentes(e.target.value));
+  fuentes('');
 
   /* ---------- TERRITORIO ---------- */
   // solo las olas que traen algún dato territorial (en España el CIS pregunta intención y confianza solo en algunos barómetros)
