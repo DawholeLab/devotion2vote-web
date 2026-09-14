@@ -347,6 +347,20 @@
   .terr-fila .mini-barra i{display:block;height:100%}
   .terr-fila .cifra-t{font-size:12px;color:var(--tinta2);white-space:nowrap}
   .mini-vis{border:1px solid var(--borde);background:var(--panel2);color:var(--tinta);border-radius:5px;padding:7px 14px;font-size:13px}
+  .rev-barra{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+  .rev-lab{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--tinta3)}
+  .rev-barra select{background:var(--fondo);border:1px solid var(--borde);color:var(--tinta);border-radius:5px;padding:6px 9px;font-size:13px}
+  .rev-barra .chip{cursor:pointer}
+  .rev-barra .chip.on{border-color:var(--marca);color:var(--tinta)}
+  #rev-cuerpo table{border-collapse:collapse;width:100%;font-size:12.5px}
+  #rev-cuerpo th{position:sticky;top:0;background:var(--panel)}
+  #rev-cuerpo td.n,#rev-cuerpo th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  #rev-cuerpo tr.tenue td{color:var(--tinta3)}
+  #rev-cuerpo tr.pais td{background:var(--panel2);font-weight:600}
+  #rev-cuerpo .dif-pos{color:#7cc496}.dif-neg{color:#e07a7a}
+  #rev-cuerpo .mini-barra{display:inline-block;width:90px;height:8px;background:var(--fondo);border-radius:3px;vertical-align:middle;overflow:hidden;margin-left:6px}
+  #rev-cuerpo .mini-barra i{display:block;height:100%;background:var(--marca)}
+  .rev-nota{font-size:12px;color:var(--tinta3);margin:8px 0 14px;line-height:1.5;max-width:900px}
   .mini-vis:hover{border-color:var(--tinta3)}
 
   /* puertas de análisis por demarcación */
@@ -749,9 +763,22 @@
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
       <button class="mini-vis" onclick="salaGenerar()">1 · Generar borrador</button>
       <button class="mini-vis" onclick="salaBorrador()">2 · Ver informe del borrador</button>
+      <button class="mini-vis" onclick="salaRevisar()">2b · Revisar los datos (territorio y series)</button>
       <button class="mini-vis" onclick="salaAprobar()">3 · Aprobar y publicar</button>
     </div>
     <div id="sala-estado" class="cod" style="font-size:13px;white-space:pre-wrap;line-height:1.5"></div>
+    <!-- Revisión de los datos del borrador: lo que verá el cliente, bloque a bloque, antes de aprobar (reclamo de Carles, 14-sep-2026) -->
+    <div id="sala-revision" style="display:none;margin-top:12px">
+      <div class="rev-barra">
+        <span class="rev-lab">Datos</span>
+        <select id="rev-fuente" onchange="revCargar()"><option value="borrador">Borrador (sin publicar)</option><option value="publicado">Publicado (lo que ve el cliente)</option></select>
+        <span class="rev-lab">Bloque</span>
+        <select id="rev-bloque" onchange="revPintar()"><option value="territorio">Territorio (por demarcación)</option><option value="contraste">Territorio · encuesta frente a urna</option><option value="olas">Series por ola</option></select>
+        <span id="rev-info" class="cod" style="font-size:12px;color:var(--tinta3)"></span>
+      </div>
+      <div class="rev-barra" id="rev-filtros"></div>
+      <div id="rev-cuerpo" class="exped"></div>
+    </div>
   </div>
 </section>
 
@@ -2194,6 +2221,126 @@ async function salaBorrador(){
     if((inf.sin_reconocer||[]).length) t+='Fuera de la sala hasta que el cuaderno lo reconozca: '+inf.sin_reconocer.join('; ')+'\n';
     $('sala-estado').textContent=t;
   }catch(e){$('sala-estado').textContent='Sin borrador: '+e.message;}
+}
+/* ── 2b · Revisar los datos del borrador ───────────────────────────────────────────────────────────────
+   Lo que reclamó Carles (14-sep-2026): «en Mi campaña ya corre municipios, pero en la Sala de Control no logro ver
+   ese paso para evaluarlo». El bloque Territorio lo calcula el generador de la sala (respuesta declarada por zona),
+   no es un paso del cuaderno; aquí se enseña tal cual lo verá el cliente, y se contrasta con la urna oficial. */
+const REV={fuente:'borrador',datos:null,ola:null,nivel:null,metrica:null,comparar:'recuerdo',urna:{}};
+/* candidato/partido de la encuesta → bloque de la urna (regla de Carles 10-sep: cada candidato en la columna de su partido).
+   El bloque se localiza por su nombre en la urna (ABINADER · LEONEL FERNANDEZ · ABEL MARTINEZ …); lo que no casa va a OT+BL. */
+const PARTIDO_SLUG={dom:{abinader:'PRM',collado:'PRM',carolina:'PRM',raquel:'PRM',guido:'PRM',wellington:'PRM',yayo:'PRM',ito:'PRM','peña_guaba':'PRM',hipolito:'PRM',
+  leonel:'FP',omar:'FP',abel:'PLD',gonzalo:'PLD',castillo:'PLD',margarita:'PLD',fjavier:'PLD',brito:'PLD',danilo:'PLD'}};
+const BLOQUE_PARTIDO={dom:{PRM:/ABINADER/i,FP:/LEONEL|FERNANDEZ/i,PLD:/ABEL|CASTILLO/i}};
+const normZ=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\bmunicipio\b|\bdistrito municipal\b|\bd\.?m\.?\b/g,'').replace(/[^a-z0-9]/g,'');
+const p1=v=>v==null?'—':Number(v).toLocaleString('es-ES',{minimumFractionDigits:1,maximumFractionDigits:1});
+const difTxt=d=>d==null?'—':'<span class="'+(d>0?'dif-pos':d<0?'dif-neg':'')+'">'+(d>0?'+':'')+p1(d)+'</span>';
+async function salaRevisar(){
+  $('sala-revision').style.display='';
+  await revCargar();
+}
+async function revCargar(){
+  REV.fuente=$('rev-fuente').value; REV.datos=null; $('rev-cuerpo').innerHTML='<p style="color:var(--tinta3)">cargando…</p>';
+  try{
+    if(REV.fuente==='borrador'){const b=await api('/dv/campana/'+salaAmbito()+'/borrador?completo=true'); REV.datos=b.datos; $('rev-info').textContent='borrador · '+(b.estado||'')+' · generado el '+(b.cuando||'')+(b.publicado?' · publicado ahora: versión '+b.publicado.version:'');}
+    else {const j=await api('/dv/campana?ambito='+salaAmbito()); REV.datos=j.datos; $('rev-info').textContent='publicado · versión '+j.version+' · '+String(j.publicado||'').replace('T',' ');}
+  }catch(e){$('rev-cuerpo').innerHTML='<p>No se pudo cargar: '+esc(e.message)+'</p>';return}
+  if(!REV.datos){$('rev-cuerpo').innerHTML='<p>Sin datos.</p>';return}
+  const olasT=Object.keys(REV.datos.territorio||{}).sort(); REV.ola=olasT[olasT.length-1]||null; REV.nivel=null; REV.metrica=null;
+  revPintar();
+}
+const nomOlaRev=o=>{const M=['','enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];const [y,m]=o.split('-');return (M[+m.slice(0,2)]||m)+(/b$/.test(o)?' (2ª)':'')+' '+y};
+function revPintar(){
+  const bloque=$('rev-bloque').value, d=REV.datos; if(!d) return;
+  if(bloque==='olas'){$('rev-filtros').innerHTML='';revOlas();return}
+  const olasT=Object.keys(d.territorio||{}).sort();
+  if(!olasT.length){$('rev-filtros').innerHTML='';$('rev-cuerpo').innerHTML='<p class="rev-nota">Este borrador no trae bloque de territorio: ninguna ola tiene reconocidas las variables de región, provincia o municipio en el diccionario.</p>';return}
+  if(!REV.ola||!d.territorio[REV.ola]) REV.ola=olasT[olasT.length-1];
+  const niveles=Object.keys(d.territorio[REV.ola]||{}); if(!REV.nivel||!niveles.includes(REV.nivel)) REV.nivel=niveles.includes('provincia')?'provincia':niveles[0];
+  let f='<span class="rev-lab">Ola</span><select onchange="REV.ola=this.value;REV.metrica=null;revPintar()">'+olasT.map(o=>'<option value="'+o+'"'+(o===REV.ola?' selected':'')+'>'+esc(nomOlaRev(o))+'</option>').join('')+'</select>';
+  f+='<span class="rev-lab">Nivel</span>'+niveles.map(n=>'<span class="chip'+(n===REV.nivel?' on':'')+'" onclick="REV.nivel=\''+n+'\';revPintar()">'+esc(NIVEL_NOMBRE[n]||n)+'</span>').join('');
+  if(bloque==='territorio'){
+    const Z=d.territorio[REV.ola][REV.nivel]||{}; const zonas=Object.values(Z);
+    const sig=(d.perfil&&d.perfil.partido_cliente||'').toUpperCase();
+    const I=(d.intencion||{})[REV.ola]; const cands=I?Object.entries(I.pct||{}).filter(([k,v])=>k!=='otros'&&v>=3).sort((a,b)=>b[1]-a[1]).map(x=>x[0]):[];
+    const mets=[]; if(zonas.some(z=>z.a!=null)) mets.push(['aprob','Aprobación del gobierno']); if(zonas.some(z=>z.pc!=null)) mets.push(['pc','Simpatía · '+(sig||'partido del cliente')]);
+    cands.forEach(c=>mets.push(['i:'+c,'Intención · '+c])); if(zonas.some(z=>z.r_n)) mets.push(['r','Recuerdo de voto (por candidato)']);
+    if(!REV.metrica||!mets.find(m=>m[0]===REV.metrica)) REV.metrica=mets.length?mets[0][0]:null;
+    f+='<span class="rev-lab">Métrica</span>'+mets.map(([k,n])=>'<span class="chip'+(k===REV.metrica?' on':'')+'" onclick="REV.metrica=\''+k+'\';revPintar()">'+esc(n)+'</span>').join('');
+    $('rev-filtros').innerHTML=f; revTerritorio(Z,sig,I); return;
+  }
+  f+='<span class="rev-lab">Comparar</span><span class="chip'+(REV.comparar==='recuerdo'?' on':'')+'" onclick="REV.comparar=\'recuerdo\';revPintar()">Recuerdo de voto frente a urna (sesgo de la muestra)</span><span class="chip'+(REV.comparar==='intencion'?' on':'')+'" onclick="REV.comparar=\'intencion\';revPintar()">Intención de hoy frente a urna (cambio)</span>';
+  $('rev-filtros').innerHTML=f; revContraste();
+}
+function revTerritorio(Z,sig,I){
+  const d=REV.datos, o=REV.ola, m=REV.metrica;
+  const val=z=>m==='aprob'?z.a:m==='pc'?z.pc:m==='r'?null:(z.i||{})[m.slice(2)];
+  let nac=null, unidad='% de los entrevistados de la zona';
+  if(m==='aprob') nac=(d.aprob[o]||{}).a; else if(m==='pc') nac=((d.partido[o]||{}).pct||{})[sig]; else if(m&&m.startsWith('i:')){nac=I?I.pct[m.slice(2)]:null;unidad='% de la intención declarada (sin ninguno/no sabe)';}
+  if(m==='r'){
+    const slugs=[...new Set(Object.values(Z).flatMap(z=>Object.keys(z.r||{})))].slice(0,6);
+    const filas=Object.entries(Z).sort((a,b)=>b[1].n-a[1].n);
+    $('rev-cuerpo').innerHTML='<p class="rev-nota">Recuerdo de voto de la elección anterior por zona, en % de quienes recuerdan un candidato (r_n). Es la base para contrastar la muestra con la urna: pestaña «Territorio · encuesta frente a urna».</p>'
+      +'<div style="overflow-x:auto"><table><tr><th>'+esc(NIVEL_NOMBRE[REV.nivel]||REV.nivel)+'</th><th class="n">entrevistas</th><th class="n">con recuerdo</th>'+slugs.map(s=>'<th class="n">'+esc(s)+'</th>').join('')+'</tr>'
+      +filas.map(([z,v])=>'<tr class="'+(v.n<60?'tenue':'')+'"><td>'+esc(z)+(v.n<60?' <small>· pocas entrevistas</small>':'')+'</td><td class="n">'+v.n+'</td><td class="n">'+(v.r_n||0)+'</td>'+slugs.map(s=>'<td class="n">'+p1((v.r||{})[s])+'</td>').join('')+'</tr>').join('')+'</table></div>';
+    return;
+  }
+  const filas=Object.entries(Z).map(([z,v])=>[z,v,val(v)]).filter(x=>x[2]!=null).sort((a,b)=>b[2]-a[2]);
+  const max=Math.max(1,...filas.map(x=>x[2]));
+  $('rev-cuerpo').innerHTML='<p class="rev-nota">Lo que verá el cliente en «Territorio» para '+esc(nomOlaRev(o))+': respuesta declarada, sin ajustar ni ponderar; '+esc(unidad)+'. Solo zonas con 20 entrevistas o más; con menos de 60 el cliente ve el aviso «pocas entrevistas». '+filas.length+' zonas.</p>'
+    +'<div style="overflow-x:auto"><table><tr><th>'+esc(NIVEL_NOMBRE[REV.nivel]||REV.nivel)+'</th><th class="n">entrevistas</th><th class="n">valor</th><th></th><th class="n">frente al país</th></tr>'
+    +(nac!=null?'<tr class="pais"><td>País (toda la encuesta)</td><td class="n"></td><td class="n">'+p1(nac)+' %</td><td></td><td class="n"></td></tr>':'')
+    +filas.map(([z,v,x])=>'<tr class="'+(v.n<60?'tenue':'')+'"><td>'+esc(z)+(v.n<60?' <small>· pocas entrevistas</small>':'')+'</td><td class="n">'+v.n+'</td><td class="n">'+p1(x)+' %</td><td><span class="mini-barra"><i style="width:'+(100*x/max).toFixed(0)+'%"></i></span></td><td class="n">'+(nac!=null?difTxt(x-nac):'—')+'</td></tr>').join('')+'</table></div>';
+}
+async function revContraste(){
+  const d=REV.datos, o=REV.ola, nivel=REV.nivel, cuerpo=$('rev-cuerpo');
+  if(!['provincia','municipio','comunidad'].includes(nivel)){cuerpo.innerHTML='<p class="rev-nota">La urna oficial está cargada por provincia y municipio; elija uno de esos niveles para contrastar.</p>';return}
+  cuerpo.innerHTML='<p style="color:var(--tinta3)">cargando la urna territorial…</p>';
+  const clave=salaAmbito()+'|'+nivel;
+  if(!REV.urna[clave]){try{REV.urna[clave]=await api('/dv/urnas/territorio?pais='+salaAmbito()+'&nivel='+nivel)}catch(e){REV.urna[clave]=[]}}
+  const urna=REV.urna[clave]; if(!urna.length){cuerpo.innerHTML='<p class="rev-nota">No hay urna territorial cargada para '+esc(salaAmbito())+' en el nivel '+esc(nivel)+'.</p>';return}
+  const porNombre={}; urna.forEach(u=>{porNombre[normZ(u.nombre)]=u;});
+  /* nombres que la encuesta abrevia y la JCE escribe completos */
+  const ALIAS={santodomingodeguzman:'distritonacional',dn:'distritonacional',santiago:'santiagodeloscaballeros',sanjuan:'sanjuandelamaguana',sanpedro:'sanpedrodemacoris',sanfrancisco:'sanfranciscodemacoris',puertoplata:'sanfelipedepuertoplata',lavega:'concepciondelavega',barahona:'santacruzdebarahona',elseibo:'santacruzdelseibo',mao:'mao'};
+  const buscaUrna=z=>{const k=normZ(z); if(porNombre[k]) return porNombre[k]; if(ALIAS[k]&&porNombre[ALIAS[k]]) return porNombre[ALIAS[k]];
+    const cand=Object.keys(porNombre).filter(n=>n.startsWith(k)||k.startsWith(n)); return cand.length===1?porNombre[cand[0]]:null;};
+  const bloques=Object.keys(urna[0].votos).filter(esCand);
+  const pais=salaAmbito().split('-')[0], PS=PARTIDO_SLUG[pais]||{}, BP=BLOQUE_PARTIDO[pais]||{};
+  const bloqueDe=slug=>{const up=String(slug).toUpperCase(); if(bloques.includes(up)) return up; const pt=PS[slug]; if(pt&&BP[pt]){const b=bloques.find(k=>BP[pt].test(k)); if(b) return b;} const rx=BP[up]; if(rx){const b=bloques.find(k=>rx.test(k)); if(b) return b;} return null;};
+  const Z=d.territorio[o][nivel]||{}; const usaRec=REV.comparar==='recuerdo';
+  const principales=bloques.filter(b=>b!=='OT+BL');
+  const totUrna={}; urna.forEach(u=>principales.forEach(b=>totUrna[b]=(totUrna[b]||0)+(u.votos[b]||0)));
+  principales.sort((a,b)=>(totUrna[b]||0)-(totUrna[a]||0)); const prin=principales.slice(0,3);
+  /* comparación entre los bloques principales (los tres candidatos con urna): la encuesta se renormaliza sobre ellos,
+     igual que la urna, para que «otros», «no votó» o candidatos nuevos (Alofoke) no desplacen las cuotas */
+  const encuesta=z=>{const src=usaRec?(z.r||{}):(z.i||{}); const raw={}, fuera={}; Object.entries(src).forEach(([sl,v])=>{const b=bloqueDe(sl); if(b&&prin.includes(b)) raw[b]=(raw[b]||0)+v; else fuera[sl]=(fuera[sl]||0)+v;});
+    const tot=prin.reduce((a,b)=>a+(raw[b]||0),0)||1; const e={}; prin.forEach(b=>e[b]=100*(raw[b]||0)/tot); return [e,fuera,tot];};
+  const filas=[], sinUrna=[]; let totN=0, sum={}, sumU={}, sumUV=0;
+  Object.entries(Z).forEach(([z,v])=>{const u=buscaUrna(z); if(!u){sinUrna.push(z);return} const [e,fuera,cub]=encuesta(v); const tu=prin.reduce((a,b)=>a+(u.votos[b]||0),0)||1; const uP={}; prin.forEach(b=>uP[b]=100*(u.votos[b]||0)/tu);
+    const peso=usaRec?(v.r_n||0):v.n; if(usaRec&&!v.r_n) return;
+    filas.push({z,v,e,fuera,uP,peso,cub}); totN+=peso; prin.forEach(b=>{sum[b]=(sum[b]||0)+e[b]*peso; sumU[b]=(sumU[b]||0)+(u.votos[b]||0);}); sumUV+=tu;});
+  filas.sort((a,b)=>b.v.n-a.v.n);
+  const nuevos=[...new Set(filas.flatMap(f=>Object.keys(f.fuera)))].filter(k=>!usaRec||!['otros'].includes(k));
+  const mad=b=>{let s=0,n=0;filas.forEach(f=>{s+=Math.abs(f.e[b]-f.uP[b])*f.peso;n+=f.peso;});return n?s/n:null};
+  const nb=b=>esc(nombreCorto(b).replace(/ FERNANDEZ| MARTINEZ/i,''));
+  let h='<p class="rev-nota">'+(usaRec?'<b>Sesgo territorial de la muestra</b>: recuerdo de voto declarado en la encuesta frente al resultado oficial de la urna en cada zona, ambos en % entre los tres candidatos principales ('+prin.map(nb).join(', ')+'). Si la muestra reproduce el territorio, las diferencias deben ser pequeñas; una zona con +10 o −10 puntos merece revisión.'
+      :'<b>Cambio frente a la última elección</b>: intención de voto declarada hoy, con cada candidato en la columna de su partido (regla de Carles), frente al resultado oficial; ambos en % entre los tres bloques principales. Las diferencias aquí son cambio político, no error de muestra.')
+    +' Ola '+esc(nomOlaRev(o))+' · '+filas.length+' zonas casadas con la urna'+(sinUrna.length?' · <b>'+sinUrna.length+' sin casar</b> (nombre distinto en la encuesta y en la JCE): '+esc(sinUrna.slice(0,12).join(', '))+(sinUrna.length>12?'…':''):'')+'.'
+    +(nuevos.length&&!usaRec?' Fuera de la comparación (sin urna 2024): '+esc(nuevos.join(', '))+'; se muestran aparte en % de toda la intención.':'')
+    +' Desviación media absoluta ponderada: '+prin.map(b=>nb(b)+' '+p1(mad(b))+' pp').join(' · ')+'.</p>';
+  h+='<div style="overflow-x:auto"><table><tr><th>'+esc(NIVEL_NOMBRE[nivel]||nivel)+'</th><th class="n">'+(usaRec?'con recuerdo':'entrevistas')+'</th>'+prin.map(b=>'<th class="n" colspan="3">'+nb(b)+'</th>').join('')+(nuevos.length&&!usaRec?'<th class="n">'+esc(nuevos.join(' · '))+'</th>':'')+'</tr>'
+    +'<tr><th></th><th></th>'+prin.map(()=>'<th class="n">encuesta</th><th class="n">urna</th><th class="n">dif</th>').join('')+(nuevos.length&&!usaRec?'<th class="n">encuesta</th>':'')+'</tr>';
+  if(totN){h+='<tr class="pais"><td>Conjunto de las zonas casadas</td><td class="n">'+totN+'</td>'+prin.map(b=>{const e=sum[b]/totN,u=100*(sumU[b]||0)/(sumUV||1);return '<td class="n">'+p1(e)+'</td><td class="n">'+p1(u)+'</td><td class="n">'+difTxt(e-u)+'</td>'}).join('')+(nuevos.length&&!usaRec?'<td class="n"></td>':'')+'</tr>';}
+  h+=filas.map(f=>'<tr class="'+(f.v.n<60?'tenue':'')+'"><td>'+esc(f.z)+'</td><td class="n">'+f.peso+'</td>'+prin.map(b=>'<td class="n">'+p1(f.e[b])+'</td><td class="n">'+p1(f.uP[b])+'</td><td class="n">'+difTxt(f.e[b]-f.uP[b])+'</td>').join('')+(nuevos.length&&!usaRec?'<td class="n">'+p1(nuevos.reduce((a,k)=>a+(f.fuera[k]||0),0))+'</td>':'')+'</tr>').join('')+'</table></div>';
+  cuerpo.innerHTML=h;
+}
+function revOlas(){
+  const d=REV.datos, olas=(d.olas||[]).slice().sort(); const sig=(d.perfil&&d.perfil.partido_cliente||'').toUpperCase();
+  const top=(pct,k)=>Object.entries(pct||{}).filter(([c,v])=>v!=null&&c!=='otros'&&c!=='abst').sort((a,b)=>b[1]-a[1]).slice(0,k).map(([c,v])=>esc(c)+' '+p1(v)).join(' · ');
+  $('rev-cuerpo').innerHTML='<p class="rev-nota">Una fila por ola con lo que el cliente verá en cada bloque. Estimación = serie oficial de la Sala de Control (anclada o corregida); intención = declarada.</p>'
+    +'<div style="overflow-x:auto"><table><tr><th>ola</th><th class="n">aprueba</th><th class="n">desaprueba</th><th class="n">'+esc(sig||'partido')+'</th><th>estimación (3 primeros)</th><th>intención declarada (3 primeros)</th><th>territorio</th></tr>'
+    +olas.map(o=>{const a=d.aprob[o]||{}, pa=((d.partido[o]||{}).pct||{})[sig], e=(d.serie||{})[o]||d.ajustada[o], i=d.intencion[o], t=d.territorio[o];
+      return '<tr><td>'+esc(nomOlaRev(o))+'</td><td class="n">'+p1(a.a)+'</td><td class="n">'+p1(a.d)+'</td><td class="n">'+p1(pa)+'</td><td>'+(e?top(e.pct,3)+(e.tipo?' <small>('+esc(e.tipo)+')</small>':''):'—')+'</td><td>'+(i?top(i.pct,3):'—')+'</td><td>'+(t?Object.keys(t).map(n=>esc(n)+' '+Object.keys(t[n]).length).join(' · '):'—')+'</td></tr>'}).join('')+'</table></div>';
 }
 async function salaAprobar(){
   if(!confirm('¿Aprobar el borrador y publicarlo para los clientes de '+salaAmbito()+'? Sustituye la versión que ven ahora.')) return;
