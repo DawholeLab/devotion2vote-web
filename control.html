@@ -1275,7 +1275,7 @@ const V_ETIQ={n_encuesta:'Casos de la encuesta (n)',n:'Casos (n)',censo:'Censo (
   estados_pct:'Estados de transferencia (% de la ola)',estados_n:'Estados de transferencia (casos)',
   matriz_pct_por_columna:'Matriz % por columna (destino × origen; cada columna suma 100 con su NS/NR)',
   n_por_origen:'Casos por origen (tamaño de cada columna)',columnas_origen:'Orden de las columnas',filas_destino:'Orden de las filas',
-  ganador_anterior:'Ganador de la elección anterior',fidelidad_ganador_pct:'Fidelidad del ganador (%)',fuga_ganador:'Fuga del ganador (hacia quién y cuánto)'};
+  comprobacion:'Comprobación (los electores repartidos por zona suman la estimación de p05)',anio_urna_territorial:'Urna territorial usada para el sesgo (año)',ganador_anterior:'Ganador de la elección anterior',fidelidad_ganador_pct:'Fidelidad del ganador (%)',fuga_ganador:'Fuga del ganador (hacia quién y cuánto)'};
 function vNum(x){return typeof x==='number'?(Number.isInteger(x)&&Math.abs(x)>=1000?x.toLocaleString('es-ES'):String(x)):esc(String(x))}
 function vMatriz(m,filas,cols){
   m=m||{};cols=(cols&&cols.length?cols:[...new Set(Object.values(m).flatMap(o=>Object.keys(o||{})))]).slice(0,14);
@@ -1345,6 +1345,25 @@ function vCampo(k,v){
           +'<div class="v-fila2">perfil: '+Object.entries(g.perfil||{}).map(([t,dd])=>t+': '+Object.entries(dd).slice(0,3).map(([cc,x])=>esc(nombreCorto(cc))+' <b>'+x.pct+'%</b>').join(', ')).join(' · ')+'</div></details>').join('')
         +'</div>').join('')+'</div>').join('');
   }
+  if(k==='niveles'&&v&&typeof v==='object'&&Object.values(v).some(x=>x&&x.zonas)){
+    /* p10 · territorio: la estimación anclada repartida por zona + el sesgo de la muestra frente a la urna */
+    const ne=x=>x==null?'—':Number(x).toLocaleString('es-ES');
+    const dif=d=>d==null?'·':'<span style="color:'+(d>0?'#7cc496':d<0?'#e07a7a':'inherit')+'">'+(d>0?'+':'')+d+'</span>';
+    const nb=b=>esc(nombreCorto(b).replace(/ FERNANDEZ| MARTINEZ/i,''));
+    const ORD={region:0,comunidad:0,provincia:1,municipio:2}; /* jsonb no conserva el orden de las claves: se ordena aquí */
+    return Object.entries(v).sort((a,b)=>(ORD[a[0]]??9)-(ORD[b[0]]??9)).map(([nivel,blq])=>{const R=blq.resumen||{}, zonas=Object.entries(blq.zonas||{}).sort((a,b)=>(b[1].entrevistas||0)-(a[1].entrevistas||0)); const bloques=R.sesgo_conjunto_pp?Object.keys(R.sesgo_conjunto_pp):[];
+      let h='<div class="v-op"><b style="font-size:14px">'+esc((NIVEL_NOMBRE[nivel]||nivel).toUpperCase())+' · '+R.zonas_publicadas+' zonas</b> <span class="mini">'+(R.zonas_agrupadas_en_otras?R.zonas_agrupadas_en_otras+' zonas pequeñas agrupadas · ':'')+'electores repartidos '+ne(R.electores_repartidos)+'</span>';
+      if(R.sesgo_conjunto_pp) h+='<div class="v-fila2">sesgo del conjunto (recuerdo − urna): '+bloques.map(b=>nb(b)+' <b>'+dif(R.sesgo_conjunto_pp[b])+'</b>').join(' · ')+' · <span class="mini">desviación media '+bloques.map(b=>nb(b)+' '+R.desviacion_media_abs_pp[b]).join(' · ')+' pp</span></div>';
+      else if(R.urna) h+='<div class="v-fila2 mini" style="color:#e5a63c">'+esc(R.urna)+'</div>';
+      if((R.zonas_a_revisar||[]).length) h+='<div class="v-fila2" style="color:#e5a63c">a revisar (se alejan del patrón general más de 10 pp): '+esc(R.zonas_a_revisar.join(', '))+'</div>';
+      if((R.zonas_sin_urna||[]).length) h+='<div class="v-fila2 mini">sin casar con la urna: '+esc(R.zonas_sin_urna.join(', '))+'</div>';
+      h+='<details'+(nivel!=='municipio'?' open':'')+'><summary>tabla por zona</summary><div style="overflow-x:auto"><table class="calor"><tr><th style="text-align:left">zona</th><th>entrev.</th><th style="text-align:left">estimación anclada (% válidos · electores)</th>'+bloques.map(b=>'<th>'+nb(b)+'<br><span class="mini">rec · urna · dif</span></th>').join('')+'<th></th></tr>'
+        +zonas.map(([z,f])=>'<tr'+(f.aviso?' style="opacity:.6"':'')+'><td class="origen">'+esc(z)+(f.zonas?' <span class="mini">('+esc(f.zonas.slice(0,8).join(', '))+(f.zonas.length>8?'…':'')+')</span>':'')+'</td><td>'+(f.entrevistas||'')+'</td><td style="text-align:left">'
+          +Object.entries(f.estimacion_pct_validos||{}).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([c,x])=>esc(nombreCorto(c))+' <b>'+x+'%</b> <span class="mini">('+ne((f.electores_por_candidato||{})[c])+')</span>').join(' · ')+'</td>'
+          +bloques.map(b=>'<td>'+(f.recuerdo_pct?f.recuerdo_pct[b]+' · '+f.urna_pct[b]+' · '+dif(f.sesgo_pp[b]):'·')+'</td>').join('')
+          +'<td class="mini">'+(f.revisar?'<span style="color:#e5a63c">revisar</span>':'')+(f.aviso?' '+esc(f.aviso):'')+'</td></tr>').join('')+'</table></div></details></div>';
+      return h;}).join('');
+  }
   if(k==='cruce_estimacion_x_preguntas'&&v&&typeof v==='object'){
     /* el cruce completo: una tabla por pregunta, plegada (electores con el número completo; escalas dicotomizadas) */
     return '<div class="v-op"><b>CRUCE DE LA ESTIMACIÓN (electores) × TODAS LAS PREGUNTAS DE LA OLA</b> <span class="mini">'+Object.keys(v).length+' preguntas</span>'
@@ -1382,7 +1401,7 @@ function vCampo(k,v){
 const V_ORDEN=['n_encuesta','n','cobertura_origen_pct','falsos_recuerdos_descartados','urna','urna_total_anclada','censo',
   'participacion_deseada_pct','participacion_alcanzable_pct','divisor_calibrado','calibracion','amortiguacion','transferencia_pct_por_origen','indecisos_repartidos',
   'n_por_origen','matriz_pct_por_columna','matriz_electores','matriz_final','lectura_transferencias','estimacion','validos_estimados',
-  'candidatos','resumen','publicos','subgrupos_por_publico','senales_voto_duro','candidatos_sin_partido_de_referencia','dimensiones_usadas','potencial_por_candidato','cruce_estimacion_x_preguntas',
+  'candidatos','resumen','publicos','subgrupos_por_publico','niveles','comprobacion','senales_voto_duro','candidatos_sin_partido_de_referencia','dimensiones_usadas','potencial_por_candidato','cruce_estimacion_x_preguntas',
   'participacion_estimada_pct','estados_pct','estados_n','ganador_anterior','fidelidad_ganador_pct','fuga_ganador'];
 function visorDetalle(res,k){
   let h='';const hechos=new Set();
@@ -2265,6 +2284,7 @@ function revPintar(){
     const I=(d.intencion||{})[REV.ola]; const cands=I?Object.entries(I.pct||{}).filter(([k,v])=>k!=='otros'&&v>=3).sort((a,b)=>b[1]-a[1]).map(x=>x[0]):[];
     const mets=[]; if(zonas.some(z=>z.a!=null)) mets.push(['aprob','Aprobación del gobierno']); if(zonas.some(z=>z.pc!=null)) mets.push(['pc','Simpatía · '+(sig||'partido del cliente')]);
     cands.forEach(c=>mets.push(['i:'+c,'Intención · '+c])); if(zonas.some(z=>z.r_n)) mets.push(['r','Recuerdo de voto (por candidato)']);
+    [...new Set(zonas.flatMap(z=>Object.keys(z.e||{})))].slice(0,6).forEach(c=>mets.push(['e:'+c,'Estimación anclada p10 · '+c]));
     if(!REV.metrica||!mets.find(m=>m[0]===REV.metrica)) REV.metrica=mets.length?mets[0][0]:null;
     f+='<span class="rev-lab">Métrica</span>'+mets.map(([k,n])=>'<span class="chip'+(k===REV.metrica?' on':'')+'" onclick="REV.metrica=\''+k+'\';revPintar()">'+esc(n)+'</span>').join('');
     $('rev-filtros').innerHTML=f; revTerritorio(Z,sig,I); return;
@@ -2274,9 +2294,10 @@ function revPintar(){
 }
 function revTerritorio(Z,sig,I){
   const d=REV.datos, o=REV.ola, m=REV.metrica;
-  const val=z=>m==='aprob'?z.a:m==='pc'?z.pc:m==='r'?null:(z.i||{})[m.slice(2)];
+  const val=z=>m==='aprob'?z.a:m==='pc'?z.pc:m==='r'?null:m.startsWith('e:')?(z.e||{})[m.slice(2)]:(z.i||{})[m.slice(2)];
   let nac=null, unidad='% de los entrevistados de la zona';
   if(m==='aprob') nac=(d.aprob[o]||{}).a; else if(m==='pc') nac=((d.partido[o]||{}).pct||{})[sig]; else if(m&&m.startsWith('i:')){nac=I?I.pct[m.slice(2)]:null;unidad='% de la intención declarada (sin ninguno/no sabe)';}
+  else if(m&&m.startsWith('e:')){const A=(d.ajustada||{})[o];nac=A?(A.pct||{})[m.slice(2)]:null;unidad='% de válidos de la estimación anclada, repartida por zona con los pesos por entrevistado (p10); las zonas marcadas «revisar» se alejan del patrón general de la muestra';}
   if(m==='r'){
     const slugs=[...new Set(Object.values(Z).flatMap(z=>Object.keys(z.r||{})))].slice(0,6);
     const filas=Object.entries(Z).sort((a,b)=>b[1].n-a[1].n);
@@ -2290,7 +2311,7 @@ function revTerritorio(Z,sig,I){
   $('rev-cuerpo').innerHTML='<p class="rev-nota">Lo que verá el cliente en «Territorio» para '+esc(nomOlaRev(o))+': respuesta declarada, sin ajustar ni ponderar; '+esc(unidad)+'. Solo zonas con 20 entrevistas o más; con menos de 60 el cliente ve el aviso «pocas entrevistas». '+filas.length+' zonas.</p>'
     +'<div style="overflow-x:auto"><table><tr><th>'+esc(NIVEL_NOMBRE[REV.nivel]||REV.nivel)+'</th><th class="n">entrevistas</th><th class="n">valor</th><th></th><th class="n">frente al país</th></tr>'
     +(nac!=null?'<tr class="pais"><td>País (toda la encuesta)</td><td class="n"></td><td class="n">'+p1(nac)+' %</td><td></td><td class="n"></td></tr>':'')
-    +filas.map(([z,v,x])=>'<tr class="'+(v.n<60?'tenue':'')+'"><td>'+esc(z)+(v.n<60?' <small>· pocas entrevistas</small>':'')+'</td><td class="n">'+v.n+'</td><td class="n">'+p1(x)+' %</td><td><span class="mini-barra"><i style="width:'+(100*x/max).toFixed(0)+'%"></i></span></td><td class="n">'+(nac!=null?difTxt(x-nac):'—')+'</td></tr>').join('')+'</table></div>';
+    +filas.map(([z,v,x])=>'<tr class="'+(v.n<60?'tenue':'')+'"><td>'+esc(z)+(v.n<60?' <small>· pocas entrevistas</small>':'')+(v.revisar?' <small style="color:#e5a63c">· revisar</small>':'')+'</td><td class="n">'+v.n+'</td><td class="n">'+p1(x)+' %</td><td><span class="mini-barra"><i style="width:'+(100*x/max).toFixed(0)+'%"></i></span></td><td class="n">'+(nac!=null?difTxt(x-nac):'—')+'</td></tr>').join('')+'</table></div>';
 }
 async function revContraste(){
   const d=REV.datos, o=REV.ola, nivel=REV.nivel, cuerpo=$('rev-cuerpo');
