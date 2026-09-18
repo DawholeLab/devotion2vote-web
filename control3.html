@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="d2v-api" content="https://devotion2vote-api.onrender.com">
+<meta name="theme-color" content="#0f6f6a">
+<title>Sala de Control 3.0 · devotion2vote</title>
+<link rel="icon" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/icono-apple.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&display=swap">
+<style>
+:root{
+  --papel:#f4f6f8; --tarj:#ffffff; --tinta:#1b2230; --tinta2:#4b5563; --tinta3:#7c8797; --linea:#dde2e8; --suave:#eef1f4;
+  --acento:#0f6f6a; --acento-suave:#dff0ee; --acento-tinta:#0b4f4b;
+  --ok:#2f7d4a; --ok-suave:#e3f3e8; --aviso:#b8651b; --aviso-suave:#f8ebdc; --mal:#b3392f; --mal-suave:#f7e2e0; --gris:#8a94a3; --gris-suave:#e8ebef;
+  --sombra:0 1px 2px rgba(20,30,40,.06),0 8px 24px rgba(20,30,40,.06);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --papel:#12171d; --tarj:#1a2129; --tinta:#e9edf1; --tinta2:#b7c0ca; --tinta3:#8a95a3; --linea:#2b343f; --suave:#202831;
+  --acento:#5fcdc4; --acento-suave:#173a38; --acento-tinta:#9fe3dc;
+  --ok:#7ccf8c; --ok-suave:#1d3325; --aviso:#e6a86a; --aviso-suave:#3a2a1a; --mal:#f08a80; --mal-suave:#3d1f1c; --gris:#8a94a3; --gris-suave:#2a323c;
+  --sombra:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+}}
+:root[data-theme="dark"]{
+  --papel:#12171d; --tarj:#1a2129; --tinta:#e9edf1; --tinta2:#b7c0ca; --tinta3:#8a95a3; --linea:#2b343f; --suave:#202831;
+  --acento:#5fcdc4; --acento-suave:#173a38; --acento-tinta:#9fe3dc;
+  --ok:#7ccf8c; --ok-suave:#1d3325; --aviso:#e6a86a; --aviso-suave:#3a2a1a; --mal:#f08a80; --mal-suave:#3d1f1c; --gris:#8a94a3; --gris-suave:#2a323c;
+  --sombra:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--papel);color:var(--tinta);font-family:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.5;font-variant-numeric:tabular-nums}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:var(--acento)}
+h1,h2,h3{font-family:"Bricolage Grotesque","Atkinson Hyperlegible",sans-serif;letter-spacing:-.01em;text-wrap:balance;margin:0}
+.oculto{display:none!important}
+.eyebrow{font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--tinta3);font-weight:700}
+
+/* ── acceso ── */
+#login{min-height:100vh;display:grid;place-items:center;padding:24px 16px}
+.caja{background:var(--tarj);border:1px solid var(--linea);border-radius:16px;padding:28px;width:min(420px,100%);box-shadow:var(--sombra)}
+.caja h1{font-size:26px;margin:6px 0 4px}
+.caja p{color:var(--tinta2);margin:0 0 18px;font-size:14.5px}
+.campo{display:flex;flex-direction:column;gap:6px;margin:0 0 12px}
+.campo label{font-size:13px;color:var(--tinta2);font-weight:700}
+input,select,textarea{font:inherit;color:var(--tinta);background:var(--papel);border:1px solid var(--linea);border-radius:10px;padding:10px 12px;width:100%}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--acento);outline-offset:1px}
+.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--linea);background:var(--tarj);border-radius:10px;padding:9px 14px;font-weight:700;font-size:14.5px;white-space:nowrap}
+.btn:hover{border-color:var(--acento);color:var(--acento-tinta)}
+.btn.primario{background:var(--acento);border-color:var(--acento);color:#fff}
+.btn.primario:hover{filter:brightness(.95);color:#fff}
+.btn.peq{padding:6px 10px;font-size:13px;border-radius:8px}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.fantasma{background:transparent}
+.lmsg{color:var(--mal);font-size:14px;min-height:20px;margin-top:8px}
+
+/* ── marco de la app ── */
+#app{display:none;min-height:100vh}
+header.barra{position:sticky;top:0;z-index:20;background:var(--tarj);border-bottom:1px solid var(--linea);display:flex;align-items:center;gap:14px;padding:10px 16px}
+header.barra .marca{display:flex;align-items:center;gap:10px;font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:17px}
+header.barra .marca img{height:26px}
+header.barra .marca small{font-weight:500;color:var(--tinta3);font-size:12px}
+.miga{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--tinta3);min-width:0;overflow:hidden;white-space:nowrap}
+.miga a{color:var(--tinta2);text-decoration:none;cursor:pointer}
+.miga a:hover{color:var(--acento)}
+.miga b{color:var(--tinta);overflow:hidden;text-overflow:ellipsis}
+.yo{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--tinta2)}
+.yo .rol{background:var(--suave);border-radius:999px;padding:2px 9px;font-size:12px}
+main{max-width:1180px;margin:0 auto;padding:24px 16px 120px}
+.pantalla{display:none}.pantalla.activa{display:block}
+.cab{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px 20px;margin:0 0 20px}
+.cab h1{font-size:clamp(24px,3.6vw,34px);line-height:1.1}
+.cab h2{font-size:clamp(20px,3vw,26px);line-height:1.15}
+.cab .sub{color:var(--tinta2);font-size:15px;max-width:72ch}
+.cab .acciones{margin-left:auto;display:flex;flex-wrap:wrap;gap:8px}
+
+/* ── puertas y acciones grandes ── */
+.puertas{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.puerta{background:var(--tarj);border:1px solid var(--linea);border-radius:16px;padding:22px;text-align:left;box-shadow:var(--sombra);display:flex;flex-direction:column;gap:8px;min-height:150px;transition:border-color .15s,transform .15s}
+.puerta:hover{border-color:var(--acento);transform:translateY(-1px)}
+.puerta .ico{width:40px;height:40px;border-radius:12px;background:var(--acento-suave);color:var(--acento-tinta);display:grid;place-items:center;font-size:20px;font-weight:700}
+.puerta h2{font-size:21px}
+.puerta p{margin:0;color:var(--tinta2);font-size:14.5px;line-height:1.45}
+.puerta .pie{margin-top:auto;color:var(--acento-tinta);font-weight:700;font-size:14px}
+.puerta.apagada{opacity:.55}
+.puerta .bandera{font-size:28px}
+
+/* ── chips y semáforo ── */
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px;font-size:12.5px;font-weight:700;background:var(--gris-suave);color:var(--tinta2);white-space:nowrap}
+.chip.ok{background:var(--ok-suave);color:var(--ok)}
+.chip.aviso{background:var(--aviso-suave);color:var(--aviso)}
+.chip.mal{background:var(--mal-suave);color:var(--mal)}
+.chip.acento{background:var(--acento-suave);color:var(--acento-tinta)}
+.chip.gris{background:var(--gris-suave);color:var(--tinta3)}
+.sem{display:inline-flex;gap:3px;align-items:center}
+.sem i{width:11px;height:11px;border-radius:3px;background:var(--gris-suave);display:inline-block}
+.sem i.corrio{background:var(--ok)}.sem i.fallo{background:var(--mal)}.sem i.espera{background:var(--aviso)}.sem i.no_aplica{background:var(--gris)}.sem i.pendiente{background:var(--gris-suave);border:1px solid var(--gris)}.sem i.no_aprobado{background:var(--gris)}
+.sem i.aprobado{outline:2px solid var(--acento);outline-offset:1px}
+.sem i.observado{outline:2px solid var(--aviso);outline-offset:1px}
+
+/* ── lista de olas ── */
+.lista{display:flex;flex-direction:column;gap:10px}
+.ola{background:var(--tarj);border:1px solid var(--linea);border-radius:14px;padding:14px 16px;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1.6fr) auto;gap:8px 18px;align-items:center;text-align:left;width:100%;transition:border-color .15s}
+.ola:hover{border-color:var(--acento)}
+.ola .t{font-weight:700;font-size:16px;font-family:"Bricolage Grotesque",sans-serif}
+.ola .m{color:var(--tinta3);font-size:13px}
+.ola .est{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:13.5px;color:var(--tinta2)}
+.ola .est b{color:var(--tinta)}
+.ola .der{display:flex;flex-direction:column;align-items:flex-end;gap:6px;font-size:12.5px;color:var(--tinta3)}
+.filtros{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px;align-items:center}
+.filtros input{max-width:280px}
+
+/* ── cadena de la ola ── */
+.resumen-ola{background:var(--tarj);border:1px solid var(--linea);border-radius:14px;padding:16px 18px;margin:0 0 18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px 20px}
+.resumen-ola .k{font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--tinta3);font-weight:700}
+.resumen-ola .v{font-size:17px;font-weight:700;font-family:"Bricolage Grotesque",sans-serif}
+.resumen-ola .v small{font-weight:500;color:var(--tinta3);font-size:12.5px}
+.lectura{font-size:14.5px;color:var(--tinta2);grid-column:1/-1}
+.operar{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px}
+.tramo{margin:0 0 22px}
+.tramo>.cabt{display:flex;align-items:baseline;gap:12px;padding:0 0 8px;border-bottom:2px solid var(--tinta);margin:0 0 10px}
+.tramo>.cabt h2{font-size:19px}
+.tramo>.cabt span{color:var(--tinta3);font-size:13.5px}
+.tramo>.cabt .cont{margin-left:auto;font-size:13px;color:var(--tinta2)}
+.paso{background:var(--tarj);border:1px solid var(--linea);border-radius:12px;margin:0 0 8px;overflow:hidden}
+.paso .fila{display:grid;grid-template-columns:44px minmax(0,1.2fr) minmax(0,1.6fr) auto;gap:6px 14px;align-items:center;padding:12px 14px}
+.paso .num{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:13px;background:var(--suave);color:var(--tinta2)}
+.paso .num.corrio{background:var(--ok-suave);color:var(--ok)}.paso .num.fallo{background:var(--mal-suave);color:var(--mal)}.paso .num.espera{background:var(--aviso-suave);color:var(--aviso)}
+.paso .nom{font-weight:700;font-family:"Bricolage Grotesque",sans-serif;font-size:16px}
+.paso .que{color:var(--tinta3);font-size:13px}
+.paso .res{font-size:14px;color:var(--tinta2);overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.paso .res b{color:var(--tinta)}
+.paso .acc{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.paso .visto{font-size:12.5px;color:var(--tinta3);margin-top:4px}
+.paso .avisos{padding:0 14px 12px 72px;font-size:13.5px;color:var(--aviso)}
+.paso .detalle{border-top:1px solid var(--linea);padding:14px 16px;background:var(--suave)}
+.paso .detalle h3{font-size:15px;margin:0 0 8px}
+.paso .detalle .nota{font-size:13px;color:var(--tinta3);margin:0 0 10px}
+.param{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr) auto;gap:8px 12px;align-items:start;padding:8px 0;border-bottom:1px solid var(--linea);font-size:14px}
+.param:last-child{border-bottom:0}
+.param code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;color:var(--tinta2)}
+.param textarea{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;min-height:38px;resize:vertical}
+.param .meta{font-size:12px;color:var(--tinta3)}
+table.datos{border-collapse:collapse;width:100%;font-size:13.5px;background:var(--tarj)}
+table.datos th,table.datos td{border-bottom:1px solid var(--linea);padding:6px 8px;text-align:left;vertical-align:top}
+table.datos th{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--tinta3);font-weight:700;background:var(--suave)}
+table.datos td.n{text-align:right;white-space:nowrap}
+.tabla-scroll{overflow-x:auto;border:1px solid var(--linea);border-radius:10px;margin:0 0 12px}
+.seccion-r{margin:0 0 14px}
+.seccion-r h4{margin:10px 0 6px;font-size:14px;font-family:"Bricolage Grotesque",sans-serif}
+.seccion-r p{margin:0 0 8px;font-size:14px}
+.regimen{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:13.5px;color:var(--tinta2)}
+.conmutador{display:inline-flex;border:1px solid var(--linea);border-radius:999px;overflow:hidden}
+.conmutador button{border:0;background:transparent;padding:5px 12px;font-size:13px;font-weight:700;color:var(--tinta3)}
+.conmutador button.on{background:var(--acento);color:#fff}
+.salidas{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.salida{background:var(--tarj);border:1px solid var(--linea);border-radius:12px;padding:14px;text-align:left}
+.salida b{display:block;font-family:"Bricolage Grotesque",sans-serif;font-size:15px}
+.salida span{font-size:13px;color:var(--tinta3)}
+.salida:hover{border-color:var(--acento)}
+
+/* ── cargar ── */
+.form{background:var(--tarj);border:1px solid var(--linea);border-radius:14px;padding:18px;max-width:720px}
+.form .g{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.zona{border:2px dashed var(--linea);border-radius:12px;padding:22px;text-align:center;color:var(--tinta2);cursor:pointer}
+.zona:hover{border-color:var(--acento)}
+.progreso{margin-top:12px;font-size:14.5px}
+.progreso .okt{color:var(--ok)}.progreso .mal{color:var(--mal)}
+.radios{display:flex;gap:8px;flex-wrap:wrap}
+.radios label{display:flex;gap:8px;align-items:center;border:1px solid var(--linea);border-radius:10px;padding:8px 12px;font-size:14px;cursor:pointer}
+.radios input{width:auto}
+
+/* ── clientes ── */
+.cliente{background:var(--tarj);border:1px solid var(--linea);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:6px;text-align:left}
+.cliente:hover{border-color:var(--acento)}
+.cliente b{font-family:"Bricolage Grotesque",sans-serif;font-size:17px}
+.cliente span{font-size:13.5px;color:var(--tinta2)}
+
+/* ── avisos, toast, dante ── */
+#alarmas{position:fixed;left:16px;bottom:16px;z-index:60;display:flex;flex-direction:column;gap:8px;max-width:min(420px,calc(100vw - 32px))}
+.alarma{background:var(--tarj);border-left:4px solid var(--mal);border-radius:10px;padding:10px 14px;box-shadow:var(--sombra);font-size:13.5px}
+.alarma b{display:block;margin-bottom:2px}.alarma small{color:var(--tinta3)}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--tinta);color:var(--papel);padding:10px 16px;border-radius:999px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:70;max-width:calc(100vw - 32px)}
+#toast.on{opacity:1}
+#dante-btn{position:fixed;right:16px;bottom:16px;z-index:2147483000;background:var(--acento);color:#fff;border:0;border-radius:999px;padding:12px 18px;font-weight:700;box-shadow:var(--sombra);display:flex;gap:8px;align-items:center}
+#dante{position:fixed;right:16px;bottom:72px;width:min(420px,calc(100vw - 32px));height:min(600px,calc(100vh - 100px));background:var(--tarj);border:1px solid var(--linea);border-radius:16px;box-shadow:var(--sombra);display:none;flex-direction:column;z-index:2147483000;overflow:hidden}
+#dante.abierto{display:flex}
+#dante .dc{padding:12px 14px;border-bottom:1px solid var(--linea);display:flex;align-items:center;gap:10px}
+#dante .dc b{font-family:"Bricolage Grotesque",sans-serif}
+#dante .dc small{color:var(--tinta3);font-size:12px}
+#d-hilo{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.d-msg{max-width:92%;padding:9px 12px;border-radius:12px;font-size:14px;white-space:pre-wrap;line-height:1.45}
+.d-msg.yo{align-self:flex-end;background:var(--acento);color:#fff}
+.d-msg.el{align-self:flex-start;background:var(--suave)}
+.d-msg .consulto{display:block;font-size:11.5px;color:var(--tinta3);margin-top:4px}
+.d-acciones{display:flex;gap:6px;flex-wrap:wrap;padding:0 12px 8px}
+.d-pie{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--linea)}
+.d-pie input{flex:1}
+.vacio{background:var(--tarj);border:1px dashed var(--linea);border-radius:14px;padding:26px;text-align:center;color:var(--tinta2)}
+.nota-p{font-size:13.5px;color:var(--tinta3);margin:8px 0 0}
+
+@media (max-width:820px){
+  main{padding:16px 16px 120px}
+  .ola{grid-template-columns:1fr;gap:8px}
+  .ola .der{align-items:flex-start}
+  .paso .fila{grid-template-columns:36px minmax(0,1fr);}
+  .paso .fila .res{grid-column:2}
+  .paso .fila .acc{grid-column:2;justify-content:flex-start}
+  .paso .avisos{padding-left:14px}
+  .param{grid-template-columns:1fr}
+  .cab .acciones{margin-left:0}
+  header.barra .miga{display:none}
+  header.barra .marca small{display:none}
+  .yo .nombre{display:none}
+  #dante{right:8px;left:8px;width:auto;bottom:66px;height:calc(100vh - 90px)}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div class="caja">
+    <div class="eyebrow">devotion2vote · Vote Transfer</div>
+    <h1>Sala de Control</h1>
+    <p>Entra con tu usuario de dirección o de equipo.</p>
+    <div class="campo"><label for="lu">Usuario</label><input id="lu" autocomplete="username" autocapitalize="none"></div>
+    <div class="campo"><label for="lp">Clave</label><input id="lp" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')entrar()"></div>
+    <button class="btn primario" onclick="entrar()" style="width:100%;justify-content:center">Entrar</button>
+    <div class="lmsg" id="lmsg"></div>
+  </div>
+</div>
+
+<div id="app">
+  <header class="barra">
+    <a class="marca" onclick="ir('puerta')" style="cursor:pointer;text-decoration:none;color:inherit"><img src="assets/monograma.png" alt=""><span>Sala de Control <small>3.0 · piloto</small></span></a>
+    <div class="miga" id="miga"></div>
+    <div class="yo"><span class="nombre" id="yo-nombre"></span><span class="rol" id="yo-rol"></span><button class="btn peq fantasma" onclick="salir()">Salir</button></div>
+  </header>
+
+  <main>
+    <!-- PUERTA -->
+    <section class="pantalla" id="p-puerta">
+      <div class="cab"><div><div class="eyebrow">¿Por dónde entras?</div><h1>Por país o por cliente</h1><div class="sub">Por país llegas a la sala general, donde se carga y se consulta todo lo común. Por cliente entras a la sala de un cliente concreto para verificar lo que se le publica.</div></div></div>
+      <div class="puertas">
+        <button class="puerta" onclick="ir('paises')"><div class="ico">🌐</div><h2>Entrar por país</h2><p>La sala general del país: cargar información nueva o consultar lo que Dante ya produjo.</p><div class="pie">Elegir país →</div></button>
+        <button class="puerta" onclick="ir('clientes')"><div class="ico">👤</div><h2>Entrar por cliente</h2><p>La sala de un cliente: sus datos, lo que pidió, lo que se le ha publicado y lo que espera aprobación.</p><div class="pie">Elegir cliente →</div></button>
+      </div>
+    </section>
+
+    <!-- PAÍSES -->
+    <section class="pantalla" id="p-paises">
+      <div class="cab"><div><div class="eyebrow">Entrar por país</div><h1>¿Qué país?</h1><div class="sub">Solo aparecen los países con datos en el motor. España es el piloto de esta sala.</div></div></div>
+      <div class="puertas" id="paises"></div>
+    </section>
+
+    <!-- SALA GENERAL DEL PAÍS -->
+    <section class="pantalla" id="p-pais">
+      <div class="cab"><div><div class="eyebrow">Sala general</div><h1 id="pais-nombre"></h1><div class="sub" id="pais-sub"></div></div>
+        <div class="acciones"><div class="regimen" id="regimen"></div></div></div>
+      <div class="puertas" style="margin-bottom:22px">
+        <button class="puerta" onclick="ir('cargar')"><div class="ico">＋</div><h2>Cargar información nueva</h2><p>Una encuesta nueva. Al cargarla, Dante reconoce las preguntas y corre solo los diez pasos del método.</p><div class="pie">Cargar una ola →</div></button>
+        <button class="puerta" onclick="ir('olas')"><div class="ico">≡</div><h2>Consultar lo que Dante produjo</h2><p id="pais-consultar">Todas las olas con el estado de cada paso: qué corrió, qué no y qué espera tu visto bueno.</p><div class="pie">Ver las olas →</div></button>
+      </div>
+      <div class="eyebrow" style="margin:0 0 8px">Accesos rápidos</div>
+      <div class="operar" id="pais-rapidos"></div>
+      <p class="nota-p" id="pais-nota"></p>
+      <div id="pais-regiones"></div>
+    </section>
+
+    <!-- OLAS -->
+    <section class="pantalla" id="p-olas">
+      <div class="cab"><div><div class="eyebrow" id="olas-eyebrow">Consultar</div><h1>Las olas</h1><div class="sub">Cada cuadrado es un paso del método: verde corrió, ámbar espera una decisión, rojo falló, gris no aplica a esa ola. El borde marca tu visto bueno.</div></div>
+        <div class="acciones"><button class="btn" onclick="ir('cargar')">＋ Cargar una ola</button><button class="btn" onclick="cargarOlas(true)">↻ Actualizar</button></div></div>
+      <div class="filtros"><input id="olas-buscar" placeholder="Buscar por código, título o fecha" oninput="pintarOlas()"><label style="font-size:13.5px;color:var(--tinta2);display:flex;gap:6px;align-items:center"><input type="checkbox" id="olas-solo" onchange="pintarOlas()" style="width:auto">Solo las que piden mi mirada</label><span id="olas-cuenta" style="font-size:13px;color:var(--tinta3)"></span></div>
+      <div class="lista" id="olas"></div>
+    </section>
+
+    <!-- OLA: LA CADENA -->
+    <section class="pantalla" id="p-ola">
+      <div class="cab"><div><div class="eyebrow" id="ola-eyebrow">Ola</div><h1 id="ola-titulo"></h1><div class="sub" id="ola-sub"></div></div>
+        <div class="acciones"><button class="btn" onclick="reanalizar()">↻ Analizar la ola entera</button><button class="btn" onclick="abrirOla(OLA_ID)">Actualizar</button></div></div>
+      <div class="resumen-ola" id="ola-resumen"></div>
+      <div class="eyebrow" style="margin:0 0 8px">Operar</div>
+      <div class="operar" id="ola-operar"></div>
+      <div id="cadena"></div>
+    </section>
+
+    <!-- CARGAR -->
+    <section class="pantalla" id="p-cargar">
+      <div class="cab"><div><div class="eyebrow">Cargar información nueva</div><h1 id="cargar-titulo">Una ola nueva</h1><div class="sub">Elige el archivo de la encuesta (SPSS .sav, Excel, CSV). Dante la lee, reconoce las preguntas y corre el método completo. Cuando termine te lleva a la cadena de la ola.</div></div></div>
+      <div class="form">
+        <div class="zona" onclick="$('arch').click()"><input type="file" id="arch" style="display:none" onchange="previsualizar()"><b id="arch-nombre">Elegir el archivo</b><br><span style="font-size:13px">o arrástralo aquí</span></div>
+        <p id="prev_res" style="font-size:14px;color:var(--tinta2);margin:12px 0"></p>
+        <div class="g" id="campos" style="display:none">
+          <div class="campo"><label>Código de la ola</label><input id="b_codigo" placeholder="esp_2026-09"></div>
+          <div class="campo"><label>Título</label><input id="b_titulo"></div>
+          <div class="campo"><label>Fecha de campo (inicio)</label><input id="b_fecha" type="date"></div>
+          <div class="campo" style="grid-column:1/-1"><label>De quién es la información</label>
+            <div class="radios"><label><input type="radio" name="dueno" value="comun" checked>Común del país (CIS, encuestas públicas, ómnibus)</label><label><input type="radio" name="dueno" value="cliente">De un cliente</label></div>
+            <p class="nota-p">Los datos de un cliente se guardan aparte y no alimentan a otros clientes. Por ahora, marca la opción y anota el cliente en el título: la separación por sala llega en el bloque de Clientes.</p></div>
+        </div>
+        <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn primario" id="btn_analizar" onclick="lanzar()">Cargar y correr el método</button><button class="btn" onclick="ir('pais')">Volver</button></div>
+        <div class="progreso" id="progreso"></div>
+      </div>
+    </section>
+
+    <!-- CLIENTES -->
+    <section class="pantalla" id="p-clientes">
+      <div class="cab"><div><div class="eyebrow">Entrar por cliente</div><h1>¿Qué cliente?</h1><div class="sub">Cada cliente tiene su sala (Mi campaña). Aquí ves su estado y apruebas lo que se le publica.</div></div></div>
+      <div class="puertas" id="clientes"></div>
+    </section>
+
+    <!-- CLIENTE -->
+    <section class="pantalla" id="p-cliente">
+      <div class="cab"><div><div class="eyebrow">Cliente</div><h1 id="cli-nombre"></h1><div class="sub" id="cli-sub"></div></div>
+        <div class="acciones" id="cli-acciones"></div></div>
+      <div class="resumen-ola" id="cli-resumen"></div>
+      <div id="cli-cuerpo"></div>
+    </section>
+  </main>
+
+  <div id="alarmas"></div>
+  <div id="toast"></div>
+  <button id="dante-btn" onclick="dante()">✦ Dante</button>
+  <div id="dante">
+    <div class="dc"><b>Dante</b><small id="d-donde"></small><button class="btn peq fantasma" style="margin-left:auto" onclick="dante()">Cerrar</button></div>
+    <div id="d-hilo"></div>
+    <div class="d-acciones" id="d-acciones"></div>
+    <div class="d-pie"><input id="d-in" placeholder="Pide un cruce, un cuadro, una corrección…" onkeydown="if(event.key==='Enter')dantePregunta()"><button class="btn primario" id="d-btn" onclick="dantePregunta()">Enviar</button></div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════ base ═══════════════════ */
+const API=(document.querySelector('meta[name=d2v-api]')||{}).content||'http://localhost:8000';
+let TOK=null,YO=null;
+try{TOK=sessionStorage.getItem('d2v_tok');YO=JSON.parse(sessionStorage.getItem('d2v_yo')||'null')}catch(e){}
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=n=>String(n??'').replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+const p1=n=>(n==null||isNaN(n))?'—':(Math.round(n*10)/10).toLocaleString('es-ES',{minimumFractionDigits:1,maximumFractionDigits:1});
+const MESES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+function fechaTxt(f){if(!f)return '';const m=String(f).match(/^(\d{4})-(\d{2})(?:-(\d{2}))?/);if(!m)return f;return (m[3]&&m[3]!=='01'?parseInt(m[3])+' de ':'')+MESES[parseInt(m[2])-1]+' de '+m[1]}
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),3200)}
+const TRAD=[
+ [/credit balance is too low/i,'Se acabó el saldo del motor de Dante.','Hay que añadir fondos; en cuanto haya saldo, vuelve solo.'],
+ [/Ya existe una base con el c[oó]digo/i,'Ya hay una ola con ese código.','Cambia el código (añade _b al final, por ejemplo) y vuelve a cargar.'],
+ [/mismo contenido|ya est[aá] cargada/i,'Este archivo ya está cargado.','Búscalo en la lista de olas.'],
+ [/Formato no admitido|No se pudo leer/i,'No puedo leer este tipo de archivo.','Valen SPSS (.sav), Excel (.xlsx), CSV y SQLite.'],
+ [/tiempo agotado/i,'El paso tardó demasiado y se detuvo.','Vuelve a intentarlo; si se repite, avisa a Matías.'],
+ [/HTTP 50\d|Bad Gateway|Failed to fetch|NetworkError|Load failed/i,'El motor no responde en este momento.','Suele ser un reinicio del servidor (1-2 minutos). Espera y reintenta.'],
+ [/403|no es del equipo|solo el director/i,'Esta acción es de dirección.','Pídesela a Matías o a Carles.'],
+];
+function alarma(msg,ctx){
+  let t='Algo no salió como debía',p='';
+  for(const [re,tt,pp] of TRAD){if(re.test(String(msg))){t=tt;p=pp;break}}
+  const d=document.createElement('div');d.className='alarma';
+  d.innerHTML='<b>'+esc(t)+'</b>'+(p?esc(p)+'<br>':'')+'<small>'+esc(ctx||'')+' · '+esc(String(msg).slice(0,140))+'</small>';
+  $('alarmas').appendChild(d);while($('alarmas').children.length>3)$('alarmas').firstChild.remove();
+  setTimeout(()=>{if(d.parentNode)d.remove()},14000);
+}
+async function api(ruta,met='GET',cuerpo=null,form=null){
+  const h={...(TOK?{'Authorization':'Bearer '+TOK}:{})};
+  let body;if(form){body=form}else if(cuerpo){h['Content-Type']='application/json';body=JSON.stringify(cuerpo)}
+  const r=await fetch(API+ruta,{method:met,headers:h,body});
+  let j=null;try{j=await r.json()}catch(e){}
+  if(r.status===401){salir();alarma('Sesión caducada','Acceso');throw new Error('sesión caducada')}
+  if(!r.ok){const m=(j&&(j.detail||JSON.stringify(j)))||('HTTP '+r.status);alarma(m,'Motor');throw new Error(m)}
+  return j;
+}
+async function descargar(ruta,nombre){
+  try{const r=await fetch(API+ruta,{headers:{'Authorization':'Bearer '+TOK}});if(!r.ok)throw new Error('HTTP '+r.status);
+    const b=await r.blob();const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=nombre||'';a.target='_blank';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),60000);
+  }catch(e){alarma(e.message,'Descarga')}
+}
+
+/* ═══════════════════ acceso ═══════════════════ */
+async function entrar(){
+  $('lmsg').textContent='…';
+  try{
+    const f=new URLSearchParams({username:$('lu').value.trim(),password:$('lp').value});
+    const r=await fetch(API+'/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:f});
+    const j=await r.json();if(!r.ok)throw new Error(j.detail||'acceso denegado');
+    TOK=j.access_token;YO={usuario:$('lu').value.trim().toLowerCase(),rol:j.rol,nombre:j.nombre};
+    try{sessionStorage.setItem('d2v_tok',TOK);sessionStorage.setItem('d2v_yo',JSON.stringify(YO))}catch(e){}
+    arrancar();
+  }catch(e){
+    let m=e.message||'';
+    if(/Failed to fetch|NetworkError|Load failed/i.test(m))m='El motor se está reiniciando (1-3 minutos). Espera un momento y pulsa Entrar otra vez.';
+    else if(/401|credencial|Incorrect/i.test(m))m='Usuario o clave incorrectos. Revisa mayúsculas y minúsculas.';
+    $('lmsg').textContent=m;
+  }
+}
+function salir(){TOK=null;YO=null;try{sessionStorage.removeItem('d2v_tok');sessionStorage.removeItem('d2v_yo')}catch(e){}$('app').style.display='none';$('login').style.display='grid'}
+const DIRECCION=()=>YO&&(YO.rol==='director'||YO.rol==='admin');
+
+/* ═══════════════════ estado y navegación ═══════════════════ */
+let AMBITOS=[],AMBITO=null,FICHA={},OLAS=null,OLA=null,OLA_ID=null,CLIENTES=null,CLIENTE=null;
+const NOMBRE_PAIS={dom:'República Dominicana',esp:'España','esp-cat':'Cataluña',mex:'México',chl:'Chile',col:'Colombia',ecu:'Ecuador',ven:'Venezuela',per:'Perú',arg:'Argentina'};
+const BANDERA={dom:'🇩🇴',esp:'🇪🇸','esp-cat':'🇪🇸',mex:'🇲🇽',chl:'🇨🇱',col:'🇨🇴',ecu:'🇪🇨',ven:'🇻🇪',per:'🇵🇪',arg:'🇦🇷'};
+const nombreDe=a=>((AMBITOS.find(x=>x.pais===a)||{}).ficha||{}).nombre||NOMBRE_PAIS[a]||a;
+async function arrancar(){
+  if(!TOK||!YO)return;
+  if(YO.rol==='cliente'){alarma('La Sala de Control es del equipo.','Acceso');salir();return}
+  $('login').style.display='none';$('app').style.display='block';
+  $('yo-nombre').textContent=YO.nombre||YO.usuario;$('yo-rol').textContent=YO.rol;
+  try{AMBITOS=await api('/dv/ambitos')}catch(e){AMBITOS=[]}
+  const h=location.hash.replace('#','');
+  if(h)ruta(h);else ir('puerta');
+}
+function ruta(h){
+  const [p,a,b]=h.split('/');
+  if(p==='pais'&&a){entrarPais(a);return}
+  if(p==='olas'&&a){entrarPais(a,'olas');return}
+  if(p==='ola'&&a&&b){AMBITO=a;FICHA=(AMBITOS.find(x=>x.pais===a)||{}).ficha||{};abrirOla(parseInt(b));return}
+  if(p==='cargar'&&a){entrarPais(a,'cargar');return}
+  if(p==='clientes'){ir('clientes');return}
+  if(p==='cliente'&&a){abrirCliente(a);return}
+  ir('puerta');
+}
+function miga(items){$('miga').innerHTML=items.map((x,i)=>(i?'<span>›</span>':'')+(x.f?'<a onclick="'+x.f+'">'+esc(x.t)+'</a>':'<b>'+esc(x.t)+'</b>')).join('')}
+function ir(p){
+  document.querySelectorAll('.pantalla').forEach(s=>s.classList.remove('activa'));
+  $('p-'+p).classList.add('activa');window.scrollTo({top:0});
+  if(p==='puerta'){miga([{t:'Entrada'}]);location.hash='';}
+  if(p==='paises'){pintarPaises();miga([{t:'Entrada',f:"ir('puerta')"},{t:'Por país'}]);location.hash='';}
+  if(p==='pais'){miga([{t:'Entrada',f:"ir('puerta')"},{t:'Por país',f:"ir('paises')"},{t:nombreDe(AMBITO)}]);location.hash='pais/'+AMBITO;}
+  if(p==='olas'){miga([{t:'Entrada',f:"ir('puerta')"},{t:nombreDe(AMBITO),f:"ir('pais')"},{t:'Consultar'}]);location.hash='olas/'+AMBITO;cargarOlas();}
+  if(p==='cargar'){miga([{t:'Entrada',f:"ir('puerta')"},{t:nombreDe(AMBITO),f:"ir('pais')"},{t:'Cargar'}]);location.hash='cargar/'+AMBITO;$('cargar-titulo').textContent='Una ola nueva de '+nombreDe(AMBITO);$('b_codigo').placeholder=AMBITO+'_2026-09';}
+  if(p==='clientes'){miga([{t:'Entrada',f:"ir('puerta')"},{t:'Por cliente'}]);location.hash='clientes';cargarClientes();}
+  if(p==='cliente'){miga([{t:'Entrada',f:"ir('puerta')"},{t:'Por cliente',f:"ir('clientes')"},{t:(CLIENTE||{}).nombre||''}]);}
+  if(p==='ola'){miga([{t:'Entrada',f:"ir('puerta')"},{t:nombreDe(AMBITO),f:"ir('pais')"},{t:'Consultar',f:"ir('olas')"},{t:(OLA||{}).ola?OLA.ola.codigo:''}]);}
+  $('d-donde').textContent=AMBITO?nombreDe(AMBITO)+(OLA&&p==='ola'?' · '+OLA.ola.codigo:''):'';
+  pintarDanteAcciones();
+}
+window.addEventListener('hashchange',()=>{const h=location.hash.replace('#','');if(h&&TOK)ruta(h)});
+
+/* ═══════════════════ países ═══════════════════ */
+function pintarPaises(){
+  const lista=AMBITOS.filter(a=>!a.pais.includes('-'));
+  $('paises').innerHTML=lista.map(a=>{
+    const f=a.ficha||{};const n=a.olas??a.n_olas??'';
+    const regs=AMBITOS.filter(r=>r.pais.startsWith(a.pais+'-')).map(r=>r.ficha.nombre||r.pais);
+    return '<button class="puerta" onclick="entrarPais(\''+a.pais+'\')"><div class="bandera">'+(f.bandera||BANDERA[a.pais]||'🏳')+'</div><h2>'+esc(f.nombre||NOMBRE_PAIS[a.pais]||a.pais)+(a.pais==='esp'?' <span class="chip acento">piloto 3.0</span>':'')+'</h2><p>'+esc((n!==''?n+' olas · ':'')+((f.niveles||[]).join(' · ')||''))+(regs.length?'<br>Salas regionales: '+esc(regs.join(', ')):'')+'</p><div class="pie">Entrar →</div></button>';
+  }).join('')||'<div class="vacio">El motor no tiene países con datos todavía.</div>';
+}
+async function entrarPais(amb,despues){
+  AMBITO=amb;FICHA=(AMBITOS.find(x=>x.pais===amb)||{}).ficha||{};OLAS=null;
+  $('pais-nombre').textContent=(FICHA.bandera||BANDERA[amb]||'')+' '+nombreDe(amb);
+  const niv=(FICHA.niveles||[]).map(n=>({comunidad:'comunidades autónomas',region:'regiones',provincia:'provincias',municipio:'municipios',distrito:'distritos',colegio:'colegios'}[n]||n)).join(' · ');
+  $('pais-sub').textContent=(FICHA.fuente_encuestas?FICHA.fuente_encuestas+'. ':'')+(niv?'Demarcaciones: '+niv+'.':'');
+  pintarRegimen(null);
+  api('/dv/regimen?pais='+amb).then(pintarRegimen).catch(()=>{});
+  $('pais-rapidos').innerHTML=['Última ola','Territorio','Públicos objetivo','Serie de estimación'].map((t,i)=>'<button class="btn" onclick="rapido('+i+')">'+t+'</button>').join('');
+  $('pais-nota').textContent='Los accesos rápidos abren el paso correspondiente de la ola más reciente. La entrada por comunidad, provincia y grupos (edad, nivel socioeconómico) llega en el siguiente bloque.';
+  // salas regionales dentro del país (p. ej. Cataluña dentro de España: sus propias bases, no las del CIS)
+  const regs=AMBITOS.filter(a=>a.pais.startsWith(amb+'-'));const padre=amb.includes('-')?AMBITOS.find(a=>a.pais===amb.split('-')[0]):null;
+  $('pais-regiones').innerHTML=(regs.length?'<div class="eyebrow" style="margin:18px 0 8px">Salas regionales con motor propio</div><div class="puertas">'+regs.map(r=>'<button class="puerta" onclick="entrarPais(\''+r.pais+'\')"><div class="bandera">'+(r.ficha.bandera||'')+'</div><h2>'+esc(r.ficha.nombre||r.pais)+'</h2><p>'+esc((r.olas||0)+' olas · '+((r.ficha.niveles||[]).join(' · ')))+'. Datos propios de la región (no los del país).</p><div class="pie">Entrar →</div></button>').join('')+'</div>':'')
+    +(padre?'<p class="nota-p">Esta sala es regional: tiene sus propias bases y su propia urna. La sala general del país es <a onclick="entrarPais(\''+padre.pais+'\')" style="cursor:pointer">'+esc(padre.ficha.nombre||padre.pais)+'</a>.</p>':'');
+  ir(despues||'pais');
+}
+function pintarRegimen(r){
+  const el=$('regimen');
+  if(!r){el.innerHTML='';return}
+  const puedo=YO&&YO.rol==='director';
+  el.innerHTML='<span>Régimen de corrida</span><span class="conmutador"><button class="'+(r.modo==='todo'?'on':'')+'" '+(puedo?'onclick="fijarRegimen(\'todo\')"':'disabled')+' title="'+esc(r.opciones.todo)+'">Corre todo</button><button class="'+(r.modo==='aprobados'?'on':'')+'" '+(puedo?'onclick="fijarRegimen(\'aprobados\')"':'disabled')+' title="'+esc(r.opciones.aprobados)+'">Solo lo aprobado</button></span>'+(r.por?'<small style="color:var(--tinta3)">fijado por '+esc(r.por)+' · '+esc(r.desde)+'</small>':'');
+}
+async function fijarRegimen(modo){
+  if(!confirm(modo==='aprobados'?'A partir de ahora, en '+nombreDe(AMBITO)+' solo correrán los pasos aprobados por el director. ¿Confirmas?':'A partir de ahora, en '+nombreDe(AMBITO)+' correrán todos los pasos (en borrador y aprobados). ¿Confirmas?'))return;
+  try{await api('/dv/regimen?pais='+AMBITO,'PUT',{modo});pintarRegimen(await api('/dv/regimen?pais='+AMBITO));toast('Régimen cambiado')}catch(e){}
+}
+async function rapido(i){
+  if(!OLAS)await cargarOlas();
+  const o=(OLAS.olas||[])[0];if(!o){toast('Este país no tiene olas todavía.');return}
+  const paso=['','p10_territorio','p08_publicos_objetivo','p07_fila_tracking'][i];
+  await abrirOla(o.id);if(paso)setTimeout(()=>verPaso(paso),300);
+}
+
+/* ═══════════════════ olas ═══════════════════ */
+async function cargarOlas(forzar){
+  if(OLAS&&!forzar){pintarOlas();return}
+  $('olas').innerHTML='<div class="vacio">Leyendo las olas…</div>';
+  try{OLAS=await api('/dv/olas?pais='+AMBITO)}catch(e){OLAS={olas:[],pasos:[]};}
+  pintarOlas();
+}
+function semaforo(o,pasos){
+  return '<span class="sem">'+pasos.map(p=>{const s=(o.pasos||{})[p.clave]||{};return '<i class="'+esc(s.estado||'pendiente')+' '+esc(s.visto||'')+'" title="'+esc(p.nombre+': '+({corrio:'corrió',fallo:'falló',espera:'espera una decisión',no_aplica:'no aplica',pendiente:'sin analizar',no_aprobado:'no aprobado'}[s.estado]||''))+(s.visto?' · '+s.visto:'')+'"></i>'}).join('')+'</span>';
+}
+function pintarOlas(){
+  if(!OLAS)return;
+  const q=($('olas-buscar').value||'').toLowerCase(),solo=$('olas-solo').checked,pasos=OLAS.pasos||[];
+  let lista=(OLAS.olas||[]).filter(o=>!q||(o.codigo+' '+(o.titulo||'')+' '+(o.fecha_campo_ini||'')+' '+fechaTxt(o.fecha_campo_ini)).toLowerCase().includes(q));
+  if(solo)lista=lista.filter(o=>o.avisos>0||o.aprobados<o.corrieron||Object.values(o.pasos||{}).some(s=>s.estado==='fallo'||s.estado==='espera'||s.estado==='pendiente'));
+  $('olas-cuenta').textContent=lista.length+' de '+(OLAS.olas||[]).length+' olas';
+  $('olas').innerHTML=lista.map(o=>{
+    const e=o.estimacion||{};const top=(e.top||[]).slice(0,3).map(t=>'<span><b>'+esc(t.quien)+'</b> '+p1(t.pct)+'%</span>').join('');
+    const pend=o.corrieron-o.aprobados;
+    return '<button class="ola" onclick="abrirOla('+o.id+')"><div><div class="t">'+esc(o.codigo)+' <span style="font-weight:500;color:var(--tinta2)">· '+esc(o.titulo||'')+'</span></div><div class="m">'+esc(fechaTxt(o.fecha_campo_ini))+(o.n_registros?' · '+fmt(o.n_registros)+' entrevistas':'')+(o.analizado?' · analizada '+esc(String(o.analizado).slice(0,10)):' · <span style="color:var(--aviso)">sin analizar</span>')+'</div></div>'
+      +'<div class="est">'+(top||'<span style="color:var(--tinta3)">sin estimación todavía</span>')+(e.participacion?'<span style="color:var(--tinta3)">participación '+p1(e.participacion)+'%</span>':'')+'</div>'
+      +'<div class="der">'+semaforo(o,pasos)+'<span>'+o.corrieron+' de '+o.aplican+' pasos corrieron'+(o.avisos?' · <span style="color:var(--aviso)">'+o.avisos+' avisos</span>':'')+'</span>'+(pend>0?'<span class="chip aviso">'+pend+' sin tu visto</span>':(o.corrieron?'<span class="chip ok">todo visto</span>':''))+'</div></button>';
+  }).join('')||'<div class="vacio">'+(q||solo?'Ninguna ola cumple el filtro.':'Este país no tiene olas todavía. Carga la primera.')+'</div>';
+}
+
+/* ═══════════════════ la cadena de una ola ═══════════════════ */
+let ABIERTO={};
+async function abrirOla(id){
+  OLA_ID=id;
+  try{OLA=await api('/dv/olas/'+id+'/control')}catch(e){return}
+  if(OLA.ola.pais!==AMBITO){AMBITO=OLA.ola.pais;FICHA=(AMBITOS.find(x=>x.pais===AMBITO)||{}).ficha||{};OLAS=null}
+  const o=OLA.ola;
+  ir('ola');location.hash='ola/'+AMBITO+'/'+id;
+  $('ola-eyebrow').textContent=nombreDe(AMBITO)+' · ola';
+  $('ola-titulo').textContent=o.codigo+' · '+(o.titulo||'');
+  $('ola-sub').textContent=[fechaTxt(o.fecha_campo_ini),o.n_registros?fmt(o.n_registros)+' entrevistas':'',o.n_variables?o.n_variables+' preguntas en el archivo':'',o.origen?'origen: '+o.origen:''].filter(Boolean).join(' · ');
+  const ex=OLA.expediente||{};const c=OLA.cadena||[];
+  const corr=c.filter(x=>x.estado==='corrio').length,apl=c.filter(x=>x.estado!=='no_aplica').length,vis=c.filter(x=>x.visto&&x.visto.estado==='aprobado').length,obs=c.filter(x=>x.visto&&x.visto.estado==='observado').length;
+  const p05=c.find(x=>x.clave==='p05_matriz_electores_salom');
+  $('ola-resumen').innerHTML=
+    '<div><div class="k">Analizada</div><div class="v">'+(ex.generado?esc(String(ex.generado).slice(0,16)):'<span style="color:var(--aviso)">todavía no</span>')+'<small> '+(ex.por?'por '+esc(ex.por):'')+'</small></div></div>'
+    +'<div><div class="k">Pasos</div><div class="v">'+corr+' <small>de '+apl+' corrieron</small></div></div>'
+    +'<div><div class="k">Tu visto bueno</div><div class="v">'+vis+' <small>aprobados'+(obs?' · '+obs+' observados':'')+'</small></div></div>'
+    +'<div><div class="k">Preguntas reconocidas</div><div class="v">'+(ex.reconocidas||0)+'</div></div>'
+    +'<div><div class="k">Avisos</div><div class="v" style="color:'+((ex.avisos||[]).length?'var(--aviso)':'inherit')+'">'+(ex.avisos||[]).length+'</div></div>'
+    +(p05&&p05.resumen?'<div style="grid-column:1/-1"><div class="k">Estimación anclada a la urna</div><div style="font-size:15px">'+esc(p05.resumen)+'</div></div>':'')
+    +(ex.lectura?'<div class="lectura">'+esc(ex.lectura)+'</div>':'');
+  $('ola-operar').innerHTML=[['Cruce','p01_recuerdo_x_intencion'],['Transferencia','p01_matriz_transferencia'],['Estimación','p05_matriz_electores_salom'],['Segmento','p08_publicos_objetivo'],['Territorio','p10_territorio']].map(([t,k])=>'<button class="btn" onclick="verPaso(\''+k+'\')">'+t+'</button>').join('')
+    +'<button class="btn" onclick="descargar(\'/dv/salidas/'+id+'/excel\',\''+esc(o.codigo)+'.xlsx\')">Excel de la ola</button>';
+  pintarCadena();
+}
+const ESTADO_TXT={corrio:'Corrió',fallo:'Falló',no_aplica:'No aplica',espera:'Espera tu decisión',no_aprobado:'No aprobado',pendiente:'Sin analizar'};
+const ESTADO_CLASE={corrio:'ok',fallo:'mal',espera:'aviso',no_aplica:'gris',no_aprobado:'gris',pendiente:'gris'};
+function pintarCadena(){
+  const c=OLA.cadena||[],tramos=OLA.tramos||[];
+  let h='';let n=0;
+  tramos.forEach(t=>{
+    const pasos=c.filter(x=>x.tramo===t.clave);
+    if(t.clave==='conclusiones'){
+      h+='<div class="tramo"><div class="cabt"><h2>Conclusiones</h2><span>'+esc(t.que)+'</span></div><div class="salidas">'
+        +'<button class="salida" onclick="descargar(\'/dv/salidas/'+OLA_ID+'/informe\',\''+esc(OLA.ola.codigo)+'_informe.docx\')"><b>Informe de la ola</b><span>Word con la lectura del método</span></button>'
+        +'<button class="salida" onclick="descargar(\'/dv/salidas/'+OLA_ID+'/ppt\',\''+esc(OLA.ola.codigo)+'_lamina.pptx\')"><b>Lámina</b><span>Presentación de la estimación</span></button>'
+        +'<button class="salida" onclick="descargar(\'/dv/salidas/'+OLA_ID+'/publicos\',\''+esc(OLA.ola.codigo)+'_publicos.docx\')"><b>Públicos objetivo</b><span>Documento de segmentación</span></button>'
+        +'<button class="salida" onclick="descargar(\'/dv/salidas/'+OLA_ID+'/excel\',\''+esc(OLA.ola.codigo)+'.xlsx\')"><b>Excel</b><span>Todas las tablas de la ola</span></button>'
+        +'</div><p class="nota-p">Estrategia, comunicación y producción son entregables por suscripción: se encienden cuando el cliente los contrata.</p></div>';
+      return;
+    }
+    const corr=pasos.filter(x=>x.estado==='corrio').length;
+    h+='<div class="tramo"><div class="cabt"><h2>'+esc(t.nombre)+'</h2><span>'+esc(t.que)+'</span><span class="cont">'+corr+' de '+pasos.length+' corrieron</span></div>';
+    pasos.forEach(p=>{n++;h+=filaPaso(p,n)});
+    h+='</div>';
+  });
+  $('cadena').innerHTML=h;
+}
+function filaPaso(p,n){
+  const v=p.visto;const puedo=DIRECCION();
+  const vistoTxt=v?'<div class="visto">'+(v.estado==='aprobado'?'✓ Aprobado':'◆ Observado')+' por '+esc(v.por)+' · '+esc(v.cuando)+(v.nota?' · «'+esc(v.nota)+'»':'')+'</div>':'';
+  const acc=[];
+  if(p.estado==='corrio')acc.push('<button class="btn peq" onclick="verPaso(\''+p.clave+'\')">Ver</button>');
+  if(p.parametros&&p.parametros.length&&puedo)acc.push('<button class="btn peq" onclick="corregirPaso(\''+p.clave+'\')">Corregir</button>');
+  if(puedo&&p.estado!=='no_aplica')acc.push('<button class="btn peq" onclick="correrPaso(\''+p.clave+'\',this)">Volver a correr</button>');
+  if(p.estado==='corrio'&&puedo){
+    if(!v||v.estado!=='aprobado')acc.push('<button class="btn peq primario" onclick="visto(\''+p.clave+'\',\'aprobado\')">Aprobar</button>');
+    if(!v||v.estado!=='observado')acc.push('<button class="btn peq" onclick="visto(\''+p.clave+'\',\'observado\')">Observar</button>');
+    if(v)acc.push('<button class="btn peq fantasma" onclick="visto(\''+p.clave+'\',\'quitar\')" title="Quitar el visto">×</button>');
+  }
+  const res=p.estado==='corrio'?esc(p.resumen||'sin resumen'):'<b style="color:var(--'+({fallo:'mal',espera:'aviso'}[p.estado]||'tinta3')+')">'+esc(ESTADO_TXT[p.estado]||p.estado)+'</b>'+(p.resumen?' · '+esc(p.resumen):'');
+  return '<div class="paso" id="paso-'+p.clave+'"><div class="fila"><div class="num '+esc(p.estado)+'">'+n+'</div>'
+    +'<div><div class="nom">'+esc(p.nombre)+' <span class="chip '+(ESTADO_CLASE[p.estado]||'gris')+'">'+esc(ESTADO_TXT[p.estado]||p.estado)+'</span>'+(v?'<span class="chip '+(v.estado==='aprobado'?'acento':'aviso')+'">'+(v.estado==='aprobado'?'✓ visto':'◆ observado')+'</span>':'')+'</div><div class="que">'+esc(p.que)+' · <span title="nombre técnico">'+esc(p.clave)+' v'+p.version+'</span>'+(p.estado_metodo!=='aprobado'?' · método en '+esc(p.estado_metodo):'')+'</div>'+vistoTxt+'</div>'
+    +'<div class="res">'+res+'</div><div class="acc">'+acc.join('')+'</div></div>'
+    +((p.avisos||[]).length?'<div class="avisos">'+p.avisos.map(a=>'⚠ '+esc(a)).join('<br>')+'</div>':'')
+    +'<div class="detalle oculto" id="det-'+p.clave+'"></div></div>';
+}
+async function visto(clave,estado){
+  let nota=null;
+  if(estado==='observado'){nota=prompt('¿Qué observas en este paso? (queda registrado con tu nombre)');if(nota===null)return}
+  try{await api('/dv/olas/'+OLA_ID+'/pasos/'+clave+'/visto','POST',{estado,nota});toast(estado==='quitar'?'Visto retirado':(estado==='aprobado'?'Paso aprobado en esta ola':'Observación guardada'));OLAS=null;await abrirOla(OLA_ID);}catch(e){}
+}
+async function correrPaso(clave,btn){
+  if(btn){btn.disabled=true;btn.textContent='Corriendo…'}
+  try{const r=await api('/dv/olas/'+OLA_ID+'/pasos/'+clave+'/correr','POST',{});toast(r.ok?'Corrió: '+(r.resumen||'').slice(0,80):'Falló: '+(r.error||''));OLAS=null;await abrirOla(OLA_ID);}
+  catch(e){if(btn){btn.disabled=false;btn.textContent='Volver a correr'}}
+}
+async function reanalizar(){
+  if(!confirm('Dante volverá a reconocer las preguntas y a correr los diez pasos sobre esta ola. Los vistos buenos se conservan, pero conviene revisarlos. ¿Seguimos?'))return;
+  toast('Analizando la ola entera… puede tardar un minuto.');
+  try{await api('/dv/bases/'+OLA_ID+'/analizar','POST',{});OLAS=null;await abrirOla(OLA_ID);toast('Análisis terminado')}catch(e){}
+}
+function toggleDet(clave,html){
+  const d=$('det-'+clave);
+  if(ABIERTO[clave]===html){d.classList.add('oculto');ABIERTO[clave]=null;return}
+  d.innerHTML=html;d.classList.remove('oculto');ABIERTO[clave]=html;
+  $('paso-'+clave).scrollIntoView({behavior:'smooth',block:'start'});
+}
+async function verPaso(clave){
+  const p=(OLA.cadena||[]).find(x=>x.clave===clave);
+  if(!p){toast('Ese paso no está en esta ola.');return}
+  if(p.estado!=='corrio'){toast('Este paso no corrió en esta ola: '+(ESTADO_TXT[p.estado]||''));$('paso-'+clave).scrollIntoView({behavior:'smooth',block:'start'});return}
+  const d=$('det-'+clave);
+  if(!d.classList.contains('oculto')&&d.dataset.modo==='ver'){d.classList.add('oculto');d.dataset.modo='';return}
+  d.innerHTML='<p class="nota">Leyendo el resultado…</p>';d.classList.remove('oculto');d.dataset.modo='ver';
+  try{const c=await api('/dv/corridas/'+p.corrida_id);
+    d.innerHTML='<h3>'+esc(p.nombre)+' · resultado de la corrida #'+p.corrida_id+'</h3><p class="nota">'+esc(p.que)+'. Versión '+esc(c.version)+' del paso · '+esc(String(c.creado).slice(0,16))+' · '+esc(c.ejecutada_por)+'</p>'+renderResultado(c.resultado)+'<button class="btn peq" onclick="verPaso(\''+clave+'\')">Cerrar</button>';
+    $('paso-'+clave).scrollIntoView({behavior:'smooth',block:'start'});
+  }catch(e){d.innerHTML='<p class="nota">No se pudo leer el resultado.</p>'}
+}
+async function corregirPaso(clave){
+  const p=(OLA.cadena||[]).find(x=>x.clave===clave);const d=$('det-'+clave);
+  if(!d.classList.contains('oculto')&&d.dataset.modo==='corregir'){d.classList.add('oculto');d.dataset.modo='';return}
+  d.dataset.modo='corregir';d.classList.remove('oculto');
+  d.innerHTML='<h3>Corregir: los parámetros que gobiernan «'+esc(p.nombre)+'» en '+esc(nombreDe(AMBITO))+'</h3><p class="nota">Cambiar un parámetro cambia el método para todas las olas de este país. Después pulsa «Volver a correr» en los pasos afectados (o «Analizar la ola entera»). Cada cambio queda registrado con tu nombre.</p>'
+    +p.parametros.map((q,i)=>'<div class="param"><div><code>'+esc(q.clave)+'</code>'+(q.declarado?'':'<div class="meta" style="color:var(--aviso)">sin declarar en este país</div>')+(q.nota?'<div class="meta">'+esc(q.nota)+'</div>':'')+'<div class="meta">'+(q.por?'por '+esc(q.por)+' · '+esc(q.desde||''):'')+'</div></div>'
+      +'<textarea id="par-'+i+'">'+esc(JSON.stringify(q.valor??{},null,1).replace(/\n\s*/g,' '))+'</textarea><div><button class="btn peq" onclick="guardarParam(\''+clave+'\','+i+',\''+esc(q.clave)+'\')">Guardar</button></div></div>').join('')
+    +'<p class="nota" style="margin-top:10px">Escribe el valor tal como está (entre llaves). Si algo no cuadra, pídeselo a Dante con palabras: «cambia el mínimo de entrevistas por zona a 30».</p><button class="btn peq" onclick="corregirPaso(\''+clave+'\')">Cerrar</button>';
+  $('paso-'+clave).scrollIntoView({behavior:'smooth',block:'start'});
+}
+async function guardarParam(clave,i,pclave){
+  let v;try{v=JSON.parse($('par-'+i).value)}catch(e){toast('El valor no está bien escrito: revisa las llaves y las comillas.');return}
+  if(typeof v!=='object'||v===null||Array.isArray(v)){toast('El valor tiene que ir entre llaves { }.');return}
+  const nota=prompt('¿Por qué cambias '+pclave+'? (una línea, queda en el registro del método)')||null;
+  try{await api('/dv/parametros/'+AMBITO,'PUT',{clave:pclave,valor:v,nota});toast('Parámetro guardado. Ahora vuelve a correr los pasos afectados.');await abrirOla(OLA_ID);corregirPaso(clave)}catch(e){}
+}
+
+/* ═══════════════════ resultados legibles ═══════════════════ */
+const ETIQ={n:'entrevistas',n_encuesta:'entrevistas',estimacion:'Estimación',lectura:'Lectura',nota:'Nota',avisos:'Avisos',resumen:'Resumen',urna:'Urna de anclaje',anio_urna_territorial:'Urna territorial (año)',niveles:'Niveles',comprobacion:'Comprobación',matriz_electores:'Matriz de electores',transferencia_pct_por_origen:'Transferencia (% por origen)',matriz_final:'Matriz final',publicos:'Públicos',subgrupos_por_publico:'Subgrupos por público',pesos_caso:'Pesos por entrevistado (interno)'};
+const OCULTAR=new Set(['pesos_caso','matriz_pct_por_columna']);
+const esNum=v=>typeof v==='number';
+function renderTerritorio(niveles){
+  let h='';
+  Object.entries(niveles).forEach(([nivel,d])=>{
+    const zonas=d.zonas||{};const res=d.resumen||{};
+    const nombres=Object.keys(zonas).sort((a,b)=>(zonas[b].entrevistas||0)-(zonas[a].entrevistas||0));
+    const cands=[...new Set(nombres.flatMap(z=>Object.keys(zonas[z].estimacion_pct_validos||{})))].filter(c=>c!=='ABSTENCIÓN');
+    const top=cands.map(c=>[c,nombres.reduce((a,z)=>a+((zonas[z].electores_por_candidato||{})[c]||0),0)]).sort((a,b)=>b[1]-a[1]).slice(0,4).map(x=>x[0]);
+    const bloques=[...new Set(nombres.flatMap(z=>Object.keys(zonas[z].sesgo_relativo_pp||{})))];
+    const topB=bloques.map(b=>[b,nombres.reduce((a,z)=>a+Math.abs((zonas[z].urna_pct||{})[b]||0),0)]).sort((a,b)=>b[1]-a[1]).slice(0,4).map(x=>x[0]);
+    const sc=res.sesgo_conjunto_pp||{};
+    h+='<div class="seccion-r"><h4>'+esc({region:'Región / comunidad',provincia:'Provincia',municipio:'Municipio'}[nivel]||nivel)+' <span style="font-weight:500;color:var(--tinta3)">· variable '+esc(d.variable||'')+' · '+(res.zonas_publicadas||nombres.length)+' zonas'+(res.zonas_casadas_con_urna!=null?' · '+res.zonas_casadas_con_urna+' casadas con la urna':'')+'</span></h4>'
+      +(res.urna?'<p style="color:var(--aviso)">'+esc(res.urna)+'</p>':'')
+      +(Object.keys(sc).length?'<p>Sesgo del conjunto de la muestra (recuerdo − urna): '+topB.map(b=>'<b>'+esc(b)+'</b> '+(sc[b]>0?'+':'')+p1(sc[b])+' pp').join(' · ')+'</p>':'')
+      +'<div class="tabla-scroll"><table class="datos"><thead><tr><th>Zona</th><th>Entrev.</th>'+top.map(c=>'<th>'+esc(c)+' %</th>').join('')+(topB.length?topB.map(b=>'<th>'+esc(b)+' sesgo rel.</th>').join('')+'<th>Revisar</th>':'')+'</tr></thead><tbody>'
+      +nombres.map(z=>{const x=zonas[z];const e=x.estimacion_pct_validos||{};const sr=x.sesgo_relativo_pp||{};
+        return '<tr'+(x.revisar?' style="background:var(--aviso-suave)"':'')+'><td><b>'+esc(z)+'</b>'+(x.aviso?' <span class="chip aviso" style="font-size:11px">'+esc(x.aviso)+'</span>':'')+'</td><td class="n">'+fmt(x.entrevistas)+'</td>'+top.map(c=>'<td class="n">'+p1(e[c])+'</td>').join('')+(topB.length?topB.map(b=>'<td class="n" style="color:'+(Math.abs(sr[b]||0)>10?'var(--mal)':'inherit')+'">'+(sr[b]!=null?(sr[b]>0?'+':'')+p1(sr[b]):'—')+'</td>').join('')+'<td>'+(x.revisar?'sí':'')+'</td>':'')+'</tr>'}).join('')
+      +'</tbody></table></div></div>';
+  });
+  return h+'<p class="nota">Estimación = % sobre los electores que eligen candidato en la zona (pesos anclados de la estimación nacional). Sesgo relativo = cuánto se aleja el recuerdo de esa zona del patrón de toda la muestra; en rojo si supera 10 puntos. Fila ámbar: zona a revisar.</p>';
+}
+function renderResultado(r,prof=0){
+  if(r==null)return '<p>—</p>';
+  if(prof===0&&r&&typeof r==='object'&&!Array.isArray(r)&&r.niveles&&typeof r.niveles==='object'){
+    const resto={...r};delete resto.niveles;
+    return renderResultado(resto,1)+'<div class="seccion-r"><h4>Territorio por nivel</h4>'+renderTerritorio(r.niveles)+'</div>';
+  }
+  if(typeof r!=='object')return '<p>'+esc(r)+'</p>';
+  if(Array.isArray(r)){
+    if(!r.length)return '<p style="color:var(--tinta3)">vacío</p>';
+    if(r.every(x=>x&&typeof x==='object'&&!Array.isArray(x))){
+      const cols=[...new Set(r.flatMap(x=>Object.keys(x)))].filter(c=>!OCULTAR.has(c)&&typeof r[0][c]!=='object'||r.every(x=>x[c]==null||typeof x[c]!=='object'));
+      return '<div class="tabla-scroll"><table class="datos"><thead><tr>'+cols.map(c=>'<th>'+esc(hum(c))+'</th>').join('')+'</tr></thead><tbody>'+r.slice(0,400).map(x=>'<tr>'+cols.map(c=>'<td class="'+(esNum(x[c])?'n':'')+'">'+celda(x[c])+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>'+(r.length>400?'<p class="nota">Se muestran 400 de '+r.length+' filas.</p>':'');
+    }
+    return '<p>'+r.map(x=>esc(typeof x==='object'?JSON.stringify(x):x)).join(' · ')+'</p>';
+  }
+  const claves=Object.keys(r).filter(k=>!OCULTAR.has(k));
+  const vals=claves.map(k=>r[k]);
+  // diccionario de números → tabla de dos columnas
+  if(claves.length&&vals.every(v=>esNum(v)||v==null)){
+    return '<div class="tabla-scroll"><table class="datos"><tbody>'+claves.map(k=>'<tr><td>'+esc(hum(k))+'</td><td class="n">'+celda(r[k])+'</td></tr>').join('')+'</tbody></table></div>';
+  }
+  // diccionario de diccionarios homogéneos → matriz
+  if(claves.length>1&&vals.every(v=>v&&typeof v==='object'&&!Array.isArray(v))&&vals.every(v=>Object.values(v).every(x=>esNum(x)||x==null||typeof x==='string'))){
+    const cols=[...new Set(vals.flatMap(v=>Object.keys(v)))];
+    if(cols.length<=40)return '<div class="tabla-scroll"><table class="datos"><thead><tr><th></th>'+cols.map(c=>'<th>'+esc(c)+'</th>').join('')+'</tr></thead><tbody>'+claves.map(k=>'<tr><td><b>'+esc(k)+'</b></td>'+cols.map(c=>'<td class="'+(esNum(r[k][c])?'n':'')+'">'+celda(r[k][c])+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';
+  }
+  // mixto → secciones
+  let h='';
+  const simples=claves.filter(k=>typeof r[k]!=='object'||r[k]==null);
+  if(simples.length)h+='<div class="tabla-scroll"><table class="datos"><tbody>'+simples.map(k=>'<tr><td style="width:34%">'+esc(hum(k))+'</td><td class="'+(esNum(r[k])?'n':'')+'">'+celda(r[k])+'</td></tr>').join('')+'</tbody></table></div>';
+  claves.filter(k=>typeof r[k]==='object'&&r[k]!=null).forEach(k=>{h+='<div class="seccion-r"><h4>'+esc(hum(k))+'</h4>'+(prof<4?renderResultado(r[k],prof+1):'<p>…</p>')+'</div>'});
+  return h;
+}
+const hum=k=>ETIQ[k]||String(k).replace(/_/g,' ').replace(/\bpct\b/g,'%');
+function celda(v){if(v==null)return '<span style="color:var(--tinta3)">—</span>';if(esNum(v))return Number.isInteger(v)?fmt(v):p1(v);if(typeof v==='object')return esc(JSON.stringify(v)).slice(0,120);return esc(v)}
+
+/* ═══════════════════ cargar ═══════════════════ */
+let PREV=null;
+const zona=document.querySelector('.zona');
+['dragenter','dragover'].forEach(ev=>zona.addEventListener(ev,e=>{e.preventDefault();zona.style.borderColor='var(--acento)'}));
+['dragleave','drop'].forEach(ev=>zona.addEventListener(ev,e=>{e.preventDefault();zona.style.borderColor=''}));
+zona.addEventListener('drop',e=>{if(e.dataTransfer.files[0]){$('arch').files=e.dataTransfer.files;previsualizar()}});
+async function previsualizar(){
+  const f=$('arch').files[0];if(!f)return;
+  $('arch-nombre').textContent=f.name;$('prev_res').textContent='Leyendo el archivo…';
+  const fd=new FormData();fd.append('archivo',f);
+  try{PREV=await api('/dv/bases/previsualizar','POST',null,fd)}catch(e){$('prev_res').textContent='';return}
+  $('campos').style.display='grid';
+  $('b_titulo').value=f.name.replace(/\.[^.]+$/,'');
+  const m=f.name.toLowerCase().match(/(20\d\d)[-_ ]?(0[1-9]|1[0-2])?/);
+  if(m){$('b_codigo').value=AMBITO+'_'+m[1]+(m[2]?'-'+m[2]:'');if(m[2])$('b_fecha').value=m[1]+'-'+m[2]+'-01'}
+  const props=(PREV.variables||[]).filter(v=>v.canon_propuesta).length;
+  $('prev_res').innerHTML='<b>'+fmt(PREV.n_registros)+'</b> entrevistas · <b>'+PREV.n_variables+'</b> preguntas · '+props+' preguntas del método reconocidas de entrada'+((PREV.avisos||[]).length?'<br>'+PREV.avisos.map(a=>'⚠ '+esc(a)).join('<br>'):'');
+}
+async function lanzar(){
+  const f=$('arch').files[0];if(!f){toast('Elige primero el archivo.');return}
+  if(!$('b_codigo').value.trim()){toast('Ponle un código a la ola (por ejemplo '+AMBITO+'_2026-09).');return}
+  const p=$('progreso');p.innerHTML='<p>· Cargando la encuesta y reconociendo las preguntas…</p><p>· Corriendo los diez pasos del método… (uno o dos minutos)</p>';
+  $('btn_analizar').disabled=true;
+  const dueno=(document.querySelector('input[name=dueno]:checked')||{}).value;
+  const fd=new FormData();fd.append('archivo',f);fd.append('codigo',$('b_codigo').value.trim());fd.append('pais',AMBITO);
+  fd.append('titulo',($('b_titulo').value.trim()||$('b_codigo').value.trim())+(dueno==='cliente'?' (datos de cliente)':''));
+  if($('b_fecha').value)fd.append('fecha_campo_ini',$('b_fecha').value);
+  fd.append('origen',dueno==='cliente'?'cliente':'publica');fd.append('ponderacion','autoponderada');
+  try{const r=await api('/dv/bases','POST',null,fd);const ex=r.expediente||{};
+    p.innerHTML='<p class="okt">✓ '+esc(ex.lectura||('Cargada la ola #'+r.id))+'</p>';OLAS=null;toast('Listo: abriendo la cadena de la ola');await abrirOla(r.id);
+  }catch(e){p.innerHTML='<p class="mal">No se cargó: '+esc(e.message)+'</p>'}
+  finally{$('btn_analizar').disabled=false}
+}
+
+/* ═══════════════════ clientes ═══════════════════ */
+async function cargarClientes(){
+  $('clientes').innerHTML='<div class="vacio">Leyendo los clientes…</div>';
+  try{CLIENTES=await api('/dv/clientes')}catch(e){$('clientes').innerHTML='<div class="vacio">La lista de clientes es de dirección.</div>';return}
+  $('clientes').innerHTML=(CLIENTES||[]).map(c=>'<button class="cliente" onclick="abrirCliente(\''+esc(c.ambito)+'\')"><b>'+esc(c.nombre||c.ambito)+'</b><span>'+esc([nombreDe(c.pais||c.ambito),c.partido,c.candidato].filter(Boolean).join(' · '))+'</span><span>'+(c.plan?'plan '+c.plan+' · ':'')+(c.usuarios||[]).length+' usuarios'+(c.activo===false?' · <b style="color:var(--mal)">inactivo</b>':'')+'</span></button>').join('')||'<div class="vacio">No hay clientes dados de alta todavía.</div>';
+}
+async function abrirCliente(amb){
+  if(!CLIENTES){try{CLIENTES=await api('/dv/clientes')}catch(e){return}}
+  CLIENTE=(CLIENTES||[]).find(c=>c.ambito===amb);if(!CLIENTE){toast('No encuentro ese cliente.');return}
+  AMBITO=CLIENTE.pais||amb.split('-')[0];FICHA=(AMBITOS.find(x=>x.pais===AMBITO)||{}).ficha||{};
+  ir('cliente');location.hash='cliente/'+amb;
+  $('cli-nombre').textContent=CLIENTE.nombre||amb;
+  $('cli-sub').textContent=[nombreDe(AMBITO),CLIENTE.partido,CLIENTE.candidato,CLIENTE.fecha_eleccion?'elección '+fechaTxt(CLIENTE.fecha_eleccion):''].filter(Boolean).join(' · ');
+  $('cli-acciones').innerHTML='<a class="btn" href="campana.html" target="_blank">Abrir Mi campaña ↗</a><button class="btn" onclick="entrarPais(\''+AMBITO+'\')">Sala general de '+esc(nombreDe(AMBITO))+'</button>';
+  $('cli-resumen').innerHTML='<div class="lectura">Leyendo el estado de la sala…</div>';$('cli-cuerpo').innerHTML='';
+  let ver=null,borr=null;
+  try{ver=await api('/dv/campana/version?ambito='+amb)}catch(e){}
+  try{borr=await api('/dv/campana/'+amb+'/borrador')}catch(e){}
+  const puedo=DIRECCION();
+  $('cli-resumen').innerHTML='<div><div class="k">Publicado en Mi campaña</div><div class="v">'+(ver&&ver.version?'versión '+esc(ver.version)+'<small> · '+esc(String(ver.publicado||'').slice(0,16))+'</small>':'<span style="color:var(--aviso)">nada todavía</span>')+'</div></div>'
+    +'<div><div class="k">Borrador del motor</div><div class="v">'+(borr&&borr.estado?esc(borr.estado):'—')+'</div></div>'
+    +'<div><div class="k">Usuarios</div><div class="v">'+(CLIENTE.usuarios||[]).length+'</div></div>'
+    +'<div><div class="k">Plan</div><div class="v">'+(CLIENTE.plan||'—')+'<small> '+esc((CLIENTE.modulos||[]).join(' · '))+'</small></div></div>'
+    +(borr&&borr.informe&&borr.informe.lectura?'<div class="lectura">'+esc(borr.informe.lectura)+'</div>':'');
+  $('cli-cuerpo').innerHTML='<div class="eyebrow" style="margin:0 0 8px">Lo que se publica</div><div class="operar">'
+    +(puedo?'<button class="btn" onclick="cliGenerar(\''+amb+'\')">Generar borrador con el motor</button><button class="btn primario" onclick="cliAprobar(\''+amb+'\')" '+(borr&&borr.estado==='listo'?'':'disabled')+'>Aprobar y publicar</button>':'<span class="chip gris">generar y aprobar son de dirección</span>')
+    +'</div><p class="nota-p">Norma: nada llega al cliente sin pasar por esta sala. El borrador se genera con las corridas aprobadas del cuaderno; revisa la cadena de las olas antes de aprobar. La ficha del cliente (lo que pidió, sus datos propios, su formulario de campaña) llega en el bloque de Clientes.</p>'
+    +'<div class="eyebrow" style="margin:16px 0 8px">Usuarios de este cliente</div>'+((CLIENTE.usuarios||[]).length?'<div class="tabla-scroll"><table class="datos"><thead><tr><th>Usuario</th><th>Nombre</th><th>Activo</th><th>Último acceso</th></tr></thead><tbody>'+CLIENTE.usuarios.map(u=>'<tr><td>'+esc(u.usuario)+'</td><td>'+esc(u.nombre)+'</td><td>'+(u.activo?'sí':'no')+'</td><td>'+esc(String(u.ultimo_acceso||'—').slice(0,16))+'</td></tr>').join('')+'</tbody></table></div>':'<p class="nota-p">Sin usuarios.</p>');
+}
+async function cliGenerar(amb){try{const r=await api('/dv/campana/'+amb+'/generar','POST',{});toast(r.lectura||'Generando…');setTimeout(()=>abrirCliente(amb),4000)}catch(e){}}
+async function cliAprobar(amb){const nota=prompt('Nota de aprobación (queda en el registro):','Aprobado desde la Sala de Control 3.0');if(nota===null)return;try{const r=await api('/dv/campana/'+amb+'/aprobar','POST',{nota});toast(r.lectura||'Publicado');abrirCliente(amb)}catch(e){}}
+
+/* ═══════════════════ Dante ═══════════════════ */
+let DSES=null,DOCUPADO=false;
+function dante(){$('dante').classList.toggle('abierto');if($('dante').classList.contains('abierto')&&!DSES)danteSesion();}
+async function danteSesion(){
+  try{const ss=await api('/dv/sesiones');let s=(ss||[]).find(x=>x.titulo==='Sala de Control');
+    if(!s)s=await api('/dv/sesiones','POST',{titulo:'Sala de Control'});DSES=await api('/dv/sesiones/'+s.id);pintarDante();}catch(e){}
+}
+function pintarDante(){
+  const h=$('d-hilo');if(!DSES)return;
+  h.innerHTML=(DSES.mensajes||[]).slice(-40).map(m=>{
+    if(m.rol==='usuario')return '<div class="d-msg yo">'+esc(m.contenido)+'</div>';
+    const hs=(m.meta&&m.meta.herramientas)||[];
+    return '<div class="d-msg el">'+esc(m.contenido)+(hs.length?'<span class="consulto">consultó: '+hs.map(x=>esc(x.nombre)).join(' · ')+'</span>':'')+'</div>';
+  }).join('')||'<div class="d-msg el">Pídeme un cruce, un cuadro o una corrección de cualquier ola. Si algo ya está en la sala, te digo dónde.</div>';
+  h.scrollTop=h.scrollHeight;
+}
+function pintarDanteAcciones(){
+  const a=[];
+  if(OLA&&$('p-ola').classList.contains('activa')){a.push(['¿Qué destaca en esta ola?','Resume en cinco líneas lo que destaca de la ola '+OLA.ola.codigo+' ('+nombreDe(AMBITO)+'): estimación, transferencias y avisos.']);a.push(['Sesgo de la muestra','¿La muestra de la ola '+OLA.ola.codigo+' está sesgada frente a la urna? Dímelo por provincia si hay territorio.'])}
+  else if(AMBITO){a.push(['Estado del país','¿Qué olas de '+nombreDe(AMBITO)+' esperan revisión y por qué?'])}
+  $('d-acciones').innerHTML=a.map(([t,q])=>'<button class="btn peq" onclick="$(\'d-in\').value='+JSON.stringify(q).replace(/"/g,'&quot;')+';dantePregunta()">'+esc(t)+'</button>').join('');
+}
+async function dantePregunta(){
+  const inp=$('d-in'),t=inp.value.trim();if(!t||DOCUPADO)return;
+  if(!DSES){await danteSesion();if(!DSES)return}
+  DOCUPADO=true;$('d-btn').disabled=true;inp.value='';
+  const ctx=(AMBITO?'[Sala de Control 3.0 · '+nombreDe(AMBITO)+(OLA&&$('p-ola').classList.contains('activa')?' · ola '+OLA.ola.codigo+' (id '+OLA_ID+')':'')+'] ':'');
+  DSES.mensajes.push({rol:'usuario',contenido:t});pintarDante();
+  $('d-hilo').innerHTML+='<div class="d-msg el" style="color:var(--tinta3)">pensando…</div>';$('d-hilo').scrollTop=1e9;
+  try{await api('/dv/dante','POST',{sesion_id:DSES.id,mensaje:ctx+t});DSES=await api('/dv/sesiones/'+DSES.id);pintarDante()}catch(e){pintarDante()}
+  finally{DOCUPADO=false;$('d-btn').disabled=false}
+}
+
+/* ═══════════════════ arranque ═══════════════════ */
+if(TOK&&YO)arrancar();else{$('login').style.display='grid'}
+</script>
+</body>
+</html>
