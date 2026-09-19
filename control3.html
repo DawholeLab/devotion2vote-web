@@ -283,7 +283,7 @@ table.calor td.origen,table.calor th.origen{text-align:left;font-weight:700;colo
 
 <div id="app">
   <header class="barra">
-    <a class="marca" onclick="ir('puerta')" style="cursor:pointer;text-decoration:none;color:inherit"><img src="assets/monograma.png" alt=""><span>Sala de Control <small>3.0 · piloto</small></span></a>
+    <a class="marca" onclick="ir('puerta')" style="cursor:pointer;text-decoration:none;color:inherit"><img src="assets/monograma.png" alt=""><span>Sala de Control <small>3.0</small></span></a>
     <div class="miga" id="miga"></div>
     <div class="yo"><span class="nombre" id="yo-nombre"></span><span class="rol" id="yo-rol"></span><button class="btn peq fantasma" onclick="salir()">Salir</button></div>
   </header>
@@ -300,7 +300,7 @@ table.calor td.origen,table.calor th.origen{text-align:left;font-weight:700;colo
 
     <!-- PAÍSES -->
     <section class="pantalla" id="p-paises">
-      <div class="cab"><div><div class="eyebrow">Entrar por país</div><h1>¿Qué país?</h1><div class="sub">Solo aparecen los países con datos en el motor. España es el piloto de esta sala.</div></div></div>
+      <div class="cab"><div><div class="eyebrow">Entrar por país</div><h1>¿Qué país?</h1><div class="sub">Solo aparecen los países con datos en el motor.</div></div></div>
       <div class="puertas" id="paises"></div>
     </section>
 
@@ -337,6 +337,14 @@ table.calor td.origen,table.calor th.origen{text-align:left;font-weight:700;colo
       <div class="cab"><div><div class="eyebrow">Biblioteca</div><h1>Documentos del país</h1><div class="sub">Cuestionarios, informes, libros y contexto que Dante lee para entender el territorio. Lo que subes aquí es común del país.</div></div></div>
       <div class="form" style="margin-bottom:16px"><div class="g"><div class="campo"><label>Archivo (PDF, Word, texto, Excel)</label><input type="file" id="bib_arch"></div><div class="campo"><label>Tipo</label><select id="bib_tipo"><option value="cualitativo">Cualitativo (informes, grupos)</option><option value="documento_clave">Documento clave (contexto)</option><option value="cuestionario">Cuestionario</option><option value="libro">Libro</option><option value="prensa">Prensa y medios</option></select></div></div><div style="margin-top:10px;display:flex;gap:8px;align-items:center"><button class="btn primario" onclick="subirBib()">Subir a la biblioteca</button><span id="bib_msg" style="font-size:13.5px;color:var(--tinta2)"></span></div></div>
       <div id="bib-lista"></div>
+    </section>
+
+    <!-- LOCUS -->
+    <section class="pantalla" id="p-locus">
+      <div class="cab"><div><div class="eyebrow" id="locus-eyebrow">LOCUS</div><h1>Segmentación LOCUS</h1><div class="sub" id="locus-sub">Los productos analíticos de LOCUS que viajan con el motor: los cuatro segmentos por era, sus subsegmentos, el mapa de posiciones en los ejes de principios (S) y actores (O), los temas, las elasticidades, el estudio de acontecimientos, las series y los informes. Solo lectura: LOCUS se produce en su propio motor.</div></div>
+        <div class="acciones" id="locus-acciones"></div></div>
+      <div class="tabs" id="locus-tabs"></div>
+      <div id="locus-cuerpo"></div>
     </section>
 
     <!-- MÉTODO -->
@@ -474,9 +482,11 @@ async function entrar(){
 }
 function salir(){TOK=null;YO=null;try{sessionStorage.removeItem('d2v_tok');sessionStorage.removeItem('d2v_yo')}catch(e){}$('app').style.display='none';$('login').style.display='grid'}
 const DIRECCION=()=>YO&&(YO.rol==='director'||YO.rol==='admin');
-/* PILOTO (18-sep-2026): la sala 3.0 se estrena con España. Los demás países se ven completos pero en modo lectura hasta el relevo. */
-const PILOTO=['esp','esp-cat'];
-const lectura=()=>!!AMBITO&&!PILOTO.includes(AMBITO);
+/* MODO LECTURA (18/19-sep-2026): la sala se estrenó con España como piloto y los demás países en lectura; el 19-sep la
+   dirección liberó la edición en todos los países (Dominicana incluida). Se conserva el mecanismo por si hiciera falta
+   volver a bloquear un país: basta con añadir su clave a LECTURA. */
+const LECTURA=[];
+const lectura=()=>!!AMBITO&&LECTURA.includes(AMBITO);
 function soloLectura(){toast('Modo lectura: '+nombreDe(AMBITO)+' se cambia desde la sala actual hasta el relevo.');}
 
 /* ═══════════════════ estado y navegación ═══════════════════ */
@@ -501,6 +511,7 @@ function ruta(h){
   if(p==='cargar'&&a){entrarPais(a,'cargar');return}
   if(p==='territorio'&&a){AMBITO=a;FICHA=(AMBITOS.find(x=>x.pais===a)||{}).ficha||{};abrirTerritorio(b||'provincia');return}
   if(p==='biblio'&&a){AMBITO=a;FICHA=(AMBITOS.find(x=>x.pais===a)||{}).ficha||{};ir('biblio');return}
+  if(p==='locus'&&a){AMBITO=a;FICHA=(AMBITOS.find(x=>x.pais===a)||{}).ficha||{};abrirLocus();return}
   if(p==='metodo'&&a){AMBITO=a;FICHA=(AMBITOS.find(x=>x.pais===a)||{}).ficha||{};ir('metodo');return}
   if(p==='clientes'){ir('clientes');return}
   if(p==='cliente'&&a){abrirCliente(a);return}
@@ -519,6 +530,7 @@ function ir(p){
   if(p==='cliente'){miga([{t:'Entrada',f:"ir('puerta')"},{t:'Por cliente',f:"ir('clientes')"},{t:(CLIENTE||{}).nombre||''}]);}
   if(p==='territorio'){miga([{t:'Entrada',f:"ir('puerta')"},{t:nombreDe(AMBITO),f:"ir('pais')"},{t:'Territorio'}]);location.hash='territorio/'+AMBITO+'/'+(TERR.nivel||'');}
   if(p==='biblio'){miga([{t:'Entrada',f:"ir('puerta')"},{t:nombreDe(AMBITO),f:"ir('pais')"},{t:'Biblioteca'}]);location.hash='biblio/'+AMBITO;cargarBib();}
+  if(p==='locus'){miga([{t:'Entrada',f:"ir('puerta')"},{t:nombreDe(AMBITO),f:"ir('pais')"},{t:'LOCUS'}]);location.hash='locus/'+AMBITO;}
   if(p==='metodo'){miga([{t:'Entrada',f:"ir('puerta')"},{t:nombreDe(AMBITO),f:"ir('pais')"},{t:'Reglas del método'}]);location.hash='metodo/'+AMBITO;$('met-titulo').textContent='El cuaderno · '+nombreDe(AMBITO);metTab('pasos');}
   if(p==='ola'){miga([{t:'Entrada',f:"ir('puerta')"},{t:nombreDe(AMBITO),f:"ir('pais')"},{t:'Consultar',f:"ir('olas')"},{t:(OLA||{}).ola?OLA.ola.codigo:''}]);}
   $('d-donde').textContent=AMBITO?nombreDe(AMBITO)+(OLA&&p==='ola'?' · '+OLA.ola.codigo:''):'';
@@ -545,7 +557,8 @@ async function entrarPais(amb,despues){
   api('/dv/regimen?pais='+amb).then(pintarRegimen).catch(()=>{});
   $('pais-rapidos').innerHTML=['Última ola','Territorio de la última ola','Públicos objetivo'].map((t,i)=>'<button class="btn" onclick="rapido('+i+')">'+t+'</button>').join('')
     +(FICHA.niveles||[]).filter(n=>n!=='pais'&&n!=='colegio').map(n=>'<button class="btn" onclick="abrirTerritorio(\''+n+'\')">'+esc({comunidad:'Comunidades',region:'Regiones',provincia:'Provincias',municipio:'Municipios',distrito:'Distritos'}[n]||n)+'</button>').join('')
-    +'<button class="btn" onclick="ir(\'biblio\')">Biblioteca</button><button class="btn" onclick="ir(\'metodo\')">Reglas del método</button>';
+    +'<button class="btn" onclick="ir(\'biblio\')">Biblioteca</button><button class="btn" onclick="ir(\'metodo\')">Reglas del método</button><button class="btn" id="btn-locus" onclick="abrirLocus()">LOCUS</button>';
+  api('/dv/locus?pais='+amb).then(()=>{}).catch(()=>{const b=$('btn-locus');if(b){b.disabled=true;b.title='Este país no tiene productos LOCUS en el motor todavía'}});
   $('pais-nota').textContent='Las demarcaciones abren la urna oficial de cada zona con la estimación de la última ola. La entrada por grupos (edad, nivel socioeconómico) llega en el siguiente bloque.';
   $('pais-lectura').innerHTML=lectura()?'<div class="lectura-aviso">🔒 <span><b>Modo lectura.</b> '+esc(nombreDe(amb))+' se ve completa en esta sala pero no se cambia desde aquí hasta el relevo: los datos y el método siguen gobernándose en la sala actual. Aquí puedes comparar.</span></div>':'';
   cargarBandeja();cargarSerie();
@@ -942,6 +955,79 @@ async function abrirVT(){
   box.innerHTML=h;
 }
 
+
+/* ═══════════════════ LOCUS: los productos de la segmentación actitudinal ═══════════════════ */
+let LOCUS=null,LOCUS_GRUPO='analisis';
+const SEG_NOMBRE={T:'Transformadores',E:'Exploradores',P:'Preservadores',R:'Renovadores'};
+async function abrirLocus(){
+  ir('locus');$('locus-eyebrow').textContent=nombreDe(AMBITO)+' · LOCUS';
+  $('locus-cuerpo').innerHTML='<div class="vacio">Leyendo los productos LOCUS…</div>';
+  try{LOCUS=await api('/dv/locus?pais='+AMBITO)}catch(e){$('locus-cuerpo').innerHTML='<div class="vacio">'+esc(nombreDe(AMBITO))+' no tiene productos LOCUS en el motor todavía. Se cargan desde LOCUS cuando el ámbito los tenga.</div>';$('locus-tabs').innerHTML='';return}
+  $('locus-acciones').innerHTML='<span class="chip gris">'+esc(LOCUS.paquete||'')+(LOCUS.fecha?' · '+esc(LOCUS.fecha):'')+'</span>';
+  $('locus-tabs').innerHTML=(LOCUS.grupos||[]).map(g=>'<button class="'+(g.clave===LOCUS_GRUPO?'on':'')+'" onclick="locusGrupo(\''+g.clave+'\',this)">'+esc(g.nombre)+' <small>'+g.archivos.length+'</small></button>').join('');
+  locusGrupo(LOCUS_GRUPO);
+}
+function locusGrupo(clave,btn){
+  LOCUS_GRUPO=clave;document.querySelectorAll('#locus-tabs button').forEach(b=>b.classList.toggle('on',b===btn||(!btn&&b.textContent.trim().toLowerCase().startsWith(({analisis:'análisis',series:'series',informes:'informes',electoral:'electoral'}[clave]||clave)))));
+  const g=(LOCUS.grupos||[]).find(x=>x.clave===clave);if(!g)return;
+  $('locus-cuerpo').innerHTML='<div class="puertas" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">'+g.archivos.map(a=>'<button class="puerta" style="min-height:0;padding:14px 16px" onclick="locusAbrir(\''+esc(a.ruta)+'\')"><h2 style="font-size:16px">'+esc(a.titulo)+'</h2><p>'+esc(a.que||'')+'</p><div class="pie" style="font-size:12px;color:var(--tinta3);font-weight:500">'+esc(a.formato)+' · '+(a.bytes>1e6?(a.bytes/1e6).toFixed(1)+' MB':Math.round(a.bytes/1024)+' KB')+'</div></button>').join('')+'</div><div id="locus-det" style="margin-top:16px"></div>';
+}
+async function locusAbrir(ruta){
+  const d=$('locus-det');d.innerHTML='<div class="vacio">Leyendo…</div>';d.scrollIntoView({behavior:'smooth',block:'start'});
+  let a;try{a=await api('/dv/locus/'+AMBITO+'/'+ruta)}catch(e){d.innerHTML='';return}
+  let h='<div class="resumen-ola" style="display:block"><div class="eyebrow">'+esc(a.ruta)+'</div><h2 style="font-size:20px;margin:4px 0 4px">'+esc(a.titulo)+'</h2><p class="nota-p" style="margin:0 0 12px">'+esc(a.que||'')+'</p>';
+  if(a.formato==='md')h+=renderMd(a.texto||'');
+  else if(a.formato==='csv')h+=renderResultado(a.filas||[])+(a.n_filas>2000?'<p class="nota-p">Se muestran 2.000 de '+fmt(a.n_filas)+' filas.</p>':'');
+  else h+=renderLocus(a.ruta,a.datos);
+  d.innerHTML=h+'<div style="margin-top:10px"><button class="btn peq" onclick="$(\'locus-det\').innerHTML=\'\'">Cerrar</button></div></div>';
+}
+function renderLocus(ruta,x){
+  const nom=k=>SEG_NOMBRE[k]?SEG_NOMBRE[k]+' ('+k+')':k;
+  if(/fichas_segmentos/.test(ruta)&&x&&typeof x==='object'){
+    return Object.entries(x).map(([era,segs])=>'<div class="seccion-r"><h4>Era '+esc(era)+'</h4><div class="tabla-scroll"><table class="datos"><thead><tr><th>Segmento</th><th>% mujeres</th><th>Edad: jóvenes · medios · mayores</th><th>Ideología media (1-10)</th><th>Saliencia política</th><th>Volatilidad</th></tr></thead><tbody>'+Object.entries(segs).map(([s,f])=>'<tr><td><b>'+esc(nom(s))+'</b></td><td class="n">'+p1(f.pct_mujer)+'</td><td class="n">'+(f.edad||[]).map(p1).join(' · ')+'</td><td class="n">'+p1(f.ideologia_media)+'</td><td class="n">'+p1(f.salience_politica)+'</td><td class="n">'+p1(f.volatilidad)+'</td></tr>').join('')+'</tbody></table></div></div>').join('')+'<p class="nota">Transformadores: cuestionan principios y actores · Exploradores: aceptan principios, cuestionan actores · Preservadores: aceptan principios y actores · Renovadores: cuestionan principios, aceptan actores.</p>';
+  }
+  if(/subsegmentos/.test(ruta)&&x&&typeof x==='object'){
+    const eras={};Object.entries(x).forEach(([k,v])=>{const [era,seg]=k.split('|');(eras[era]=eras[era]||[]).push([seg,v])});
+    return Object.entries(eras).sort((a,b)=>b[0].localeCompare(a[0])).map(([era,lista])=>'<div class="seccion-r"><h4>Era '+esc(era)+'</h4>'+lista.sort((a,b)=>a[0].localeCompare(b[0])).map(([seg,v])=>'<p style="margin:8px 0 4px"><b>'+esc(nom(seg))+'</b> <small style="color:var(--tinta3)">muestra '+fmt(v.n_muestra)+' · estabilidad '+p1((v.estabilidad||0)*100)+'%</small></p><div class="tabla-scroll"><table class="datos"><thead><tr><th>Subsegmento</th><th>Peso %</th><th>S</th><th>O</th><th>Ideología</th><th>Edad</th><th>Rasgos que lo definen</th></tr></thead><tbody>'+(v.subsegmentos||[]).map(ss=>'<tr><td><b>'+esc(ss.nombre||'')+'</b></td><td class="n">'+p1(ss.share)+'</td><td class="n">'+(ss.S!=null?ss.S.toFixed(2):'—')+'</td><td class="n">'+(ss.O!=null?ss.O.toFixed(2):'—')+'</td><td class="n">'+p1(ss.ideologia)+'</td><td class="n">'+p1(ss.edad)+'</td><td>'+(ss.rasgos||[]).map(r=>esc(String(r[0]).replace(/^t_/,'tema: ').replace(/_/g,' '))+' '+(r[1]>0?'+':'')+Number(r[1]).toFixed(2)).join(' · ')+'</td></tr>').join('')+'</tbody></table></div>').join('')+'</div>').join('');
+  }
+  if(/mapa_posiciones/.test(ruta)&&x&&x.quad_anual){
+    const q=x.quad_anual;const NOMS=['Preservadores','Exploradores','Renovadores','Transformadores'];
+    let h='<div class="seccion-r"><h4>Reparto anual de la población en los cuatro cuadrantes (%)</h4><div class="tabla-scroll"><table class="datos"><thead><tr><th>Año</th>'+NOMS.map(n=>'<th>'+n+'</th>').join('')+'</tr></thead><tbody>'+Object.entries(q).map(([a,v])=>'<tr><td><b>'+esc(a)+'</b></td>'+v.map(z=>'<td class="n">'+p1(z)+'</td>').join('')+'</tr>').join('')+'</tbody></table></div><p class="nota">Orden de los cuadrantes según el producto LOCUS (quad_anual): se muestra tal como viene; la rejilla S×O completa por era está en «grids».</p></div>';
+    if(x.grids){h+='<div class="seccion-r"><h4>Rejilla S × O por era (densidad)</h4>'+Object.entries(x.grids).map(([era,pts])=>{const mx=Math.max(...pts.map(p=>p[2]||0))||1;const cel={};pts.forEach(p=>cel[p[0]+','+p[1]]=p[2]);let g='<p style="margin:8px 0 4px"><b>'+esc(era)+'</b></p><div class="tabla-scroll"><table class="calor"><tr><th class="origen">S ↓ · O →</th>'+[...Array(12).keys()].map(o=>'<th>'+o+'</th>').join('')+'</tr>';for(let s=11;s>=0;s--){g+='<tr><td class="origen">'+s+'</td>'+[...Array(12).keys()].map(o=>{const v=cel[s+','+o]||0;return '<td style="background:color-mix(in srgb,var(--acento) '+Math.round(85*v/mx)+'%,transparent);color:'+(v/mx>0.5?'#fff':'inherit')+'">'+(v?fmt(Math.round(v)):'')+'</td>'}).join('')+'</tr>'}return g+'</table></div>'}).join('')+'</div>'}
+    return h;
+  }
+  if(/monitor_seg/.test(ruta)&&x&&x.fechas&&x.seg){
+    const serie=(fechas,dic,pie)=>{const temas=Object.keys(dic).map(t=>[t,(dic[t]||[]).filter(v=>v!=null).reduce((a,b)=>a+b,0)/Math.max(1,(dic[t]||[]).filter(v=>v!=null).length)]).sort((a,b)=>b[1]-a[1]).slice(0,6).map(x=>x[0]);
+      const olas=fechas.map((f,i)=>({fecha:String(f),valores:Object.fromEntries(temas.map(t=>[t,{grafica:(dic[t]||[])[i]}]))}));return '<div class="grafica">'+graficaLineas(olas,temas,Object.fromEntries(temas.map(t=>[t,t.replace(/_/g,' ')])),pie)+'</div>'};
+    let h='<p class="nota">Cada gráfica: el % de ese segmento que señala cada tema como principal, ola a ola (los seis temas con más peso).</p>';
+    Object.entries(x.seg).forEach(([seg,dic])=>{h+='<div class="seccion-r"><h4>'+esc(nom(seg))+'</h4>'+serie(x.fechas,dic,'temas del segmento')+'</div>'});
+    if(x.sub&&x.fechas_sub){h+='<div class="seccion-r"><h4>Subsegmentos: última medición</h4><div class="tabla-scroll"><table class="datos"><thead><tr><th>Subsegmento</th><th>Tema principal</th><th>Última ola</th><th>Serie (mín · media · máx)</th></tr></thead><tbody>'+Object.entries(x.sub).map(([ss,dic])=>{const temas=Object.entries(dic).map(([t,v])=>{const vv=(v||[]).filter(z=>z!=null);return [t,vv.length?vv[vv.length-1]:null,vv.length?Math.min(...vv):null,vv.length?vv.reduce((a,b)=>a+b,0)/vv.length:null,vv.length?Math.max(...vv):null]}).sort((a,b)=>(b[1]||0)-(a[1]||0));const t=temas[0]||[];return '<tr><td><b>'+esc(ss)+'</b></td><td>'+esc(String(t[0]||'').replace(/_/g,' '))+'</td><td class="n">'+p1(t[1])+'%</td><td class="n">'+p1(t[2])+' · '+p1(t[3])+' · '+p1(t[4])+'</td></tr>'}).join('')+'</tbody></table></div></div>'}
+    return h;
+  }
+  if(/espana_data/.test(ruta)&&x&&x.fechas){
+    const ser=['S','O','vol','eco'].filter(k=>Array.isArray(x[k]));const olas=x.fechas.map((f,i)=>({fecha:String(f),valores:Object.fromEntries(ser.map(k=>[k,{grafica:x[k][i]!=null?100*x[k][i]:null}]))}));
+    return '<div class="grafica">'+graficaLineas(olas,ser,{S:'Eje S · principios (×100)',O:'Eje O · actores (×100)',vol:'Volatilidad (×100)',eco:'Economía (×100)'},'ejes LOCUS')+'</div>';
+  }
+  if(/eventstudy/.test(ruta)&&x&&x.eventos){
+    return '<div class="tabla-scroll"><table class="datos"><thead><tr><th>Acontecimiento</th><th>Ola posterior</th><th>S antes → después</th><th>O antes → después</th><th>Volatilidad</th><th>Transformadores</th><th>Exploradores</th><th>Renovadores</th><th>Preservadores</th></tr></thead><tbody>'+Object.entries(x.eventos).map(([n,e])=>{const f=e.efectos||{};const c=k=>f[k]?p1(f[k].pre)+' → '+p1(f[k].post)+' <small style="color:'+(Math.abs(f[k].z||0)>=1.96?'var(--mal)':'var(--tinta3)')+'">('+(f[k].delta>0?'+':'')+p1(f[k].delta)+')</small>':'—';return '<tr><td><b>'+esc(n)+'</b></td><td>'+esc(e.ola_post||'')+'</td><td class="n">'+c('S')+'</td><td class="n">'+c('O')+'</td><td class="n">'+c('vol')+'</td><td class="n">'+c('T')+'</td><td class="n">'+c('E')+'</td><td class="n">'+c('R')+'</td><td class="n">'+c('P')+'</td></tr>'}).join('')+'</tbody></table></div><p class="nota">Entre paréntesis, el cambio; en rojo cuando es estadísticamente claro (z ≥ 1,96).</p>';
+  }
+  if(/cruces_|temas_mapa|elasticidades/.test(ruta))return renderResultado(x,1);
+  return renderResultado(x);
+}
+function renderMd(t){
+  const lines=String(t).split('\n');let h='',inTable=false,inList=false;
+  const inline=s=>esc(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/`(.+?)`/g,'<code>$1</code>').replace(/\*(.+?)\*/g,'<i>$1</i>');
+  const close=()=>{if(inTable){h+='</tbody></table></div>';inTable=false}if(inList){h+='</ul>';inList=false}};
+  lines.forEach(l=>{
+    if(/^\|/.test(l)){if(/^\|\s*-/.test(l))return;const cells=l.split('|').slice(1,-1).map(c=>c.trim());if(!inTable){close();h+='<div class="tabla-scroll"><table class="datos"><thead><tr>'+cells.map(c=>'<th>'+inline(c)+'</th>').join('')+'</tr></thead><tbody>';inTable=true;return}h+='<tr>'+cells.map(c=>'<td>'+inline(c)+'</td>').join('')+'</tr>';return}
+    if(inTable)close();
+    const m=l.match(/^(#{1,4})\s+(.*)/);if(m){close();h+='<h'+(m[1].length+1)+' style="font-size:'+(20-m[1].length*2)+'px;margin:14px 0 6px">'+inline(m[2])+'</h'+(m[1].length+1)+'>';return}
+    if(/^\s*[-*]\s+/.test(l)){if(!inList){h+='<ul style="margin:4px 0 8px 18px;padding:0">';inList=true}h+='<li style="margin:2px 0">'+inline(l.replace(/^\s*[-*]\s+/,''))+'</li>';return}
+    if(!l.trim()){close();return}
+    close();h+='<p style="margin:0 0 8px">'+inline(l)+'</p>';
+  });close();return h;
+}
+
 /* ═══════════════════ bandeja: lo que espera tu mirada ═══════════════════ */
 let BANDEJA=null;
 async function cargarBandeja(){
@@ -1001,7 +1087,7 @@ async function cargarSerie(){
   if(!olas.length||!prot.length){$('serie').innerHTML='<div class="vacio">Sin estimaciones comparables todavía.</div>';return}
   $('serie').innerHTML='<div class="grafica">'+graficaLineas(olas,prot,SERIE.etiquetas||{})+'</div>';
 }
-function graficaLineas(olas,prot,etq){
+function graficaLineas(olas,prot,etq,pie){
   const W=900,H=300,ml=44,mr=16,mt=14,mb=34;const n=olas.length;
   const xs=i=>ml+(n>1?(W-ml-mr)*i/(n-1):(W-ml-mr)/2);
   let max=0;olas.forEach(o=>prot.forEach(p=>{const v=((o.valores||{})[p]||{}).grafica;if(v!=null&&v>max)max=v}));max=Math.ceil((max+3)/10)*10||10;
@@ -1015,7 +1101,7 @@ function graficaLineas(olas,prot,etq){
     h+='<polyline fill="none" stroke="'+c+'" stroke-width="2.2" stroke-linejoin="round" points="'+pts.map(q=>q[0]+','+q[1]).join(' ')+'"/>';
     const u=pts[pts.length-1];h+='<circle cx="'+u[0]+'" cy="'+u[1]+'" r="4" fill="'+c+'"/>';ult[p]=u[2];
   });
-  h+='</svg><div class="leyenda">'+prot.map((p,k)=>'<span><i style="background:'+COLORES[k%COLORES.length]+'"></i>'+esc(etq[p]||p)+(ult[p]!=null?' <b>'+p1(ult[p])+'%</b>':'')+'</span>').join('')+'<span style="color:var(--tinta3)">'+n+' olas · última: '+esc(olas[n-1].fecha.slice(0,7))+' · estimación anclada a la urna</span></div>';
+  h+='</svg><div class="leyenda">'+prot.map((p,k)=>'<span><i style="background:'+COLORES[k%COLORES.length]+'"></i>'+esc(etq[p]||p)+(ult[p]!=null?' <b>'+p1(ult[p])+'%</b>':'')+'</span>').join('')+'<span style="color:var(--tinta3)">'+n+' olas · última: '+esc(olas[n-1].fecha.slice(0,7))+' · '+esc(pie||'estimación anclada a la urna')+'</span></div>';
   return h;
 }
 
