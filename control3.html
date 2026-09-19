@@ -533,7 +533,8 @@ function ir(p){
   if(p==='locus'){miga([{t:'Entrada',f:"ir('puerta')"},{t:nombreDe(AMBITO),f:"ir('pais')"},{t:'LOCUS'}]);location.hash='locus/'+AMBITO;}
   if(p==='metodo'){miga([{t:'Entrada',f:"ir('puerta')"},{t:nombreDe(AMBITO),f:"ir('pais')"},{t:'Reglas del método'}]);location.hash='metodo/'+AMBITO;$('met-titulo').textContent='El cuaderno · '+nombreDe(AMBITO);metTab('pasos');}
   if(p==='ola'){miga([{t:'Entrada',f:"ir('puerta')"},{t:nombreDe(AMBITO),f:"ir('pais')"},{t:'Consultar',f:"ir('olas')"},{t:(OLA||{}).ola?OLA.ola.codigo:''}]);}
-  $('d-donde').textContent=AMBITO?nombreDe(AMBITO)+(OLA&&p==='ola'?' · '+OLA.ola.codigo:''):'';
+  $('d-donde').textContent=danteTitulo();
+  if($('dante').classList.contains('abierto'))danteSesion();
   pintarDanteAcciones();
 }
 window.addEventListener('hashchange',()=>{const h=location.hash.replace('#','');if(h&&TOK)ruta(h)});
@@ -872,20 +873,27 @@ async function cliAprobar(amb){if(lectura()){soloLectura();return}const nota=pro
 
 /* ═══════════════════ Dante ═══════════════════ */
 let DSES=null,DOCUPADO=false;
-function dante(){$('dante').classList.toggle('abierto');if($('dante').classList.contains('abierto')&&!DSES)danteSesion();}
+const ACCIONES_DANTE=new Set(['correr_paso','analizar_ola','fijar_parametro','visto_paso']);
+function danteTitulo(){return (OLA&&$('p-ola').classList.contains('activa'))?'Ola '+OLA.ola.codigo:'Sala de Control'+(AMBITO?' · '+nombreDe(AMBITO):'')}
+function dante(){$('dante').classList.toggle('abierto');if($('dante').classList.contains('abierto'))danteSesion();}
 async function danteSesion(){
-  try{const ss=await api('/dv/sesiones');let s=(ss||[]).find(x=>x.titulo==='Sala de Control');
-    if(!s)s=await api('/dv/sesiones','POST',{titulo:'Sala de Control'});DSES=await api('/dv/sesiones/'+s.id);pintarDante();}catch(e){}
+  // una sesión por ola (Dante ve el libro de códigos y los documentos de esa ola) y una general por país
+  const titulo=danteTitulo();if(DSES&&DSES.titulo===titulo)return;
+  try{const ss=await api('/dv/sesiones');let s=(ss||[]).find(x=>x.titulo===titulo);
+    if(!s)s=await api('/dv/sesiones','POST',{titulo,base_id:(OLA&&$('p-ola').classList.contains('activa'))?OLA_ID:null});
+    DSES=await api('/dv/sesiones/'+s.id);$('d-donde').textContent=titulo;pintarDante();}catch(e){}
 }
 function pintarDante(){
   const h=$('d-hilo');if(!DSES)return;
   h.innerHTML=(DSES.mensajes||[]).slice(-40).map(m=>{
     if(m.rol==='usuario')return '<div class="d-msg yo">'+esc(m.contenido)+'</div>';
     const hs=(m.meta&&m.meta.herramientas)||[];const puedo=DIRECCION()&&!lectura();
+    const consultas=hs.filter(x=>!ACCIONES_DANTE.has(x.nombre)),acciones=hs.filter(x=>ACCIONES_DANTE.has(x.nombre));
+    const rastro=(consultas.length?'<span class="consulto">consultó: '+consultas.map(x=>esc(x.nombre)).join(' · ')+'</span>':'')+(acciones.length?'<span class="consulto" style="color:var(--acento-tinta)">✔ actuó: '+acciones.map(x=>esc(x.nombre.replace(/_/g,' '))+(x.error?' (falló)':'')).join(' · ')+'</span>':'');
     const sello=m.marca?'<span class="d-sello">✓ marcado: '+esc(m.marca)+'</span>':'';
     const marcas=(m.id&&puedo&&!m.marca)?'<span class="d-marcas">'+['paso','regla','referencia','error'].map(k=>'<button onclick="marcaAbrir('+m.id+',\''+k+'\',this)">'+k+'</button>').join('')+'</span>':'';
-    return '<div class="d-msg el">'+esc(m.contenido)+(hs.length?'<span class="consulto">consultó: '+hs.map(x=>esc(x.nombre)).join(' · ')+'</span>':'')+enlacesDante(m.contenido)+sello+marcas+'</div>';
-  }).join('')||'<div class="d-msg el">Pídeme un cruce, un cuadro o una corrección de cualquier ola. Si algo ya está en la sala, te digo dónde.</div>';
+    return '<div class="d-msg el">'+esc(m.contenido)+rastro+enlacesDante(m.contenido)+sello+marcas+'</div>';
+  }).join('')||'<div class="d-msg el">Pídeme un cruce, un cuadro, una corrección o un Excel de cualquier ola. Si algo ya está en la sala, te digo dónde. Con usuario de dirección también puedo volver a correr pasos, cambiar parámetros y dejar vistos buenos cuando me lo pidas.</div>';
   h.scrollTop=h.scrollHeight;
 }
 function pintarDanteAcciones(){
@@ -896,16 +904,16 @@ function pintarDanteAcciones(){
 }
 async function dantePregunta(){
   const inp=$('d-in'),t=inp.value.trim();if(!t||DOCUPADO)return;
-  if(!DSES){await danteSesion();if(!DSES)return}
+  await danteSesion();if(!DSES)return;
   DOCUPADO=true;$('d-btn').disabled=true;inp.value='';
-  const ctx=(AMBITO?'[Sala de Control 3.0 · '+nombreDe(AMBITO)+(OLA&&$('p-ola').classList.contains('activa')?' · ola '+OLA.ola.codigo+' (id '+OLA_ID+')':'')+'] ':'');
+  const ctx=(AMBITO?'[Sala de Control 3.0 · '+nombreDe(AMBITO)+(OLA&&$('p-ola').classList.contains('activa')?' · ola abierta '+OLA.ola.codigo+' (id '+OLA_ID+')':'')+'] ':'');
   DSES.mensajes.push({rol:'usuario',contenido:t});pintarDante();
   $('d-hilo').innerHTML+='<div class="d-msg el" style="color:var(--tinta3)">pensando…</div>';$('d-hilo').scrollTop=1e9;
-  try{await api('/dv/dante','POST',{sesion_id:DSES.id,mensaje:ctx+t});DSES=await api('/dv/sesiones/'+DSES.id);pintarDante()}catch(e){pintarDante()}
+  try{const r=await api('/dv/dante','POST',{sesion_id:DSES.id,mensaje:ctx+t});DSES=await api('/dv/sesiones/'+DSES.id);pintarDante();
+    if((r.herramientas||[]).some(x=>ACCIONES_DANTE.has(x.nombre)&&!x.error)){OLAS=null;toast('Dante actuó sobre el motor: la sala se actualiza');if(OLA&&$('p-ola').classList.contains('activa'))await abrirOla(OLA_ID);else if($('p-olas').classList.contains('activa'))cargarOlas(true);else if($('p-pais').classList.contains('activa')){cargarBandeja();cargarSerie()}}
+  }catch(e){pintarDante()}
   finally{DOCUPADO=false;$('d-btn').disabled=false}
 }
-
-
 
 /* ═══════════════════ análisis Vote-Transfer de la ola (síntesis del método) ═══════════════════ */
 const ORIGEN_COLOR=['#0f6f6a','#b8651b','#4c5fd5','#b3392f','#7a5aa8','#2f7d4a','#c9922a','#5a6b7b','#8a3f7a','#3a7ca5','#9a9a9a','#666'];
@@ -1243,6 +1251,7 @@ function enlacesDante(texto){
   // «llévame ahí»: si Dante menciona una ola de este país, un botón la abre en la sala
   const olas=(OLAS&&OLAS.olas)||[];const vistos=new Set();const b=[];
   (String(texto).match(/\b[a-z]{2,3}(?:-[a-z]+)?_\d{4}-\d{2}[a-z_]*\b/gi)||[]).forEach(cod=>{const o=olas.find(x=>x.codigo.toLowerCase()===cod.toLowerCase());if(o&&!vistos.has(o.id)){vistos.add(o.id);b.push('<button onclick="abrirOla('+o.id+')">Abrir '+esc(o.codigo)+' →</button>')}});
+  (String(texto).match(/\/dv\/salidas\/(\d+)\/(excel|informe|ppt|publicos)/g)||[]).forEach(u=>{if(vistos.has(u))return;vistos.add(u);const m=u.match(/\/dv\/salidas\/(\d+)\/(\w+)/);const o=olas.find(x=>x.id===parseInt(m[1]));const nom={excel:'Excel',informe:'Informe (Word)',ppt:'Lámina (PowerPoint)',publicos:'Públicos (Word)'}[m[2]]||m[2];b.push('<button onclick="descargar(\''+u+'\',\''+esc((o?o.codigo:'ola_'+m[1])+'_'+m[2])+'\')">⬇ '+nom+'</button>')});
   if(/territorio|provincia|municipio/i.test(texto)&&AMBITO)b.push('<button onclick="abrirTerritorio(\'provincia\')">Abrir Territorio →</button>');
   if(/biblioteca|documento|cuestionario/i.test(texto)&&AMBITO)b.push('<button onclick="ir(\'biblio\')">Abrir Biblioteca →</button>');
   return b.length?'<span class="d-marcas">'+b.slice(0,4).join('')+'</span>':'';
