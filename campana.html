@@ -88,6 +88,84 @@ nav.barra button.on{color:var(--acc2)}
 .lc-pub{padding:12px 0;border-bottom:1px solid var(--linea)}
 .lc-pub .fila{border:0;padding:4px 0}
 #lc-resumen{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}@media (max-width:760px){#lc-resumen{grid-template-columns:1fr 1fr}}
+.lc-tabs{flex-wrap:wrap;margin-bottom:12px}.lc-tabs button{flex:1 1 auto;min-width:0;padding:8px 6px;font-size:12.5px;white-space:nowrap}
+/* cartografía oficial LOCUS (tema v4): tarjeta oscura dentro de la sala */
+.lcx{--xbg:#070d1c;--xbg2:#0e1730;--xink:#eef2fb;--xmut:#8fa0c4;--xacc:#5da9ff;--xamb:#eda100;--xline:rgba(120,160,230,.16);
+  background:linear-gradient(180deg,#101a36,#0b1326);border:1px solid rgba(120,160,230,.14);border-radius:18px;box-shadow:0 18px 50px rgba(4,10,26,.45);padding:18px 20px;color:var(--xink)}
+.lcx *{box-sizing:border-box}
+.lcx-cab{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:14px;position:relative;z-index:4}
+.lcx-badge{display:inline-block;background:rgba(237,161,0,.12);border:1px solid rgba(237,161,0,.4);color:var(--xamb);font-size:11px;letter-spacing:.08em;padding:3px 10px;border-radius:20px;font-weight:700}
+.lcx-tit{font-family:Lora,Georgia,serif;font-size:19px;color:var(--xink)}
+.lcx-sub{color:var(--xmut);font-size:12.5px}
+.lcx-wrap{display:grid;grid-template-columns:minmax(300px,1.3fr) minmax(240px,1fr);gap:16px;align-items:start}
+@media (max-width:840px){.lcx-wrap{grid-template-columns:1fr}}
+#lcx-biplot{position:relative;width:100%;aspect-ratio:1;background:url('assets/carto/fondo_nexus.jpg') center/cover no-repeat #0c1428;border:1px solid rgba(120,160,230,.2);border-radius:14px;overflow:hidden}
+#lcx-biplot::before{content:'';position:absolute;inset:0;background:rgba(9,15,32,.5)}
+#lcx-biplot,#lcx-plane{overflow:visible}
+.lcx-cell{position:absolute;border-radius:2px;pointer-events:none}
+.lcx-bub{position:absolute;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;cursor:pointer;transform:translate(-50%,50%);transition:all .55s ease;border:2px solid rgba(238,242,251,.9);box-shadow:0 0 22px rgba(120,180,255,.45),0 0 60px rgba(93,169,255,.18);font-family:Montserrat,Arial,sans-serif;overflow:visible!important;z-index:2}
+.lcx-sat{position:absolute;border-radius:50%;border:1.5px solid rgba(238,242,251,.8);box-shadow:0 0 10px rgba(120,180,255,.4);cursor:pointer;transform:translate(-50%,50%);display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;transition:all .55s ease;overflow:visible!important;z-index:1}
+.lcx-bub::after,.lcx-sat::after{content:'';position:absolute;inset:-46%;background:center/contain no-repeat;pointer-events:none;animation:lcxGirar 26s linear infinite;mix-blend-mode:screen;opacity:.95}
+.lcx-sat::after{inset:-60%;animation-duration:15s;opacity:.8}
+.lcx-T::after{background-image:url('assets/carto/anillo_t.png')}.lcx-E::after{background-image:url('assets/carto/anillo_e.png')}.lcx-R::after{background-image:url('assets/carto/anillo_r.png')}.lcx-P::after{background-image:url('assets/carto/anillo_p.png')}
+@keyframes lcxGirar{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.lcx-bub::after,.lcx-sat::after{animation:none}}
+.lcx-tema{position:absolute;transform:translate(-50%,50%);background:rgba(7,13,28,.9);color:#eef2fb;border:1px solid rgba(120,160,230,.3);font-size:10px;padding:2px 8px;border-radius:10px;cursor:default;white-space:nowrap;font-weight:600;transition:all .55s ease;z-index:3}
+.lcx-axis{position:absolute;font-size:10px;color:#8fa0c4;font-weight:700;letter-spacing:.2em;text-shadow:0 1px 6px #070d1c;z-index:1}
+.lcx-qlab{position:absolute;font-size:10px;font-weight:800;opacity:.85;letter-spacing:.08em;text-shadow:0 1px 8px #070d1c;z-index:1}
+.lcx-layers{display:flex;gap:12px;font-size:12px;color:var(--xmut);margin:10px 0 0;flex-wrap:wrap;align-items:center}
+.lcx-layers label{display:flex;align-items:center;gap:5px;cursor:pointer}
+.lcx-zbtns{margin-left:auto;display:flex;gap:6px}
+.lcx-layers button,.lcx-step,.lcx-pl,.lcx-gran button{border:1px solid var(--xline);background:transparent;color:var(--xmut);border-radius:8px;padding:3px 10px;cursor:pointer;font:inherit;font-size:12px;min-height:30px}
+.lcx-layers button:hover,.lcx-step:hover,.lcx-pl:hover{color:var(--xink);border-color:rgba(120,180,255,.45)}
+.lcx-tctl{display:flex;align-items:center;gap:8px;margin-top:12px;flex-wrap:wrap}
+.lcx-gran{display:flex;border:1px solid var(--xline);border-radius:16px;overflow:hidden}
+.lcx-gran button{border:0;border-radius:0}.lcx-gran button.on{background:var(--xacc);color:#0a1020;font-weight:700}
+.lcx-step,.lcx-pl{color:var(--xink)}
+.lcx-tctl input[type=range]{flex:1;min-width:120px;accent-color:var(--xacc)}
+.lcx-per{font-family:Montserrat,Arial,sans-serif;font-size:14px;font-weight:800;min-width:90px;color:var(--xink)}
+.lcx-pern{color:var(--xmut);font-size:11px}
+.lcx-ficha{border:1px solid var(--xline);border-radius:13px;background:rgba(10,16,32,.5);padding:14px 16px;min-height:200px}
+.lcx-ficha h3{font-size:16px;margin:0 0 2px;font-family:Lora,Georgia,serif;color:var(--xink)}
+.lcx-tag{font-size:11.5px;color:var(--xmut);margin-bottom:10px}
+.lcx-frow{display:flex;justify-content:space-between;font-size:12.5px;padding:5px 0;border-bottom:1px solid rgba(120,160,230,.12);gap:10px;color:#bcc7e2}
+.lcx-frow b{color:var(--xacc)}
+.lcx-mini-bar{height:7px;border-radius:4px;background:rgba(120,160,230,.15);overflow:hidden;margin-top:3px}.lcx-mini-bar div{height:100%}
+.lcx-lectura{margin-top:14px;border-top:1px solid var(--xline);padding-top:10px}
+.lcx-lectura p{margin:8px 0;font-size:14px;color:#d5def2;line-height:1.55}.lcx-lectura b{color:#fff}
+.lcx-nota{font-size:11.5px;color:#8fa0c4;margin:10px 0 0;line-height:1.6}
+.lcx-leg{color:#cdd7ee;margin-bottom:8px}
+.lcx-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:6px 0 10px}
+.lcx-kpi{border:1px solid var(--xline);border-radius:12px;padding:10px 12px;background:rgba(10,16,32,.5)}
+.lcx-kpi .v{font-family:Montserrat,Arial,sans-serif;font-weight:800;font-size:20px;color:var(--xink)}.lcx-kpi .l{font-size:11.5px;color:var(--xmut)}
+.lcx-mini{position:relative;width:100%;max-width:520px;aspect-ratio:1;background:url('assets/carto/fondo_nexus.jpg') center/cover no-repeat #0c1428;border:1px solid rgba(120,160,230,.2);border-radius:14px;overflow:hidden;margin:0 auto}
+.lcx-mini::before{content:'';position:absolute;inset:0;background:rgba(9,15,32,.55)}
+.lcx-mini svg{position:absolute;inset:0;width:100%;height:100%}
+.lcx-subs{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.lcx-sub-card{border:1px solid var(--xline);border-radius:12px;padding:10px 12px;background:rgba(10,16,32,.5)}
+.lcx-sub-card h4{margin:0 0 4px;font-size:13px;font-family:Montserrat,Arial,sans-serif;display:flex;align-items:center;gap:6px}
+.lcx-sub-card h4 i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.lcx-sub-card .p{font-size:12px;color:#d5def2;margin:0 0 4px}
+.lcx-warn{color:#ff9d9d;font-size:11px}
+.lcx .chip{background:rgba(93,169,255,.1);border:1px solid var(--xline);color:var(--xmut)}.lcx .chip.on{background:rgba(93,169,255,.22);color:var(--xink);border-color:rgba(93,169,255,.5)}
+.lcx table{width:100%;border-collapse:collapse;font-size:12.5px}.lcx th{text-align:left;color:#9fb2d8;font-weight:600;border-bottom:1px solid rgba(120,160,230,.24);padding:5px 4px}.lcx td{color:#bcc7e2;border-bottom:1px solid rgba(120,160,230,.08);padding:5px 4px}
+/* partitura */
+.lcx-band{display:flex;align-items:stretch;gap:0;margin-bottom:7px}
+.lcx-blab{width:150px;flex:0 0 150px;padding:4px 8px 0 0}.lcx-blab .p1{font-size:12px;font-weight:700;color:var(--xink);line-height:1.2}.lcx-blab .p2{font-size:10px;color:var(--xmut)}
+@media (max-width:560px){.lcx-blab{width:100px;flex-basis:100px}}
+.lcx-bviz{flex:1;position:relative;border:1px solid var(--xline);border-radius:8px;background:rgba(10,16,32,.5);overflow:hidden}
+.lcx-axisx{display:flex;justify-content:space-between;margin-left:150px;font-size:10.5px;color:var(--xmut);padding-top:4px}
+@media (max-width:560px){.lcx-axisx{margin-left:100px}}
+.lcx-tip{position:fixed;z-index:50;background:#0a1020;border:1px solid rgba(120,160,230,.35);border-radius:10px;padding:8px 10px;font-size:11.5px;color:#eef2fb;pointer-events:none;max-width:300px;line-height:1.5;box-shadow:0 8px 30px rgba(0,0,0,.5)}
+.lcx-katgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px}
+.lcx-kat{border:1px solid var(--xline);border-radius:12px;padding:10px 12px;background:rgba(10,16,32,.5);position:relative}
+.lcx-kat .num{font-size:10px;color:var(--xmut);letter-spacing:.1em}.lcx-kat .poles{font-size:13px;font-weight:700;color:var(--xink);display:flex;gap:6px;flex-wrap:wrap;align-items:center}.lcx-kat .vs{font-size:9px;color:var(--xmut)}
+.lcx-kat .kbar{height:3px;border-radius:2px;margin:6px 0;background:linear-gradient(90deg,var(--kc),var(--kc2))}
+.lcx-kat .def{font-size:11px;color:#bcc7e2;line-height:1.45}
+.lcx-kbadge{display:inline-block;margin-top:6px;font-size:9px;letter-spacing:.08em;padding:2px 7px;border-radius:10px;border:1px solid var(--xline);color:var(--xmut)}
+.lcx-kbadge.on{color:#2fd4a7;border-color:rgba(47,212,167,.5)}.lcx-kbadge.raiz{color:var(--xamb);border-color:rgba(237,161,0,.5)}
+.lcx-det{border:1px solid var(--xline);border-radius:12px;margin-top:12px;padding:0 12px}.lcx-det summary{cursor:pointer;padding:10px 0;color:var(--xacc);font-size:13px;list-style:none}.lcx-det summary::-webkit-details-marker{display:none}
+.lcx-lente{padding:8px 0;border-top:1px solid var(--xline);font-size:12px;color:#bcc7e2}.lcx-lente b{color:var(--xink)}.lcx-lente .au{color:var(--xmut);font-size:10.5px}
 
 .chips{display:flex;gap:8px;flex-wrap:wrap}
 .chip{background:var(--chip);border-radius:999px;padding:7px 14px;font-size:14px;font-weight:500;min-height:36px;display:inline-flex;align-items:center;gap:6px;border:1px solid transparent}
@@ -536,37 +614,125 @@ td .celda{display:inline-block;min-width:44px;padding:2px 6px;border-radius:5px}
 <!-- ============ LOCUS ============ -->
 <section class="pantalla" id="p-locus">
   <div>
-    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0">LOCUS · mentalidades del electorado</h2><span class="lc-tag" id="lc-etq" hidden><i></i>Estimado</span></div>
-    <p class="mut small" style="margin-top:4px" id="lc-sub">Cada elector, según cómo se relaciona con los principios y con los actores de la política, pertenece a una de cuatro mentalidades; los que quedan entre dos se cuentan «en el umbral». Estimación del método LOCUS sobre las mismas encuestas y los mismos pesos en electores que el resto de la sala.</p>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0">LOCUS · el mapa vivo del electorado</h2><span class="lc-tag" id="lc-etq" hidden><i></i>Estimado</span></div>
+    <p class="mut small" style="margin-top:4px" id="lc-sub">Cada persona entrevistada ocupa un punto de un plano según dos preguntas de fondo: ¿cree que el país necesita cambiar de rumbo? (principios, eje vertical) y ¿busca actores distintos de los actuales? (encarnaciones, eje horizontal). De ahí salen cuatro mentalidades: Transformadores, Exploradores, Renovadores y Preservadores. LOCUS es un método propio de Dawhole; aquí está aplicado a las mismas encuestas que el resto de la sala.</p>
   </div>
   <div class="vacio" id="lc-vacio" hidden>LOCUS está en preparación para esta sala: la dirección de Devotion2Vote lo publica directamente en cuanto tiene la primera estimación.</div>
   <div id="lc-cuerpo" hidden>
-    <div class="card" style="padding:12px 16px;margin-bottom:12px">
-      <div class="ctrl">
-        <button class="rb" id="lc-prev" aria-label="Toma anterior">◀</button>
-        <button class="rb" id="lc-next" aria-label="Toma siguiente">▶</button>
-        <input type="range" id="lc-range" min="0" max="1" value="1" aria-label="Toma">
-        <span class="ola-txt" id="lc-ola"></span>
+    <div class="seg lc-tabs" role="tablist" id="lc-tabs"><button class="on" data-lc="mapa">Mapa</button><button data-lc="retrato">Retrato</button><button data-lc="movimiento">Movimiento</button><button data-lc="temas">Temas</button><button data-lc="subseg">Subsegmentos</button><button data-lc="polaridades">Polaridades</button><button data-lc="publicos">Públicos</button><button data-lc="metodo">Método</button></div>
+
+    <!-- MAPA -->
+    <div id="lc-mapa" class="lcx">
+      <div class="lcx-cab"><span class="lcx-badge" id="lcx-badge">ESTIMADO</span><span class="lcx-tit">Plano S × O</span><span class="lcx-sub" id="lcx-sub"></span></div>
+      <div class="lcx-wrap">
+        <div>
+          <div id="lcx-biplot">
+            <span class="lcx-axis" style="top:7px;left:50%;transform:translateX(-50%)">NUEVO RUMBO</span>
+            <span class="lcx-axis" style="bottom:7px;left:50%;transform:translateX(-50%)">MISMO RUMBO</span>
+            <span class="lcx-axis" style="left:7px;top:50%;transform:rotate(-90deg) translateX(50%);transform-origin:left">MISMOS ACTORES</span>
+            <span class="lcx-axis" style="right:7px;top:50%;transform:rotate(90deg) translateX(-50%);transform-origin:right">NUEVOS ACTORES</span>
+            <span class="lcx-qlab" style="top:24px;right:32px" data-q="T">TRANSFORMADORES</span>
+            <span class="lcx-qlab" style="top:24px;left:32px" data-q="R">RENOVADORES</span>
+            <span class="lcx-qlab" style="bottom:24px;right:32px" data-q="E">EXPLORADORES</span>
+            <span class="lcx-qlab" style="bottom:24px;left:32px" data-q="P">PRESERVADORES</span>
+            <div id="lcx-plane" style="position:absolute;inset:0"></div>
+            <svg id="lcx-trails" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+          </div>
+          <div class="lcx-layers">
+            <label><input type="checkbox" id="lcx-lyBub" checked> Segmentos</label>
+            <label><input type="checkbox" id="lcx-lySub" checked> Subsegmentos</label>
+            <label><input type="checkbox" id="lcx-lyVar"> Temas</label>
+            <label><input type="checkbox" id="lcx-lyTrail"> Trayectoria</label>
+            <span class="lcx-zbtns"><button type="button" id="lcx-zin">+</button><button type="button" id="lcx-zout">−</button><button type="button" id="lcx-zreset">reset</button></span>
+          </div>
+          <div class="lcx-tctl">
+            <div class="lcx-gran"><button type="button" id="lcx-gAno" class="on">Año</button><button type="button" id="lcx-gToma">Toma</button></div>
+            <button type="button" class="lcx-step" id="lcx-stepB" aria-label="Anterior">◀</button>
+            <input type="range" id="lcx-per" min="0" max="6" value="6" step="1" aria-label="Periodo">
+            <button type="button" class="lcx-step" id="lcx-stepF" aria-label="Siguiente">▶</button>
+            <button type="button" class="lcx-pl" id="lcx-play">▶ reproducir</button>
+            <span><span class="lcx-per" id="lcx-perlab"></span><br><span class="lcx-pern" id="lcx-pern"></span></span>
+          </div>
+        </div>
+        <div class="lcx-ficha" id="lcx-ficha">
+          <h3 id="lcx-f_t">Toque un medallón</h3>
+          <div class="lcx-tag" id="lcx-f_s">Perfil del segmento o subsegmento en el periodo elegido</div>
+          <div id="lcx-f_body"></div>
+        </div>
       </div>
-      <p class="small mut" id="lc-titular" style="margin:8px 0 0"></p>
+      <div class="lcx-lectura" id="lcx-lectura"></div>
     </div>
-    <div class="seg" role="tablist" id="lc-tabs" style="margin-bottom:12px"><button class="on" data-lc="retrato">Retrato</button><button data-lc="publicos">Públicos</button><button data-lc="evolucion">Evolución</button><button data-lc="metodo">Método</button></div>
-    <div id="lc-retrato">
+
+    <!-- RETRATO -->
+    <div id="lc-retrato" hidden>
+      <div class="card" style="padding:12px 16px;margin-bottom:12px">
+        <div class="ctrl"><button class="rb" id="lc-prev" aria-label="Toma anterior">◀</button><button class="rb" id="lc-next" aria-label="Toma siguiente">▶</button><input type="range" id="lc-range" min="0" max="1" value="1" aria-label="Toma"><span class="ola-txt" id="lc-ola"></span></div>
+        <p class="small mut" id="lc-titular" style="margin:8px 0 0"></p>
+      </div>
       <div class="card" style="margin-bottom:12px"><span class="lab">El electorado por mentalidad</span><div class="lc-apilada" id="lc-apilada" style="margin:10px 0 8px"></div><div class="lc-leyenda" id="lc-leyenda"></div></div>
       <div id="lc-resumen"></div>
       <div class="grid2" id="lc-tarjetas" style="margin-top:12px"></div>
+      <div class="card lcx" style="margin-top:12px"><div class="lcx-cab"><span class="lcx-tit">Año a año</span><span class="lcx-sub">peso de cada mentalidad en la población clasificada</span></div><div class="lc-leyenda lcx-leg" id="lc-anual-leg"></div><svg id="lc-anual" viewBox="0 0 680 260" style="width:100%;height:auto;display:block"></svg></div>
     </div>
+
+    <!-- MOVIMIENTO -->
+    <div id="lc-movimiento" hidden>
+      <div class="card lcx"><div class="lcx-cab"><span class="lcx-tit">Recomposición del electorado</span><span class="lcx-sub" id="lc-mov-sub"></span></div>
+        <div id="lc-mov-kpis" class="lcx-kpis"></div>
+        <div class="lc-leyenda lcx-leg" id="lc-evo-leyenda" style="margin-top:8px"></div>
+        <svg id="lc-svg" viewBox="0 0 680 300" style="width:100%;height:auto;display:block"></svg>
+        <p class="lcx-nota">Cortes repetidos, no panel: lo que se ve es el cambio de composición entre encuestas («marea, no golpe»), nunca el movimiento de las mismas personas. Por eso se dice «los Transformadores crecieron X puntos», y no «el X % pasó de un tipo a otro».</p>
+      </div>
+      <div class="card lcx" style="margin-top:12px"><div class="lcx-cab"><span class="lcx-tit">Trayectoria de los medallones</span><span class="lcx-sub">centro de cada mentalidad en el plano, toma a toma</span></div>
+        <div class="lcx-mini" id="lc-trail-plane"></div>
+        <p class="lcx-nota">Cada línea une el centro de gravedad de una mentalidad a lo largo de las tomas; el punto grande es la última. Un centro que se aleja del cruce de ejes es una mentalidad más nítida (más consolidada); uno que se acerca, una mentalidad que se difumina.</p>
+      </div>
+    </div>
+
+    <!-- TEMAS -->
+    <div id="lc-temas" hidden>
+      <div class="card lcx"><div class="lcx-cab"><span class="lcx-tit">Dónde viven los problemas</span><span class="lcx-sub">cada tema, situado en la posición media de quienes lo citan</span></div>
+        <div class="chips" id="lc-temas-anos" style="margin-bottom:10px"></div>
+        <div class="lcx-wrap"><div class="lcx-mini" id="lc-temas-plane"></div><div id="lc-temas-tabla"></div></div>
+        <p class="lcx-nota">Pregunta «principal problema que le afecta a usted y a su familia», macroagrupada. Se publican los temas con al menos 3 % de las menciones del año. Que un tema se desplace en el plano no significa que cambie la agenda: cambia la lectura que la gente hace de ella.</p>
+      </div>
+    </div>
+
+    <!-- SUBSEGMENTOS -->
+    <div id="lc-subseg" hidden>
+      <div class="card lcx"><div class="lcx-cab"><span class="lcx-tit">Subsegmentos</span><span class="lcx-sub">núcleos y franjas dentro de cada mentalidad</span></div>
+        <div class="chips" id="lc-subs-anos" style="margin-bottom:10px"></div>
+        <div id="lc-subs-lista" class="lcx-subs"></div>
+        <p class="lcx-nota">Agrupación exploratoria (versión 0) por posición dentro de cada cuadrante y año; los rasgos son diferencias frente a la media de su cuadrante, en puntos. La estabilidad mide si la agrupación se repite al partir la muestra en dos: por debajo de 0,7 se lee con cautela. Son hipótesis con nombre, no verdades cerradas.</p>
+      </div>
+    </div>
+
+    <!-- POLARIDADES -->
+    <div id="lc-polaridades" hidden>
+      <div class="card lcx"><div class="lcx-cab"><span class="lcx-tit">Polaridades</span><span class="lcx-sub" id="lc-pol-sub"></span></div>
+        <div class="chips" style="margin-bottom:10px"><button class="chip on" data-pv="p">Partitura</button><button class="chip" data-pv="c">Constelación</button><button class="chip" data-pv="k">Catálogo</button><span style="flex:1"></span><button class="chip" id="lc-pol-hit">Hitos</button><button class="chip" id="lc-pol-esc">Escala absoluta</button><button class="chip" id="lc-pol-ord">Ordenar por activación</button></div>
+        <div id="lc-partitura"><div id="lc-bands"></div><div class="lcx-axisx" id="lc-pol-axis"></div></div>
+        <div id="lc-constelacion" hidden></div>
+        <div id="lc-catalogo" hidden></div>
+        <p class="lcx-nota" id="lc-pol-leyenda"></p>
+        <details class="lcx-det"><summary>Lentes de lectura</summary><div id="lc-lentes"></div></details>
+      </div>
+    </div>
+
+    <!-- PÚBLICOS -->
     <div id="lc-publicos" hidden>
       <div class="chips" id="lc-cands" style="margin-bottom:12px"></div>
-      <div class="card"><span class="lab" id="lc-pub-lab">Públicos por mentalidad</span><p class="small mut" style="margin:6px 0 2px">Cada público del candidato (los cuatro de la segmentación) descompuesto por mentalidad, en electores. Sirve para saber a qué mentalidad se le habla en cada público.</p><div id="lc-pub-lista"></div></div>
+      <div class="card"><span class="lab" id="lc-pub-lab">Públicos por mentalidad</span><p class="small mut" style="margin:6px 0 2px">Cada público del candidato (los cuatro de la segmentación) descompuesto por mentalidad. Sirve para saber a qué mentalidad se le habla en cada público.</p><div id="lc-pub-lista"></div></div>
     </div>
-    <div id="lc-evolucion" hidden>
-      <div class="card"><span class="lab">Evolución por ola</span><p class="small mut" style="margin:6px 0 8px" id="lc-evo-nota"></p><div class="rel"><svg id="lc-svg" viewBox="0 0 680 280" style="width:100%;height:auto;display:block"></svg></div><div class="lc-leyenda" id="lc-evo-leyenda" style="margin-top:8px"></div></div>
-    </div>
+
+    <!-- MÉTODO -->
     <div id="lc-metodo" hidden>
-      <div class="card"><span class="lab">Cómo se estimó</span><p class="small mut" id="lc-met-txt" style="margin:6px 0 8px"></p><div id="lc-preguntas"></div><div class="acciones" style="margin-top:12px"><button class="btn sec chico" data-ir="fuentes">Ver las fuentes de datos</button></div></div>
+      <div class="card"><span class="lab">Cómo se estimó</span><p class="small mut" id="lc-met-txt" style="margin:6px 0 8px"></p><div id="lc-preguntas"></div></div>
+      <div class="card" style="margin-top:12px"><span class="lab">Lo que se puede afirmar y lo que no</span><div id="lc-honestidad" class="small" style="margin-top:8px"></div></div>
+      <div class="card" style="margin-top:12px"><span class="lab">Ficha técnico-analítica</span><div id="lc-ficha-tec" class="small mut" style="margin-top:8px;line-height:1.6"></div><div class="acciones" style="margin-top:12px"><button class="btn sec chico" data-ir="fuentes">Ver las fuentes de datos</button></div></div>
     </div>
   </div>
+  <div id="lcx-tip" class="lcx-tip" hidden></div>
 </section>
 
 <!-- ============ FUENTES DE DATOS ============ -->
@@ -1144,37 +1310,53 @@ let TOK=null,YO=null;
   fuentes('');
 
   /* ---------- LOCUS ---------- */
-  const LC=DATA.locus||null; const LC_T=['T','E','R','P','U']; const LC_PAL={T:'#2F6F73',E:'#8C6D1F',R:'#6B4E9B',P:'#3C7A3A',U:'#9A958E'};
+  const LC=DATA.locus||null; const LC_T=['T','E','R','P','U'];
+  const LC_PAL={T:'#e34948',E:'#1baf7a',R:'#eda100',P:'#2a78d6',U:'#9A958E'};   // paleta oficial de la cartografía LOCUS
+  const LC_NOM={T:'Transformadores',E:'Exploradores',R:'Renovadores',P:'Preservadores',U:'En el umbral'};
   const LC_PUB={duro:'Voto duro',retener:'A retener',conquistar:'A conquistar',movilizar:'A movilizar'};
   const lcCol=k=>((LC&&LC.tipos&&LC.tipos[k]&&LC.tipos[k].color)||LC_PAL[k]);
-  const LC_NOM={T:'Transformadores',E:'Exploradores',R:'Renovadores',P:'Preservadores',U:'En el umbral'}; // doctrina A1: nombres oficiales
   const lcNom=k=>((LC&&LC.tipos&&LC.tipos[k]&&(LC.tipos[k].corto||LC.tipos[k].nombre))||LC_NOM[k]||k);
   const lcUni=()=>(LC&&LC.unidad==='entrevistas')?'entrevistas':'electores';
-  let LC_OLAS=[], lci=0, lcTab='retrato', lcCand=null;
+  const cm=x=>String(x).replace('.',',');
+  const MESN=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const lcLab=p=>p.length===4?p:MESN[+p.slice(5,7)-1]+' '+p.slice(0,4)+(p.length>7?' ('+p.slice(7).toLowerCase()+')':'');
+  let LC_OLAS=[], lci=0, lcTab='mapa', lcCand=null;
+  const MP=LC&&LC.mapa?LC.mapa:null;   // cartografía: tomas, anos, grids, fichas, subs, temas, quad_anual
+  const PL=LC&&LC.polaridades?LC.polaridades:null;
+  document.querySelectorAll('#lcx-biplot .lcx-qlab').forEach(e=>e.style.color=lcCol(e.dataset.q));
+
   function locusInit(){
     const vac=document.getElementById('lc-vacio'), cu=document.getElementById('lc-cuerpo');
     if(!LC||!LC.olas||!Object.keys(LC.olas).length){vac.hidden=false;cu.hidden=true;return;}
     vac.hidden=true;cu.hidden=false; document.getElementById('lc-etq').hidden=false;
-    if(LC.maqueta){document.getElementById('lc-sub').innerHTML='<b>Maqueta con datos simulados</b> para diseñar la pantalla: las cifras no son reales. La versión definitiva la publica directamente la dirección de Devotion2Vote. '+document.getElementById('lc-sub').textContent;}
+    if(LC.maqueta){document.getElementById('lc-sub').innerHTML='<b>Maqueta con datos simulados</b> para diseñar la pantalla: las cifras no son reales. '+document.getElementById('lc-sub').textContent;}
     LC_OLAS=Object.keys(LC.olas).sort(); lci=LC_OLAS.length-1;
     const r=document.getElementById('lc-range'); r.max=LC_OLAS.length-1; r.value=lci;
+    if(!MP){document.querySelector('#lc-tabs [data-lc="mapa"]').hidden=true;document.querySelector('#lc-tabs [data-lc="temas"]').hidden=true;document.querySelector('#lc-tabs [data-lc="subseg"]').hidden=true;lcTab='retrato';}
+    if(!PL) document.querySelector('#lc-tabs [data-lc="polaridades"]').hidden=true;
+    if(MP) mapaInit();
+    if(PL) polInit();
     locus();
+  }
+  function lcTabs(){
+    document.querySelectorAll('#lc-tabs button').forEach(b=>b.classList.toggle('on',b.dataset.lc===lcTab));
+    for(const t of ['mapa','retrato','movimiento','temas','subseg','polaridades','publicos','metodo']) document.getElementById('lc-'+t).hidden=(t!==lcTab);
   }
   function locus(){
     if(!LC||!LC_OLAS.length) return;
+    lcTabs();
     const o=LC_OLAS[lci], L=LC.olas[o]; const tot=Object.values(L.electores||{}).reduce((a,b)=>a+b,0)||1;
     const LC_V=LC_T.filter(k=>k!=='U'||(L.electores&&L.electores.U));
     document.getElementById('lc-ola').textContent=nomOla(o); document.getElementById('lc-range').value=lci;
     document.getElementById('lc-titular').textContent=`${LC.etiqueta||'Estimado'} · ${fmt(tot)} ${lcUni()} tipificadas${L.n_sin_aproximar!=null?' · '+L.n_sin_aproximar+' de '+(L.n||'—')+' entrevistas sin aproximar':''}${L.n_tenues!=null?' · '+L.n_tenues+' tenues (asignación poco firme)':''}${LC.pesos&&LC.pesos!=='p05'?' · sin pesos de la estimación de voto: cada entrevista cuenta una':''}.`;
-    document.querySelectorAll('#lc-tabs button').forEach(b=>b.classList.toggle('on',b.dataset.lc===lcTab));
-    for(const t of ['retrato','publicos','evolucion','metodo']) document.getElementById('lc-'+t).hidden=(t!==lcTab);
     // retrato
     document.getElementById('lc-apilada').innerHTML=LC_V.map(k=>`<i style="width:${100*(L.electores[k]||0)/tot}%;background:${lcCol(k)}" title="${lcNom(k)}"></i>`).join('');
     document.getElementById('lc-leyenda').innerHTML=LC_V.map(k=>`<span><i style="background:${lcCol(k)}"></i>${escT(lcNom(k))} ${pct(L.pct?L.pct[k]:100*(L.electores[k]||0)/tot)}</span>`).join('');
     document.getElementById('lc-resumen').innerHTML=LC_V.map(k=>`<div class="card" style="padding:12px 14px"><div class="lc-tipo"><div class="cab"><i style="background:${lcCol(k)}"></i><b class="small">${escT(lcNom(k))}</b></div><div class="num" style="font-size:22px">${fmt(L.electores[k]||0)}</div><div class="small mut">${lcUni()} · ${pct(L.pct?L.pct[k]:100*(L.electores[k]||0)/tot)}${L.firmeza&&L.firmeza[k]!=null?' · firmeza '+Math.round(100*L.firmeza[k])+'/100':''}</div></div></div>`).join('');
     document.getElementById('lc-tarjetas').innerHTML=LC_T.filter(k=>k!=='U').map(k=>{const t=(LC.tipos||{})[k]||{}; const lect=(L.lecturas&&L.lecturas[k])||t.lectura||'';
-      const pf=(L.perfil||{})[k]; const pft=pf?[pf.pct_mujer!=null?pf.pct_mujer+' % mujeres':null, pf.edad?(pf.edad[0]+' % de 18-30 · '+pf.edad[2]+' % de 51+'):null, pf.region_top?'pesa más en '+pf.region_top.replace(/\s*\d+%$/,''):null].filter(Boolean).join(' · '):'';
+      const pf=(L.perfil||{})[k]; const pft=pf?[pf.pct_mujer!=null?pf.pct_mujer+' % mujeres':null, pf.edad?(pf.edad[0]+' % de 18-30 · '+pf.edad[2]+' % de 51+'):null, pf.region_top?'pesa más en '+pf.region_top.replace(/\s*\d+%$/,''):null, pf.S!=null?'posición S '+cm(pf.S)+' · O '+cm(pf.O):null].filter(Boolean).join(' · '):'';
       return `<div class="card"><div class="lc-tipo"><div class="cab"><i style="background:${lcCol(k)}"></i><b>${escT(t.nombre||LC_NOM[k]||k)}</b><span class="small mut" style="margin-left:auto">${pct(L.pct?L.pct[k]:0)}</span></div><div class="barra-h"><i style="width:${L.pct?L.pct[k]:0}%;background:${lcCol(k)}"></i></div><p class="small" style="margin:6px 0 0">${escT(lect)}</p>${pft?`<p class="small mut" style="margin:6px 0 0">En esta encuesta: ${escT(pft)}.</p>`:''}</div></div>`}).join('');
+    chartAnual();
     // públicos
     const cands=Object.keys(L.publicos||{}); if(!cands.includes(lcCand)) lcCand=cands[0]||null;
     document.getElementById('lc-cands').innerHTML=cands.length?cands.map(c=>`<button class="chip ${c===lcCand?'on':''}" data-lcc="${c}"><i style="background:${C[c]||C.otros}"></i>${escT(CAND[c]||c)}</button>`).join(''):'<span class="small mut">Esta encuesta no tiene públicos por mentalidad: LOCUS se estimó sin la segmentación de Vote-Transfer de esa ola (aparecerán cuando esté aprobada).</span>';
@@ -1182,22 +1364,216 @@ let TOK=null,YO=null;
     document.getElementById('lc-pub-lab').textContent=lcCand?`Públicos de ${CAND[lcCand]||lcCand} por mentalidad`:'Públicos por mentalidad';
     document.getElementById('lc-pub-lista').innerHTML=P?Object.keys(LC_PUB).filter(k=>P[k]).map(k=>{const v=P[k]; const t=Object.values(v).reduce((a,b)=>a+b,0)||1; const top=LC_T.filter(x=>x!=='U').sort((a,b)=>(v[b]||0)-(v[a]||0))[0];
       return `<div class="lc-pub"><div class="fila"><b>${LC_PUB[k]}</b><span class="n">${fmt(t)}</span></div><div class="lc-apilada" style="height:12px">${LC_T.map(x=>`<i style="width:${100*(v[x]||0)/t}%;background:${lcCol(x)}"></i>`).join('')}</div><div class="lc-leyenda" style="margin-top:6px">${LC_T.map(x=>`<span><i style="background:${lcCol(x)}"></i>${escT(lcNom(x))} ${fmt(v[x]||0)} · ${p1(100*(v[x]||0)/t)} %</span>`).join('')}</div><p class="small mut" style="margin:6px 0 0">Domina ${escT(lcNom(top))}: ${p1(100*(v[top]||0)/t)} % de este público.</p></div>`}).join(''):'';
-    // evolución
-    const olas=LC_OLAS; const svg=document.getElementById('lc-svg'); const W=680,H=280,ml=40,mr=16,mt=16,mb=34; const xs=i=>ml+(W-ml-mr)*(olas.length>1?i/(olas.length-1):0.5);
-    const maxv=Math.max(10,...olas.flatMap(x=>LC_T.map(k=>(LC.olas[x].pct||{})[k]||0)))*1.15; const ys=v=>mt+(H-mt-mb)*(1-v/maxv);
-    document.getElementById('lc-evo-nota').textContent=olas.length>1?`${olas.length} encuestas con estimación LOCUS, de ${nomOla(olas[0]).toLowerCase()} a ${nomOla(olas[olas.length-1]).toLowerCase()} · % de electores tipificados.`:'Solo hay una encuesta con estimación LOCUS; la evolución aparecerá cuando haya más.';
-    svg.innerHTML=[0,25,50].filter(v=>v<maxv).map(v=>`<line x1="${ml}" x2="${W-mr}" y1="${ys(v)}" y2="${ys(v)}" stroke="var(--linea)"/><text x="${ml-6}" y="${ys(v)+4}" font-size="11" text-anchor="end" fill="var(--mut)">${v} %</text>`).join('')
-      +LC_T.filter(k=>k!=='U'||olas.some(x=>(LC.olas[x].electores||{}).U)).map(k=>`<polyline fill="none" stroke="${lcCol(k)}" stroke-width="2.5" points="${olas.map((x,i)=>xs(i)+','+ys((LC.olas[x].pct||{})[k]||0)).join(' ')}"/>`+olas.map((x,i)=>`<circle cx="${xs(i)}" cy="${ys((LC.olas[x].pct||{})[k]||0)}" r="3.5" fill="${lcCol(k)}"/>`).join('')).join('')
-      +olas.filter((x,i)=>olas.length<=8||i===0||i===olas.length-1||i%Math.ceil(olas.length/6)===0).map(x=>{const i=olas.indexOf(x);return `<text x="${xs(i)}" y="${H-10}" font-size="11" text-anchor="${olas.length>1&&i===0?'start':olas.length>1&&i===olas.length-1?'end':'middle'}" fill="var(--mut)">${olas.length>12?x:nomOla(x)}</text>`}).join('');
-    document.getElementById('lc-evo-leyenda').innerHTML=LC_T.filter(k=>k!=='U'||olas.some(x=>(LC.olas[x].electores||{}).U)).map(k=>`<span><i style="background:${lcCol(k)}"></i>${escT(lcNom(k))}</span>`).join('');
+    // movimiento
+    movimiento();
     // método
-    document.getElementById('lc-met-txt').textContent=`${LC.metodo||'Método LOCUS'}. En ${nomOla(o).toLowerCase()} se usaron ${(L.preguntas||[]).length} preguntas de la encuesta; cada una lee uno de los dos ejes: S, los principios que organizan un ámbito, y O, los actores que lo encarnan. ${LC.pesos==='p05'?'Los electores se pesan con los mismos pesos que la estimación de voto (paso p05).':'Esta estimación se hizo de forma autónoma, sin los pesos de la estimación de voto: la unidad es la entrevista'+(LC.pesos==='declarada'?' con la ponderación declarada de la encuesta.':'.')}${LC.prior?' Prior del clasificador: '+LC.prior+'.':''}`;
-    document.getElementById('lc-preguntas').innerHTML=(L.preguntas||[]).map(q=>`<div class="fila" style="padding:6px 0;gap:10px"><span class="small">${escT(q.pregunta||q.clave)}</span><span class="small mut" style="white-space:nowrap">eje ${escT(q.eje||'—')} · ${escT(q.dominio||'')}${q.variable?' · '+escT(q.variable):''}</span></div>`).join('')||'<div class="small mut">p12 declarará aquí las preguntas usadas.</div>';
+    document.getElementById('lc-met-txt').textContent=`${LC.metodo||'Método LOCUS'}. En ${nomOla(o).toLowerCase()} se usaron ${(L.preguntas||[]).length} preguntas de la encuesta; cada una lee uno de los dos ejes: S, los principios que organizan un ámbito (¿hace falta otro rumbo?), y O, los actores que lo encarnan (¿hacen falta otras caras?). ${LC.pesos==='p05'?'Los electores se pesan con los mismos pesos que la estimación de voto (paso p05).':'Esta estimación se hizo de forma autónoma, sin los pesos de la estimación de voto: la unidad es la entrevista'+(LC.pesos==='declarada'?' con la ponderación declarada de la encuesta.':'.')}${LC.prior?' Referencia del clasificador: '+LC.prior+'.':''}`;
+    document.getElementById('lc-preguntas').innerHTML=(L.preguntas||[]).map(q=>`<div class="fila" style="padding:6px 0;gap:10px"><span class="small">${escT(q.pregunta||q.clave)}</span><span class="small mut" style="white-space:nowrap">eje ${escT(q.eje||'—')} · ${escT(q.dominio||'')}${q.variable?' · '+escT(q.variable):''}</span></div>`).join('')||'<div class="small mut">Las preguntas usadas se declaran con cada estimación.</div>';
+    document.getElementById('lc-honestidad').innerHTML=[
+      ['Sí','«En junio los Transformadores son el 54 % de las entrevistas clasificadas» — una composición, con su n sin clasificar declarado.'],
+      ['Sí','«Los Transformadores crecieron 37 puntos desde 2020» — una recomposición entre encuestas distintas (estimado).'],
+      ['Sí','«Los Transformadores son más jóvenes y pesan más en la Metropolitana» — un perfil de quienes hoy están en ese cuadrante.'],
+      ['No','«El 30 % de los Preservadores se pasó a Transformadores» — eso exigiría seguir a las mismas personas (panel), y no lo hay.'],
+      ['No','«Fulano es Transformador» — el tipo describe la relación de una persona con el sistema en un momento, no a la persona; nunca se usa sobre individuos.'],
+      ['No','«Los Transformadores votarán por X» — la mentalidad no es una predicción de conducta; el cruce con el voto se hace aparte, con Vote-Transfer.'],
+      ['Aviso','Ejes S y O: hipótesis doctrinal aplicada con una receta portable sobre las preguntas de estas encuestas (clase inferencia, etiqueta ESTIMADO) hasta que exista la batería propia.']
+    ].map(([t,x])=>`<div class="fila" style="padding:6px 0;gap:10px;align-items:flex-start"><b style="flex:0 0 44px;color:${t==='Sí'?'var(--ok)':t==='No'?'var(--acc2)':'var(--mut)'}">${t}</b><span>${x}</span></div>`).join('');
+    document.getElementById('lc-ficha-tec').innerHTML=LC.ficha_tecnica?LC.ficha_tecnica.split('\n').map(x=>'<p style="margin:0 0 8px">'+escT(x)+'</p>').join(''):'<p>La ficha técnica se publica con cada estimación.</p>';
   }
+  function chartAnual(){
+    const svg=document.getElementById('lc-anual'); const leg=document.getElementById('lc-anual-leg');
+    const QA=MP&&MP.quad_anual?MP.quad_anual:(LC.quad_anual||null); if(!QA){svg.innerHTML='';leg.innerHTML='';return;}
+    const anos=Object.keys(QA).sort(); const KS=['T','E','R','P'];
+    const val=(a,k)=>{const v=QA[a]; return Array.isArray(v)?v[KS.indexOf(k)]:(v[k]||0)};
+    const W=680,H=260,ml=40,mr=16,mt=16,mb=30; const xs=i=>ml+(W-ml-mr)*(anos.length>1?i/(anos.length-1):0.5); const maxv=70; const ys=v=>mt+(H-mt-mb)*(1-v/maxv);
+    svg.innerHTML=[0,25,50].map(v=>`<line x1="${ml}" x2="${W-mr}" y1="${ys(v)}" y2="${ys(v)}" stroke="rgba(120,160,230,.14)"/><text x="${ml-6}" y="${ys(v)+4}" font-size="11" text-anchor="end" fill="#8fa0c4">${v} %</text>`).join('')
+      +KS.map(k=>{const pts=anos.map((a,i)=>xs(i)+','+ys(val(a,k))); return `<path d="M${xs(0)},${ys(0)} L${pts.join(' L')} L${xs(anos.length-1)},${ys(0)}Z" fill="${lcCol(k)}" opacity=".13"/><polyline fill="none" stroke="${lcCol(k)}" stroke-width="2.5" points="${pts.join(' ')}"/>`+anos.map((a,i)=>`<circle cx="${xs(i)}" cy="${ys(val(a,k))}" r="3.5" fill="${lcCol(k)}"><title>${lcNom(k)} ${a}: ${cm(val(a,k))} %</title></circle>`).join('')}).join('')
+      +anos.map((a,i)=>`<text x="${xs(i)}" y="${H-8}" font-size="11" text-anchor="middle" fill="#8fa0c4">${a}</text>`).join('');
+    leg.innerHTML=KS.map(k=>`<span><i style="background:${lcCol(k)}"></i>${lcNom(k)}</span>`).join('');
+  }
+  function movimiento(){
+    const olas=LC_OLAS; const KS=LC_T.filter(k=>k!=='U'||olas.some(x=>(LC.olas[x].electores||{}).U));
+    const first=LC.olas[olas[0]], last=LC.olas[olas[olas.length-1]];
+    document.getElementById('lc-mov-sub').textContent=`${olas.length} encuestas · de ${nomOla(olas[0]).toLowerCase()} a ${nomOla(olas[olas.length-1]).toLowerCase()} · % de ${lcUni()} tipificadas`;
+    document.getElementById('lc-mov-kpis').innerHTML=KS.map(k=>{const d=((last.pct||{})[k]||0)-((first.pct||{})[k]||0); return `<div class="lcx-kpi"><div class="l"><i style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${lcCol(k)};margin-right:5px"></i>${lcNom(k)}</div><div class="v">${d>0?'+':''}${cm(d.toFixed(1))} pp</div><div class="l">${cm((first.pct||{})[k]||0)} % → ${cm((last.pct||{})[k]||0)} % · estimado</div></div>`}).join('');
+    const svg=document.getElementById('lc-svg'); const W=680,H=300,ml=40,mr=16,mt=16,mb=34; const xs=i=>ml+(W-ml-mr)*(olas.length>1?i/(olas.length-1):0.5);
+    const maxv=Math.max(10,...olas.flatMap(x=>KS.map(k=>(LC.olas[x].pct||{})[k]||0)))*1.12; const ys=v=>mt+(H-mt-mb)*(1-v/maxv);
+    svg.innerHTML=[0,25,50].filter(v=>v<maxv).map(v=>`<line x1="${ml}" x2="${W-mr}" y1="${ys(v)}" y2="${ys(v)}" stroke="rgba(120,160,230,.14)"/><text x="${ml-6}" y="${ys(v)+4}" font-size="11" text-anchor="end" fill="#8fa0c4">${v} %</text>`).join('')
+      +KS.map(k=>`<polyline fill="none" stroke="${lcCol(k)}" stroke-width="2.2" points="${olas.map((x,i)=>xs(i)+','+ys((LC.olas[x].pct||{})[k]||0)).join(' ')}"/>`+olas.map((x,i)=>`<circle cx="${xs(i)}" cy="${ys((LC.olas[x].pct||{})[k]||0)}" r="2.8" fill="${lcCol(k)}"><title>${lcNom(k)} · ${nomOla(x)}: ${cm((LC.olas[x].pct||{})[k]||0)} %</title></circle>`).join('')).join('')
+      +olas.filter((x,i)=>{const st=Math.ceil(olas.length/6);return olas.length<=8||i===0||i===olas.length-1||(i%st===0&&i<olas.length-st/2)}).map(x=>{const i=olas.indexOf(x);return `<text x="${xs(i)}" y="${H-10}" font-size="11" text-anchor="${olas.length>1&&i===0?'start':olas.length>1&&i===olas.length-1?'end':'middle'}" fill="#8fa0c4">${olas.length>12?x:nomOla(x)}</text>`}).join('');
+    document.getElementById('lc-evo-leyenda').innerHTML=KS.map(k=>`<span><i style="background:${lcCol(k)}"></i>${lcNom(k)}</span>`).join('');
+    // trayectoria de centroides
+    const tp=document.getElementById('lc-trail-plane');
+    if(MP&&MP.fichas){
+      const toms=MP.tomas; const px=v=>4+92*v, py=v=>100-(4+92*v);
+      let s=miniAxes();
+      'TERP'.split('').forEach(q=>{const pts=toms.map(t=>(MP.fichas[t]||{})[q]).filter(f=>f&&f.S!=null); if(!pts.length) return;
+        s+=`<polyline fill="none" stroke="${lcCol(q)}" stroke-width=".6" stroke-opacity=".7" points="${pts.map(f=>px(f.O)+','+py(f.S)).join(' ')}" vector-effect="non-scaling-stroke"/>`;
+        s+=pts.map((f,i)=>`<circle cx="${px(f.O)}" cy="${py(f.S)}" r="${i===pts.length-1?2.2:0.7}" fill="${lcCol(q)}" opacity="${i===pts.length-1?1:.55}"><title>${lcNom(q)} · ${lcLab(toms[toms.indexOf(toms.filter(t=>(MP.fichas[t]||{})[q]&&(MP.fichas[t][q].S!=null))[i])])}: S ${cm(f.S)} · O ${cm(f.O)} · ${cm(f.share)} %</title></circle>`).join('');
+        const l=pts[pts.length-1]; s+=`<text x="${px(l.O)+3}" y="${py(l.S)-3}" font-size="3.2" fill="${lcCol(q)}" font-weight="700">${q}</text>`;
+      });
+      tp.innerHTML=`<svg viewBox="0 0 100 100">${s}</svg>`;
+    } else tp.innerHTML='<div class="lcx-nota" style="padding:20px">La trayectoria requiere las posiciones S y O de cada mentalidad por toma.</div>';
+  }
+  function miniAxes(){return `<line x1="50" y1="4" x2="50" y2="96" stroke="rgba(143,160,196,.5)" stroke-width=".4"/><line x1="4" y1="50" x2="96" y2="50" stroke="rgba(143,160,196,.5)" stroke-width=".4"/><text x="50" y="3" font-size="2.6" text-anchor="middle" fill="#8fa0c4" letter-spacing=".3">NUEVO RUMBO</text><text x="50" y="99" font-size="2.6" text-anchor="middle" fill="#8fa0c4" letter-spacing=".3">MISMO RUMBO</text><text x="97" y="50" font-size="2.6" text-anchor="middle" fill="#8fa0c4" transform="rotate(90 97 50)">NUEVOS ACTORES</text><text x="3" y="50" font-size="2.6" text-anchor="middle" fill="#8fa0c4" transform="rotate(-90 3 50)">MISMOS ACTORES</text>`;}
+  // ---- temas
+  let lcTemaAno=null;
+  function temas(){
+    if(!MP||!MP.temas) return; const anos=Object.keys(MP.temas).sort(); if(!anos.includes(lcTemaAno)) lcTemaAno=anos[anos.length-1];
+    document.getElementById('lc-temas-anos').innerHTML=anos.map(a=>`<button class="chip ${a===lcTemaAno?'on':''}" data-lct="${a}">${a}</button>`).join('');
+    const T=MP.temas[lcTemaAno]||{}; const ent=Object.entries(T).sort((a,b)=>b[1].share-a[1].share);
+    const px=v=>4+92*v, py=v=>100-(4+92*v);
+    let s=miniAxes();
+    // sombras de todos los años para ver el viaje
+    ent.forEach(([t,v])=>{const prev=anos.filter(a=>a<lcTemaAno&&MP.temas[a][t]); if(prev.length) s+=`<polyline fill="none" stroke="#eef2fb" stroke-opacity=".25" stroke-width=".4" stroke-dasharray="1,1" points="${prev.map(a=>px(MP.temas[a][t].O)+','+py(MP.temas[a][t].S)).join(' ')} ${px(v.O)},${py(v.S)}" vector-effect="non-scaling-stroke"/>`;});
+    ent.forEach(([t,v],i)=>{const r=1.2+Math.sqrt(v.share)*0.45; s+=`<circle cx="${px(v.O)}" cy="${py(v.S)}" r="${r}" fill="#eda100" fill-opacity=".85" stroke="#fff" stroke-width=".3"><title>${t} · ${cm(v.share)} % · S ${cm(v.S)} · O ${cm(v.O)}</title></circle><text x="${px(v.O)+r+0.8}" y="${py(v.S)+1}" font-size="${v.share>25?3:2.5}" fill="#eef2fb" font-weight="600">${escT(t)} ${cm(v.share)}%</text>`;});
+    document.getElementById('lc-temas-plane').innerHTML=`<svg viewBox="0 0 100 100">${s}</svg>`;
+    document.getElementById('lc-temas-tabla').innerHTML=`<table><tr><th>Tema</th><th>Menciones</th><th>S</th><th>O</th><th>Cuadrante</th></tr>${ent.map(([t,v])=>`<tr><td>${escT(t)}</td><td>${cm(v.share)} %</td><td>${cm(v.S)}</td><td>${cm(v.O)}</td><td style="color:${lcCol(quadSO(v.S,v.O))}">${lcNom(quadSO(v.S,v.O))}</td></tr>`).join('')}</table>`;
+  }
+  const quadSO=(S,O)=>(S>=0.5&&O>=0.5)?'T':(S<0.5&&O>=0.5)?'E':(S>=0.5&&O<0.5)?'R':'P';
+  // ---- subsegmentos
+  let lcSubAno=null;
+  function subsegs(){
+    if(!MP||!MP.subs) return; const anos=[...new Set(Object.keys(MP.subs).map(k=>k.split('|')[0]))].sort(); if(!anos.includes(lcSubAno)) lcSubAno=anos[anos.length-1];
+    document.getElementById('lc-subs-anos').innerHTML=anos.map(a=>`<button class="chip ${a===lcSubAno?'on':''}" data-lcs="${a}">${a}</button>`).join('');
+    document.getElementById('lc-subs-lista').innerHTML='TERP'.split('').map(q=>{const g=MP.subs[lcSubAno+'|'+q]; if(!g) return '';
+      return g.subsegmentos.map((s,i)=>`<div class="lcx-sub-card"><h4><i style="background:${lcCol(q)}"></i>${lcNom(q)} · ${q}${i+1} <span style="margin-left:auto;font-weight:400;color:#8fa0c4">${cm(s.share)} % del cuadrante</span></h4>${s.perfil?`<p class="p">${escT(s.perfil)}</p>`:''}<div class="lcx-frow"><span>Posición S / O</span><b>${cm(s.S)} / ${cm(s.O)}</b></div>${s.edad!=null?`<div class="lcx-frow"><span>Edad media aprox.</span><b>${s.edad}</b></div>`:''}${(s.rasgos||[]).map(r=>`<div class="lcx-frow"><span>${escT(r[0])}</span><b>${r[1]>0?'+':''}${cm(r[1])}</b></div>`).join('')}<div class="lcx-nota" style="margin-top:6px">n ${fmt(g.n_muestra)} · estabilidad ${cm(g.estabilidad)}${g.estabilidad<0.7?' · <span class="lcx-warn">agrupación contextual: leer con cautela</span>':''}</div></div>`).join('')}).join('')||'<div class="lcx-nota">Sin subsegmentos para ese año.</div>';
+  }
+  // ---- MAPA (cartografía oficial LOCUS, motor del Mapa de segmentos v2)
+  let MODE='ano', PERS=[], curPer=0, curQ=null, curSub=null, playT=null, Z=1, CX=0.5, CY=0.5;
+  const pcx=v=>4+92*((v-(CX-0.5/Z))*Z), pcy=v=>4+92*((v-(CY-0.5/Z))*Z), fuera=(x,y)=>x<-10||x>110||y<-10||y>110;
+  const quadOf=(bx,by)=>{const o=bx>=6,s=by>=6;return s&&o?'T':(!s&&o)?'E':(s&&!o)?'R':'P';};
+  const anoDe=p=>p.slice(0,4);
+  function mapaInit(){
+    document.getElementById('lcx-sub').textContent=`${MP.tomas.length} tomas y ${MP.anos.length} años · ${Object.values(MP.grids[MP.anos[MP.anos.length-1]]||[]).reduce((a,c)=>a+c[2],0).toLocaleString('es-ES')} posiciones en el último año`;
+    if(LC.etiqueta) document.getElementById('lcx-badge').textContent=LC.etiqueta+(LC.contraste?' · '+LC.contraste:'');
+    document.getElementById('lcx-lectura').innerHTML=(LC.lectura||[]).map(p=>'<p>'+p.replace(/^\*\*(.+?)\*\*/,'<b>$1</b>')+'</p>').join('');
+    const slider=document.getElementById('lcx-per');
+    document.getElementById('lcx-gAno').onclick=()=>setMode('ano'); document.getElementById('lcx-gToma').onclick=()=>setMode('toma');
+    slider.oninput=e=>{curPer=+e.target.value;draw();};
+    document.getElementById('lcx-stepB').onclick=()=>{if(curPer>0){curPer--;slider.value=curPer;draw();}};
+    document.getElementById('lcx-stepF').onclick=()=>{if(curPer<PERS.length-1){curPer++;slider.value=curPer;draw();}};
+    const playB=document.getElementById('lcx-play');
+    playB.onclick=()=>{ if(playT){clearInterval(playT);playT=null;playB.textContent='▶ reproducir';return;}
+      if(curPer>=PERS.length-1){curPer=0;slider.value=0;draw();} playB.textContent='⏸ pausa';
+      playT=setInterval(()=>{ if(curPer>=PERS.length-1){clearInterval(playT);playT=null;playB.textContent='▶ reproducir';return;} curPer++;slider.value=curPer;draw(); },MODE==='ano'?1300:650); };
+    ['lcx-lySub','lcx-lyVar','lcx-lyBub','lcx-lyTrail'].forEach(id=>document.getElementById(id).addEventListener('change',draw));
+    document.getElementById('lcx-zin').onclick=()=>zoomAt(0.5,0.5,1.4); document.getElementById('lcx-zout').onclick=()=>zoomAt(0.5,0.5,1/1.4); document.getElementById('lcx-zreset').onclick=zoomReset;
+    const box=document.getElementById('lcx-biplot');
+    box.addEventListener('wheel',e=>{if(!e.ctrlKey&&Z===1) return; e.preventDefault();const r=box.getBoundingClientRect();zoomAt((e.clientX-r.left)/r.width,1-(e.clientY-r.top)/r.height,e.deltaY<0?1.25:1/1.25);},{passive:false});
+    let drag=null;
+    box.addEventListener('pointerdown',e=>{if(Z>1&&!e.target.closest('.lcx-bub,.lcx-sat')){const r=box.getBoundingClientRect();drag=[e.clientX,e.clientY,CX,CY,r.width,r.height];box.setPointerCapture(e.pointerId);}});
+    box.addEventListener('pointermove',e=>{if(drag){CX=drag[2]-(e.clientX-drag[0])/(drag[4]*0.0092*Z*100);CY=drag[3]+(e.clientY-drag[1])/(drag[5]*0.0092*Z*100);clampVP();draw();}});
+    box.addEventListener('pointerup',()=>drag=null); box.addEventListener('dblclick',zoomReset);
+    setMode('ano');
+  }
+  function clampVP(){const hz=0.5/Z; CX=Math.min(1-hz+0.05,Math.max(hz-0.05,CX)); CY=Math.min(1-hz+0.05,Math.max(hz-0.05,CY));}
+  function zoomAt(fx,fy,f){const nz=Math.min(14,Math.max(1,Z*f)); const x0=CX-0.5/Z,y0=CY-0.5/Z; const dx=x0+(fx*100-4)/(92*Z),dy=y0+(fy*100-4)/(92*Z); Z=nz; CX=dx-(fx*100-4)/(92*nz)+0.5/nz; CY=dy-(fy*100-4)/(92*nz)+0.5/nz; clampVP(); draw();}
+  function zoomReset(){Z=1;CX=0.5;CY=0.5;draw();}
+  function setMode(m){MODE=m;PERS=m==='ano'?MP.anos:MP.tomas; document.getElementById('lcx-gAno').classList.toggle('on',m==='ano'); document.getElementById('lcx-gToma').classList.toggle('on',m==='toma'); curPer=PERS.length-1; const s=document.getElementById('lcx-per'); s.max=PERS.length-1; s.value=curPer; draw();}
+  function draw(){
+    const per=PERS[curPer]; document.getElementById('lcx-perlab').textContent=lcLab(per);
+    const cells=MP.grids[per]; const bp=document.getElementById('lcx-plane'); bp.innerHTML=''; if(!cells) return;
+    const max=Math.max(...cells.map(c=>c[2])), tot=cells.reduce((a,c)=>a+c[2],0);
+    document.getElementById('lcx-pern').textContent='n='+tot.toLocaleString('es-ES')+' posiciones';
+    const agg={T:[0,0,0],E:[0,0,0],R:[0,0,0],P:[0,0,0]};
+    cells.forEach(([bx,by,w])=>{const q=quadOf(bx,by); const cx=pcx(bx/12),cy=pcy(by/12); agg[q][0]+=w*(bx+0.5)/12;agg[q][1]+=w*(by+0.5)/12;agg[q][2]+=w; if(fuera(cx,cy)) return;
+      const d=document.createElement('div'); d.className='lcx-cell'; d.style.left=cx+'%'; d.style.bottom=cy+'%'; const cw=(92*Z/12); d.style.width='calc('+cw+'% - 2px)'; d.style.height='calc('+cw+'% - 2px)'; d.style.background=lcCol(q); d.style.opacity=(0.05+0.5*Math.sqrt(w/max)).toFixed(2); bp.appendChild(d);});
+    if(document.getElementById('lcx-lyVar').checked){const tt2=MP.temas[anoDe(per)]||{}; const puestos=[];
+      Object.entries(tt2).sort((a,b)=>b[1].share-a[1].share).forEach(([t,v])=>{const tx2=pcx(v.O); let ty2=pcy(v.S); if(fuera(tx2,ty2)) return; while(puestos.some(([px,py])=>Math.abs(px-tx2)<16&&Math.abs(py-ty2)<4.2)) ty2-=4.4; puestos.push([tx2,ty2]);
+        const d=document.createElement('div'); d.className='lcx-tema'; d.style.left=tx2+'%'; d.style.bottom=ty2+'%'; d.style.fontSize=(v.share>25?11.5:10)+'px'; d.textContent=t+' '+cm(v.share)+'%'; d.title='S='+cm(v.S)+' · O='+cm(v.O)+' · share de menciones de '+anoDe(per); bp.appendChild(d);});}
+    if(document.getElementById('lcx-lySub').checked){'TERP'.split('').forEach(q=>{const g=MP.subs[anoDe(per)+'|'+q]; if(!g) return;
+      g.subsegmentos.forEach((s,i)=>{const sx2=pcx(s.O),sy2=pcy(s.S); if(fuera(sx2,sy2)) return; const d=document.createElement('div'); d.className='lcx-sat lcx-'+q; const sz=Math.max(18,Math.sqrt(s.share)*4.2); d.style.width=d.style.height=sz+'px'; d.style.left=sx2+'%'; d.style.bottom=sy2+'%'; d.style.background=lcCol(q); d.textContent=q+(i+1); d.title=(s.perfil||q+(i+1))+' — '+cm(s.share)+'% del cuadrante'; d.onclick=ev=>{ev.stopPropagation();fichaSub(q,i);}; bp.appendChild(d);});});}
+    if(document.getElementById('lcx-lyBub').checked){Object.entries(agg).forEach(([q,[sx,sy,w]])=>{if(!w) return; const pct2=100*w/tot; const bx2=pcx(sx/w),by2=pcy(sy/w); if(fuera(bx2,by2)) return;
+      const b=document.createElement('div'); b.className='lcx-bub lcx-'+q; const sz=Math.max(34,Math.sqrt(pct2)*16*Math.min(Z,2)); b.style.width=b.style.height=sz+'px'; b.style.fontSize=(sz>50?15:11)+'px'; b.style.left=bx2+'%'; b.style.bottom=by2+'%'; b.style.background=lcCol(q); b.textContent=pct2.toFixed(0)+'%'; b.title=lcNom(q)+' '+cm(pct2.toFixed(1))+'%'; b.onclick=()=>ficha(q); bp.appendChild(b);});}
+    const tr=document.getElementById('lcx-trails'); tr.innerHTML='';
+    if(document.getElementById('lcx-lyTrail').checked&&MODE==='toma'){let s=''; 'TERP'.split('').forEach(q=>{const pts=PERS.slice(0,curPer+1).map(t=>(MP.fichas[t]||{})[q]).filter(f=>f&&f.S!=null); if(pts.length<2) return; s+=`<polyline fill="none" stroke="${lcCol(q)}" stroke-width=".5" stroke-opacity=".8" points="${pts.map(f=>pcx(f.O)+','+(100-pcy(f.S))).join(' ')}" vector-effect="non-scaling-stroke"/>`;}); tr.innerHTML=s;}
+    if(curSub) fichaSub(curSub[0],curSub[1]); else if(curQ) ficha(curQ);
+  }
+  function ficha(q){curQ=q;curSub=null; const per=PERS[curPer]; const f=(MP.fichas[per]||{})[q]; if(!f) return; const ed=f.edad||[0,0,0];
+    const t=document.getElementById('lcx-f_t'); t.textContent=lcNom(q); t.style.color=lcCol(q);
+    document.getElementById('lcx-f_s').textContent=lcLab(per)+' · '+cm(f.share)+' % · n='+f.n.toLocaleString('es-ES');
+    document.getElementById('lcx-f_body').innerHTML=`<div class="lcx-frow"><span>Posición media S / O</span><b>${cm(f.S)} / ${cm(f.O)}</b></div><div class="lcx-frow"><span>Mujeres</span><b>${f.pct_mujer!=null?f.pct_mujer+' %':'—'}</b></div><div class="lcx-frow"><span>Región con más peso</span><b>${f.region_top||'—'}</b></div><div style="font-size:11.5px;color:#8fa0c4;margin-top:10px">Estructura de edad</div>${[['18–30',ed[0]],['31–50',ed[1]],['51+',ed[2]]].map(([l,v])=>`<div class="lcx-frow"><span>${l}</span><b>${v} %</b></div><div class="lcx-mini-bar"><div style="width:${v}%;background:${lcCol(q)}"></div></div>`).join('')}<p class="lcx-nota">${escT(((LC.tipos||{})[q]||{}).lectura||'')}</p>`;}
+  function fichaSub(q,i){const per=PERS[curPer]; const g=MP.subs[anoDe(per)+'|'+q]; if(!g||!g.subsegmentos[i]){ficha(q);return;} curSub=[q,i];curQ=null; const s=g.subsegmentos[i];
+    const t=document.getElementById('lcx-f_t'); t.textContent=lcNom(q)+' · '+q+(i+1); t.style.color=lcCol(q);
+    document.getElementById('lcx-f_s').textContent='Subsegmentos de '+anoDe(per)+' · '+cm(s.share)+' % del cuadrante · estabilidad '+cm(g.estabilidad);
+    document.getElementById('lcx-f_body').innerHTML=(s.perfil?`<div style="font-size:13px;color:#d5def2;margin-bottom:8px">${escT(s.perfil)}</div>`:'')+`<div class="lcx-frow"><span>Posición S / O</span><b>${cm(s.S)} / ${cm(s.O)}</b></div>`+(s.edad!=null?`<div class="lcx-frow"><span>Edad media aprox.</span><b>${s.edad}</b></div>`:'')+`<div style="font-size:11.5px;color:#8fa0c4;margin-top:10px">Rasgos distintivos frente a su cuadrante (puntos)</div>`+(s.rasgos||[]).map(r=>`<div class="lcx-frow"><span>${escT(r[0])}</span><b>${r[1]>0?'+':''}${cm(r[1])}</b></div>`).join('')+(g.estabilidad<0.7?'<div class="lcx-warn" style="margin-top:8px">Agrupación contextual (estabilidad &lt; 0,7): interpretar con cautela.</div>':'');}
+  // ---- POLARIDADES (motor de la sala Polaridades)
+  let polView='p', polHit=false, polAbs=false, polOrd=false, HUES=null;
+  const hslHex=(h,s,l)=>{s/=100;l/=100;const kk=n=>(n+h/30)%12,a=s*Math.min(l,1-l),f=n=>l-a*Math.max(-1,Math.min(kk(n)-3,9-kk(n),1));const c=x=>Math.round(255*x).toString(16).padStart(2,'0');return'#'+c(f(0))+c(f(8))+c(f(4));};
+  function serieColor(k){ if(!HUES){HUES={};(PL.catalogo||[]).forEach(p=>{if(p.serie)HUES[p.serie]=(p.n*137.508)%360;});} const hue=HUES[k]!=null?HUES[k]:((PL.series[k].orden*137.508)%360); return hslHex(hue,78,62);}
+  const polMonths=()=>{const s=new Set();Object.values(PL.series).forEach(o=>Object.keys(o.data).forEach(m=>s.add(m)));return[...s].sort();};
+  const lastZ=o=>{const ks=Object.keys(o.data).sort();const vs=ks.map(k=>o.data[k]);const mu=vs.reduce((a,b)=>a+b,0)/vs.length;const sd=Math.sqrt(vs.reduce((a,b)=>a+(b-mu)**2,0)/vs.length)||1;return (vs[vs.length-1]-mu)/sd;};
+  const polOrder=()=>{const ks=Object.keys(PL.series); return polOrd?ks.sort((a,b)=>lastZ(PL.series[b])-lastZ(PL.series[a])):ks.sort((a,b)=>PL.series[a].orden-PL.series[b].orden);};
+  function polInit(){
+    document.getElementById('lc-pol-sub').textContent=`${Object.keys(PL.series).length} polaridades en monitoreo de un catálogo de ${(PL.catalogo||[]).length} · ${PL.ventana||''} · actualizado ${PL.actualizado||''}`;
+    document.querySelectorAll('#lc-polaridades [data-pv]').forEach(b=>b.onclick=()=>{polView=b.dataset.pv;document.querySelectorAll('#lc-polaridades [data-pv]').forEach(x=>x.classList.toggle('on',x===b));polRender();});
+    document.getElementById('lc-pol-hit').onclick=e=>{polHit=!polHit;e.currentTarget.classList.toggle('on',polHit);polRender();};
+    document.getElementById('lc-pol-esc').onclick=e=>{polAbs=!polAbs;e.currentTarget.classList.toggle('on',polAbs);polRender();};
+    document.getElementById('lc-pol-ord').onclick=e=>{polOrd=!polOrd;e.currentTarget.classList.toggle('on',polOrd);polRender();};
+    document.getElementById('lc-lentes').innerHTML=(PL.lentes||[]).map(l=>`<div class="lcx-lente"><b>${escT(l.nombre_es||l.nombre||'')}</b> <span class="au">${escT(l.autor||'')}</span><br>${escT(l.def_es||l.def||'')}</div>`).join('');
+    window.addEventListener('resize',()=>{if(lcTab==='polaridades')polRender();});
+  }
+  function polRender(){
+    document.getElementById('lc-partitura').hidden=polView!=='p'; document.getElementById('lc-constelacion').hidden=polView!=='c'; document.getElementById('lc-catalogo').hidden=polView!=='k';
+    document.getElementById('lc-pol-leyenda').textContent=polView==='k'?'':polView==='p'?'Relleno en el color de cada polaridad = activación mes a mes · punto ámbar = momento anotado (pase el cursor) · línea vertical ámbar = hito · línea gris = cambio de instrumento. Escala propia de cada banda salvo escala absoluta. Los huecos son meses sin medición: no se rellenan.':'Tamaño del nodo = activación actual respecto a su propia historia (z); halo verde = muy por encima de su nivel histórico. Las cadenas de precedencia aparecerán cuando estén confirmadas (hoy no hay ninguna de nivel A).';
+    try{ polView==='p'?renderPart():(polView==='c'?renderConst():renderCat()); }catch(err){ console.error('LOCUS polaridades:',err); }
+  }
+  function renderPart(){
+    const MS=polMonths(), cont=document.getElementById('lc-bands'); cont.innerHTML=''; const W=1000,H=56;
+    const globalMax=Math.max(...Object.values(PL.series).map(o=>Math.max(...Object.values(o.data).filter(Number.isFinite))));
+    polOrder().forEach(k=>{const o=PL.series[k]; let mx=polAbs?globalMax:Math.max(...Object.values(o.data).filter(Number.isFinite)); if(!Number.isFinite(mx)||mx<=0) mx=1; const col=serieColor(k), gid='lcpg_'+k;
+      const row=document.createElement('div'); row.className='lcx-band'; row.innerHTML=`<div class="lcx-blab"><div class="p1">${escT(o.label_es||o.label||k)}</div><div class="p2">${escT(o.gob_es||o.gob||'')}</div></div>`;
+      const viz=document.createElement('div'); viz.className='lcx-bviz'; viz.style.height=H+'px';
+      let segs=[],cur=[]; MS.forEach((m,i)=>{const v=o.data[m]; if(v==null){if(cur.length)segs.push(cur);cur=[];return;} cur.push([(i/(MS.length-1))*W,H-4-(v/mx)*(H-12),m,v]);}); if(cur.length) segs.push(cur);
+      const areas=segs.map(sg=>{let p=`M${sg[0][0].toFixed(1)},${H-2}`;sg.forEach(pt=>p+=`L${pt[0].toFixed(1)},${pt[1].toFixed(1)}`);return p+`L${sg[sg.length-1][0].toFixed(1)},${H-2}Z`;}).join(' ');
+      const lines=segs.map(sg=>sg.map((pt,i2)=>(i2?'L':'M')+pt[0].toFixed(1)+','+pt[1].toFixed(1)).join('')).join(' ');
+      let puentes=''; for(let si=0;si<segs.length-1;si++){const a=segs[si][segs[si].length-1],b=segs[si+1][0]; if(MS.indexOf(b[2])-MS.indexOf(a[2])<=2) puentes+=`<line x1="${a[0].toFixed(1)}" y1="${a[1].toFixed(1)}" x2="${b[0].toFixed(1)}" y2="${b[1].toFixed(1)}" stroke="${col}" stroke-width="1" stroke-dasharray="3,3" opacity=".55" vector-effect="non-scaling-stroke"/>`;}
+      let hit='',hitHtml='';
+      if(polHit)(PL.hitos||[]).filter(h=>h.serie===k).forEach(h=>{const i=MS.indexOf(h.mes);if(i<0)return;const x=(i/(MS.length-1))*W; hit+=`<line x1="${x}" y1="4" x2="${x}" y2="${H-4}" stroke="#eda100" stroke-width="1" stroke-dasharray="2,3" vector-effect="non-scaling-stroke"/>`; hitHtml+=`<span style="position:absolute;left:${(x/W*100).toFixed(2)}%;top:2px;margin-left:4px;font-size:8.5px;color:#eda100;white-space:nowrap">${escT(h.es||h.texto||'')}</span>`;});
+      if(PL.ruptura&&PL.ruptura.serie===k){const i=MS.indexOf(PL.ruptura.mes); if(i>=0){const x=(i/(MS.length-1))*W; hit+=`<line x1="${x}" y1="4" x2="${x}" y2="${H-4}" stroke="#8fa0c4" stroke-width="1" stroke-dasharray="1,3" vector-effect="non-scaling-stroke"/>`; hitHtml+=`<span style="position:absolute;left:${(x/W*100).toFixed(2)}%;bottom:2px;margin-left:4px;font-size:8px;color:#8fa0c4;white-space:nowrap">${escT(PL.ruptura.es||'')}</span>`;}}
+      const ksS=Object.keys(o.data).sort(); if(ksS.length&&ksS[0]>MS[0]){const xi=(MS.indexOf(ksS[0])/(MS.length-1))*W; hitHtml+=`<span style="position:absolute;left:${Math.max(1,(xi/W*100)-16).toFixed(2)}%;top:50%;transform:translateY(-50%);font-size:9px;color:#8fa0c4;white-space:nowrap">medición desde ${ksS[0].slice(0,4)} →</span>`;}
+      let dots=''; if(PL.momentos&&PL.momentos[k]) Object.keys(PL.momentos[k]).forEach(mm=>{const ii=MS.indexOf(mm),vv=o.data[mm]; if(ii<0||vv==null) return; const xx=(ii/(MS.length-1))*W,yy=H-4-(vv/mx)*(H-12); dots+=`<circle cx="${xx.toFixed(1)}" cy="${yy.toFixed(1)}" r="6" fill="#eda100" opacity=".3"/><circle cx="${xx.toFixed(1)}" cy="${yy.toFixed(1)}" r="3" fill="#eda100" opacity=".95"/>`;});
+      viz.innerHTML=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="display:block;width:100%;height:${H}px"><defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${col}" stop-opacity=".55"/><stop offset="1" stop-color="${col}" stop-opacity=".05"/></linearGradient></defs><path d="${areas}" fill="url(#${gid})"/><path d="${lines}" fill="none" stroke="${col}" stroke-width="6" opacity=".2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="${lines}" fill="none" stroke="${col}" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>${puentes}${dots}${hit}</svg>${hitHtml}`;
+      const tip=document.getElementById('lcx-tip');
+      viz.onmousemove=e=>{const r=viz.getBoundingClientRect();const i=Math.round((e.clientX-r.left)/r.width*(MS.length-1));const m=MS[i],v=o.data[m]; if(v==null){tip.hidden=true;return;} tip.hidden=false; tip.style.left=Math.min(e.clientX+12,window.innerWidth-310)+'px'; tip.style.top=(e.clientY-10)+'px'; const mom=(PL.momentos&&PL.momentos[k]&&PL.momentos[k][m])||null; tip.innerHTML=`<b>${m}</b> · ${(v*100).toFixed(1).replace('.',',')} % de activación`+(mom?`<div style="margin-top:5px;border-top:1px solid rgba(120,160,230,.25);padding-top:5px;color:#c3cfe8">${escT(mom.es||mom)}</div>`:'');};
+      viz.onmouseleave=()=>{tip.hidden=true;};
+      row.appendChild(viz); cont.appendChild(row);});
+    const ax=document.getElementById('lc-pol-axis'); ax.innerHTML=''; const y0=+MS[0].slice(0,4), y1=+MS[MS.length-1].slice(0,4); for(let y=y0;y<=y1;y++){const s=document.createElement('span');s.textContent=y;ax.appendChild(s);}
+  }
+  function renderCat(){
+    const c=document.getElementById('lc-catalogo'); let h=`<div class="lcx-nota" style="margin:0 0 10px">${escT((PL.modelo||{}).nota_es||'')}</div><div class="lcx-katgrid">`;
+    (PL.catalogo||[]).forEach(p=>{const hue=(p.n*137.508)%360; const nom=p.es||'', i=nom.indexOf(' / '); const a=i>0?nom.slice(0,i):nom,b=i>0?nom.slice(i+3):'';
+      const badge=p.tag==='raiz'?'<span class="lcx-kbadge raiz">RANGO CERO · SUBYACE A TODAS</span>':p.tag==='meta'?'<span class="lcx-kbadge">META-POLARIDAD · EN MONITOREO</span>':p.tag==='fund'?'<span class="lcx-kbadge">NUEVA · 2026</span>':p.serie?'<span class="lcx-kbadge on">EN MONITOREO</span>':'<span class="lcx-kbadge">EN PREPARACIÓN</span>';
+      h+=`<div class="lcx-kat" style="--kc:hsl(${hue} 78% 62%);--kc2:hsl(${(hue+55)%360} 78% 60%)"><div class="num">${String(p.n).padStart(2,'0')}</div><div class="poles"><span>${escT(a)}</span><span class="vs">VS</span><span>${escT(b)}</span></div><div class="kbar"></div><div class="def">${escT(p.def_es||'')}</div>${badge}</div>`;});
+    c.innerHTML=h+'</div>';
+  }
+  function renderConst(){
+    const c=document.getElementById('lc-constelacion'); const W=Math.max(320,c.clientWidth||900),Hc=Math.min(560,Math.max(380,W*0.62)),cx=W/2,cy=Hc/2;
+    const ks=Object.keys(PL.series).sort((a,b)=>PL.series[a].orden-PL.series[b].orden); const P={}; ks.forEach((k,i)=>{const a=(i/ks.length)*2*Math.PI-Math.PI/2; P[k]=[cx+Math.cos(a)*(W*0.34),cy+Math.sin(a)*(Hc*0.36)];});
+    let defs='',nodes='';
+    ks.forEach(k=>{const o=PL.series[k],[x,y]=P[k]; const z=lastZ(o); const r=10+Math.max(0,Math.min(2.6,z+1.1))*11; const hot=z>0.8; const col=serieColor(k);
+      defs+=`<radialGradient id="lcn_${k}"><stop offset="0" stop-color="${col}" stop-opacity="${hot?'.55':'.38'}"/><stop offset=".6" stop-color="${col}" stop-opacity="${hot?'.22':'.12'}"/><stop offset="1" stop-color="${col}" stop-opacity="0"/></radialGradient>`;
+      nodes+=`<g data-k="${k}" style="cursor:pointer"><circle cx="${x}" cy="${y}" r="${(r+14).toFixed(1)}" fill="transparent"/><circle cx="${x}" cy="${y}" r="${(r*(hot?2.4:1.9)).toFixed(1)}" fill="url(#lcn_${k})"/><circle cx="${x}" cy="${y}" r="${r.toFixed(1)}" fill="${col}" fill-opacity=".16" stroke="${hot?'#2fd4a7':col}" stroke-width="1.5"/><circle cx="${x}" cy="${y}" r="${Math.max(3.2,r*0.3).toFixed(1)}" fill="${col}"/><text x="${x}" y="${y+r+14}" text-anchor="middle" font-size="10.5" fill="#eef2fb" font-weight="600" pointer-events="none">${escT(o.label_es||k)}</text><text x="${x}" y="${y+r+26}" text-anchor="middle" font-size="8.5" fill="#8fa0c4" pointer-events="none">${hot?'activada':''}</text></g>`;});
+    c.innerHTML=`<svg viewBox="0 0 ${W} ${Hc}" style="display:block;width:100%"><defs>${defs}</defs><text x="${cx}" y="26" text-anchor="middle" font-size="11" fill="#8fa0c4" letter-spacing="2">ESTADO DEL SISTEMA · ${PL.actualizado||''}</text>${nodes}</svg>`;
+    const tip=document.getElementById('lcx-tip');
+    c.querySelectorAll('g[data-k]').forEach(g=>{g.addEventListener('mousemove',e=>{tip.innerHTML=polFicha(g.dataset.k);tip.hidden=false;tip.style.left=Math.min(e.clientX+14,window.innerWidth-300)+'px';tip.style.top=Math.max(10,e.clientY-30)+'px';}); g.addEventListener('mouseleave',()=>{tip.hidden=true;}); g.addEventListener('click',e=>{tip.innerHTML=polFicha(g.dataset.k);tip.hidden=false;tip.style.left=Math.min(e.clientX+14,window.innerWidth-300)+'px';tip.style.top=Math.max(10,e.clientY-30)+'px';});});
+  }
+  function polFicha(k){const o=PL.series[k]; const ksr=Object.keys(o.data).sort(); const vs=ksr.map(m=>o.data[m]); const last=vs[vs.length-1],lastM=ksr[ksr.length-1]; const mu=vs.reduce((a,b)=>a+b,0)/vs.length; const z=lastZ(o); let iMax=0; vs.forEach((v,i)=>{if(v>vs[iMax])iMax=i;});
+    const rec=vs.slice(-6).reduce((a,b)=>a+b,0)/Math.min(6,vs.length); const prev=vs.slice(-18,-6); const prevM=prev.length?prev.reduce((a,b)=>a+b,0)/prev.length:rec; const trend=rec>prevM*1.12?'al alza':rec<prevM*0.88?'a la baja':'estable';
+    const estado=z>0.8?'muy por encima de su nivel histórico':z>0.25?'por encima de su nivel histórico':z<-0.8?'muy por debajo de su nivel histórico':z<-0.25?'por debajo de su nivel histórico':'en su nivel histórico'; const pc=v=>(v*100).toFixed(1).replace('.',',')+' %';
+    const hito=(PL.hitos||[]).find(h=>h.serie===k);
+    return `<div style="font-weight:600;color:#eef2fb;margin-bottom:3px">${escT(o.label_es||k)}</div><div style="color:#8fa0c4;font-size:10px;margin-bottom:6px">${escT(o.gob_es||'')}</div><div><b style="color:#5da9ff">${pc(last)}</b> de activación · ${lastM}</div><div>${estado} (media ${pc(mu)})</div><div>Tendencia reciente: <b>${trend}</b></div><div>Pico histórico: ${pc(vs[iMax])} · ${ksr[iMax]}${hito&&hito.mes.slice(0,7)===ksr[iMax].slice(0,7)?' — '+escT(hito.es||''):''}</div>${o.lectura_es?'<div style="margin-top:6px;border-top:1px solid rgba(120,160,230,.2);padding-top:6px;color:#c3cfe8;font-style:italic">'+escT(o.lectura_es)+'</div>':''}`;}
+  // ---- eventos
   document.getElementById('lc-prev').onclick=()=>{lci=Math.max(0,lci-1);locus();};
   document.getElementById('lc-next').onclick=()=>{lci=Math.min(LC_OLAS.length-1,lci+1);locus();};
   document.getElementById('lc-range').oninput=e=>{lci=+e.target.value;locus();};
-  document.addEventListener('click',e=>{const t=e.target.closest('#lc-tabs button'); if(t){lcTab=t.dataset.lc;locus();return;} const c=e.target.closest('[data-lcc]'); if(c){lcCand=c.dataset.lcc;locus();}});
+  document.addEventListener('click',e=>{
+    const t=e.target.closest('#lc-tabs button'); if(t){lcTab=t.dataset.lc;lcTabs(); if(lcTab==='temas')temas(); if(lcTab==='subseg')subsegs(); if(lcTab==='polaridades')polRender(); if(lcTab==='mapa'&&MP)draw(); return;}
+    const c=e.target.closest('[data-lcc]'); if(c){lcCand=c.dataset.lcc;locus();return;}
+    const ta=e.target.closest('[data-lct]'); if(ta){lcTemaAno=ta.dataset.lct;temas();return;}
+    const sa=e.target.closest('[data-lcs]'); if(sa){lcSubAno=sa.dataset.lcs;subsegs();return;}
+  });
   locusInit();
 
   /* ---------- TERRITORIO ---------- */
