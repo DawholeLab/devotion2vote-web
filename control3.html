@@ -342,7 +342,7 @@ table.calor td.origen,table.calor th.origen{text-align:left;font-weight:700;colo
 
     <!-- LOCUS -->
     <section class="pantalla" id="p-locus">
-      <div class="cab"><div><div class="eyebrow" id="locus-eyebrow">LOCUS</div><h1>Segmentación LOCUS</h1><div class="sub" id="locus-sub">Los productos analíticos de LOCUS que viajan con el motor: los cuatro segmentos por era, sus subsegmentos, el mapa de posiciones en los ejes de principios (S) y actores (O), los temas, las elasticidades, el estudio de acontecimientos, las series y los informes. Y los tipos LOCUS de cada ola (paso «Tipos LOCUS» de la cadena): autónomos de Vote-Transfer y cruzados con sus públicos cuando ya corrió. Todo estimado.</div></div>
+      <div class="cab"><div><div class="eyebrow" id="locus-eyebrow">LOCUS</div><h1>Segmentación LOCUS</h1><div class="sub" id="locus-sub">Los productos analíticos de LOCUS que viajan con el motor: los cuatro segmentos por era, sus subsegmentos, el mapa de posiciones en los ejes de principios (S) y actores (O), los temas, las elasticidades, el estudio de acontecimientos, las series y los informes. Y los tipos LOCUS de cada ola (paso «Tipos LOCUS» de la cadena, en todos los países): autónomos de Vote-Transfer y cruzados con sus públicos cuando ya corrió. Todo estimado.</div></div>
         <div class="acciones" id="locus-acciones"></div></div>
       <div class="tabs" id="locus-tabs"></div>
       <div id="locus-cuerpo"></div>
@@ -797,21 +797,21 @@ function renderTiposOlas(L){ // bloque «tipos» del inventario LOCUS = bloque `
   const claves=Object.keys(L.olas||{}).sort();if(!claves.length)return '<div class="vacio">Sin olas aprobadas.</div>';
   const u=L.ultima||claves[claves.length-1];const o=L.olas[u];const id=(L.ids||{})[u]||{};
   const lista=TIPOS_LOCUS.map(([k])=>({clave:k,nombre:(L.tipos[k]||{}).corto||SEG_NOMBRE[k],pct:(o.pct||{})[k],electores:o.unidad==='electores'?(o.electores||{})[k]:null,casos:o.unidad==='entrevistas'?(o.electores||{})[k]:null}));
-  let h='<div class="resumen-ola" style="display:block"><div class="eyebrow">Tipos LOCUS · ola '+esc(u)+'</div><h2 style="font-size:20px;margin:4px 0 8px">Los cuatro tipos en la última ola aprobada</h2>'
-    +'<div class="chips" style="margin:0 0 10px"><span class="chip aviso">'+esc(L.etiqueta||'ESTIMADO')+'</span><span class="chip gris">'+(o.pesos==='p05'?'electores: pesos de Vote-Transfer (p05)':o.pesos==='declarada'?'entrevistas: ponderación de la encuesta':'entrevistas sin ponderar')+'</span><span class="chip acento">✓ aprobado en la ola</span><span class="chip gris">'+fmt(o.n_tipificados)+' de '+fmt(o.n)+' tipificados</span></div>'
+  let h='<div class="resumen-ola" style="display:block"><div class="eyebrow">Tipos LOCUS · ola '+esc(u)+'</div><h2 style="font-size:20px;margin:4px 0 8px">Los cuatro tipos en la última ola</h2>'
+    +'<div class="chips" style="margin:0 0 10px"><span class="chip aviso">'+esc(L.etiqueta||'ESTIMADO')+'</span><span class="chip gris">'+(o.pesos==='p05'?'electores: pesos de Vote-Transfer (p05)':o.pesos==='declarada'?'entrevistas: ponderación de la encuesta':'entrevistas sin ponderar')+'</span>'+(o.visto?'<span class="chip '+(o.visto==='aprobado'?'acento':'aviso')+'">'+(o.visto==='aprobado'?'✓ visto en la ola':'◆ observado')+'</span>':'<span class="chip gris">sin visto (LOCUS publica sin esperar aprobación, por ahora)</span>')+'<span class="chip gris">'+fmt(o.n_tipificados)+' de '+fmt(o.n)+' tipificados</span></div>'
     +barrasTipos(lista)
     +(o.lectura||[]).map(x=>'<p>'+esc(x)+'</p>').join('');
   if(claves.length>1){const olas=claves.map(c=>({fecha:c,valores:Object.fromEntries(TIPOS_LOCUS.map(([k])=>[k,{grafica:(L.olas[c].pct||{})[k]}]))}));
     const save=COLORES.slice();TIPOS_LOCUS.forEach(([k],i)=>COLORES[i]=COLOR_TIPO[k]);
-    h+='<div class="seccion-r"><h4>Ola a ola (solo olas aprobadas)</h4><div class="grafica">'+graficaLineas(olas,TIPOS_LOCUS.map(x=>x[0]),Object.fromEntries(TIPOS_LOCUS),'tipos LOCUS · % de la ola')+'</div></div>';
+    h+='<div class="seccion-r"><h4>Ola a ola</h4><div class="grafica">'+graficaLineas(olas,TIPOS_LOCUS.map(x=>x[0]),Object.fromEntries(TIPOS_LOCUS),'tipos LOCUS · % de la ola')+'</div></div>';
     save.forEach((c,i)=>COLORES[i]=c);}
-  else h+='<p class="nota">La evolución ola a ola aparece cuando haya más de una ola con el paso aprobado.</p>';
+  else h+='<p class="nota">La evolución ola a ola aparece cuando haya más de una ola con el paso corrido.</p>';
   const P8={duro:'Voto duro',retener:'A retener',conquistar:'A conquistar',movilizar:'A movilizar'};
   Object.entries(o.publicos||{}).forEach(([c,pubs])=>{const filas={};Object.entries(pubs).forEach(([pub,f])=>{const tot=TIPOS_LOCUS.reduce((a,[k])=>a+(f[k]||0),0)||1;filas[P8[pub]||pub]=Object.fromEntries(TIPOS_LOCUS.map(([k])=>[k,Math.round(1000*(f[k]||0)/tot)/10]))});h+=tablaCruceTipos('Públicos de '+c.toUpperCase()+' por tipo (Vote-Transfer, % del público)',filas,TIPOS_LOCUS.map(x=>x[0]),k=>SEG_NOMBRE[k])});
   if(o.tipo_por_voto){const filas={};Object.entries(o.tipo_por_voto).forEach(([p,f])=>{filas[p.toUpperCase()]=f});h+=tablaCruceTipos('De qué tipo es el voto a cada partido',filas,TIPOS_LOCUS.map(x=>x[0]),k=>SEG_NOMBRE[k])}
   if((o.preguntas||[]).length)h+='<div class="seccion-r"><h4>Preguntas de la encuesta que leyó LOCUS</h4><div class="tabla-scroll"><table class="datos"><thead><tr><th>Señal</th><th>Eje</th><th>Dominio</th><th>Variable</th></tr></thead><tbody>'+o.preguntas.map(q=>'<tr><td>'+esc(q.pregunta||q.clave)+'</td><td>'+esc(q.eje||'')+'</td><td>'+esc(q.dominio||'')+'</td><td><span title="nombre técnico">'+esc(q.variable||'')+'</span></td></tr>').join('')+'</tbody></table></div></div>';
   h+='<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">'+(id.base_id?'<button class="btn" onclick="abrirOla('+id.base_id+')">Abrir la ola '+esc(id.codigo||'')+' →</button>':'')+'</div>'
-    +'<p class="nota">'+esc(L.metodo||'')+'. '+esc(L.nota||'')+' Solo entran aquí (y en la sala de clientes) las olas cuyo paso «Tipos LOCUS» tiene el visto de aprobado.</p></div>';
+    +'<p class="nota">'+esc(L.metodo||'')+'. '+esc(L.nota||'')+' Por decisión de dirección (19-sep), LOCUS se publica en la sala de clientes sin esperar el visto de la Sala de Control; el visto queda como supervisión. Para exigirlo más adelante: Reglas del método › P.LOCUS.exigir_visto.</p></div>';
   return h;
 }
 function renderResultado(r,prof=0){
@@ -1024,7 +1024,7 @@ const SEG_NOMBRE={T:'Transformadores',E:'Exploradores',P:'Preservadores',R:'Reno
 async function abrirLocus(){
   ir('locus');$('locus-eyebrow').textContent=nombreDe(AMBITO)+' · LOCUS';
   $('locus-cuerpo').innerHTML='<div class="vacio">Leyendo los productos LOCUS…</div>';
-  try{LOCUS=await api('/dv/locus?pais='+AMBITO)}catch(e){$('locus-cuerpo').innerHTML='<div class="vacio">'+esc(nombreDe(AMBITO))+' no tiene productos LOCUS en el motor todavía. Se cargan desde LOCUS cuando el ámbito los tenga.</div>';$('locus-tabs').innerHTML='';return}
+  try{LOCUS=await api('/dv/locus?pais='+AMBITO)}catch(e){$('locus-cuerpo').innerHTML='<div class="vacio">No se pudo leer LOCUS para '+esc(nombreDe(AMBITO))+'.</div>';$('locus-tabs').innerHTML='';return}
   $('locus-acciones').innerHTML='<span class="chip gris">'+esc(LOCUS.paquete||'')+(LOCUS.fecha?' · '+esc(LOCUS.fecha):'')+'</span>';
   if(LOCUS.tipos&&LOCUS_GRUPO==='analisis'&&!LOCUS._tab)LOCUS_GRUPO='tipos';
   $('locus-tabs').innerHTML=(LOCUS.tipos?'<button class="'+(LOCUS_GRUPO==='tipos'?'on':'')+'" onclick="locusGrupo(\'tipos\',this)">Tipos en las olas <small>'+Object.keys(LOCUS.tipos.olas||{}).length+'</small></button>':'')
