@@ -1147,7 +1147,9 @@ let TOK=null,YO=null;
   const LC=DATA.locus||null; const LC_T=['T','E','R','P','U']; const LC_PAL={T:'#2F6F73',E:'#8C6D1F',R:'#6B4E9B',P:'#3C7A3A',U:'#9A958E'};
   const LC_PUB={duro:'Voto duro',retener:'A retener',conquistar:'A conquistar',movilizar:'A movilizar'};
   const lcCol=k=>((LC&&LC.tipos&&LC.tipos[k]&&LC.tipos[k].color)||LC_PAL[k]);
-  const lcNom=k=>((LC&&LC.tipos&&LC.tipos[k]&&(LC.tipos[k].corto||LC.tipos[k].nombre))||k);
+  const LC_NOM={T:'Transformadores',E:'Exploradores',R:'Renovadores',P:'Preservadores',U:'En el umbral'}; // doctrina A1: nombres oficiales
+  const lcNom=k=>((LC&&LC.tipos&&LC.tipos[k]&&(LC.tipos[k].corto||LC.tipos[k].nombre))||LC_NOM[k]||k);
+  const lcUni=()=>(LC&&LC.unidad==='entrevistas')?'entrevistas':'electores';
   let LC_OLAS=[], lci=0, lcTab='retrato', lcCand=null;
   function locusInit(){
     const vac=document.getElementById('lc-vacio'), cu=document.getElementById('lc-cuerpo');
@@ -1162,18 +1164,18 @@ let TOK=null,YO=null;
     if(!LC||!LC_OLAS.length) return;
     const o=LC_OLAS[lci], L=LC.olas[o]; const tot=Object.values(L.electores||{}).reduce((a,b)=>a+b,0)||1;
     document.getElementById('lc-ola').textContent=nomOla(o); document.getElementById('lc-range').value=lci;
-    document.getElementById('lc-titular').textContent=`${LC.etiqueta||'Estimado'} · ${fmt(tot)} electores tipificados · ${L.n_sin_aproximar||0} de ${L.n||'—'} entrevistas sin aproximar · ${L.n_tenues||0} tenues (asignación poco firme).`;
+    document.getElementById('lc-titular').textContent=`${LC.etiqueta||'Estimado'} · ${fmt(tot)} ${lcUni()} tipificados · ${L.n_sin_aproximar||0} de ${L.n||'—'} entrevistas sin aproximar · ${L.n_tenues||0} tenues (asignación poco firme)${LC.pesos&&LC.pesos!=='p05'?' · sin pesos de la estimación de voto ('+LC.pesos+')':''}.`;
     document.querySelectorAll('#lc-tabs button').forEach(b=>b.classList.toggle('on',b.dataset.lc===lcTab));
     for(const t of ['retrato','publicos','evolucion','metodo']) document.getElementById('lc-'+t).hidden=(t!==lcTab);
     // retrato
     document.getElementById('lc-apilada').innerHTML=LC_T.map(k=>`<i style="width:${100*(L.electores[k]||0)/tot}%;background:${lcCol(k)}" title="${lcNom(k)}"></i>`).join('');
     document.getElementById('lc-leyenda').innerHTML=LC_T.map(k=>`<span><i style="background:${lcCol(k)}"></i>${escT(lcNom(k))} ${pct(L.pct?L.pct[k]:100*(L.electores[k]||0)/tot)}</span>`).join('');
-    document.getElementById('lc-resumen').innerHTML=LC_T.map(k=>`<div class="card" style="padding:12px 14px"><div class="lc-tipo"><div class="cab"><i style="background:${lcCol(k)}"></i><b class="small">${escT(lcNom(k))}</b></div><div class="num" style="font-size:22px">${fmt(L.electores[k]||0)}</div><div class="small mut">electores · ${pct(L.pct?L.pct[k]:100*(L.electores[k]||0)/tot)}${L.firmeza&&L.firmeza[k]!=null?' · firmeza '+Math.round(100*L.firmeza[k])+'/100':''}</div></div></div>`).join('');
+    document.getElementById('lc-resumen').innerHTML=LC_T.map(k=>`<div class="card" style="padding:12px 14px"><div class="lc-tipo"><div class="cab"><i style="background:${lcCol(k)}"></i><b class="small">${escT(lcNom(k))}</b></div><div class="num" style="font-size:22px">${fmt(L.electores[k]||0)}</div><div class="small mut">${lcUni()} · ${pct(L.pct?L.pct[k]:100*(L.electores[k]||0)/tot)}${L.firmeza&&L.firmeza[k]!=null?' · firmeza '+Math.round(100*L.firmeza[k])+'/100':''}</div></div></div>`).join('');
     document.getElementById('lc-tarjetas').innerHTML=LC_T.filter(k=>k!=='U').map(k=>{const t=(LC.tipos||{})[k]||{}; const lect=(L.lecturas&&L.lecturas[k])||t.lectura||'';
-      return `<div class="card"><div class="lc-tipo"><div class="cab"><i style="background:${lcCol(k)}"></i><b>${escT(t.nombre||k)}</b><span class="small mut" style="margin-left:auto">${pct(L.pct?L.pct[k]:0)}</span></div><div class="barra-h"><i style="width:${L.pct?L.pct[k]:0}%;background:${lcCol(k)}"></i></div><p class="small" style="margin:6px 0 0">${escT(lect)}</p></div></div>`}).join('');
+      return `<div class="card"><div class="lc-tipo"><div class="cab"><i style="background:${lcCol(k)}"></i><b>${escT(t.nombre||LC_NOM[k]||k)}</b><span class="small mut" style="margin-left:auto">${pct(L.pct?L.pct[k]:0)}</span></div><div class="barra-h"><i style="width:${L.pct?L.pct[k]:0}%;background:${lcCol(k)}"></i></div><p class="small" style="margin:6px 0 0">${escT(lect)}</p></div></div>`}).join('');
     // públicos
     const cands=Object.keys(L.publicos||{}); if(!cands.includes(lcCand)) lcCand=cands[0]||null;
-    document.getElementById('lc-cands').innerHTML=cands.length?cands.map(c=>`<button class="chip ${c===lcCand?'on':''}" data-lcc="${c}"><i style="background:${C[c]||C.otros}"></i>${escT(CAND[c]||c)}</button>`).join(''):'<span class="small mut">Esta encuesta no tiene públicos por mentalidad (no hay segmentación aprobada de esa ola).</span>';
+    document.getElementById('lc-cands').innerHTML=cands.length?cands.map(c=>`<button class="chip ${c===lcCand?'on':''}" data-lcc="${c}"><i style="background:${C[c]||C.otros}"></i>${escT(CAND[c]||c)}</button>`).join(''):'<span class="small mut">Esta encuesta no tiene públicos por mentalidad: LOCUS se estimó sin la segmentación de Vote-Transfer de esa ola (aparecerán cuando esté aprobada).</span>';
     const P=lcCand?L.publicos[lcCand]:null;
     document.getElementById('lc-pub-lab').textContent=lcCand?`Públicos de ${CAND[lcCand]||lcCand} por mentalidad`:'Públicos por mentalidad';
     document.getElementById('lc-pub-lista').innerHTML=P?Object.keys(LC_PUB).filter(k=>P[k]).map(k=>{const v=P[k]; const t=Object.values(v).reduce((a,b)=>a+b,0)||1; const top=LC_T.filter(x=>x!=='U').sort((a,b)=>(v[b]||0)-(v[a]||0))[0];
@@ -1187,7 +1189,7 @@ let TOK=null,YO=null;
       +olas.map((x,i)=>`<text x="${xs(i)}" y="${H-10}" font-size="11" text-anchor="${olas.length>1&&i===0?'start':olas.length>1&&i===olas.length-1?'end':'middle'}" fill="var(--mut)">${nomOla(x)}</text>`).join('');
     document.getElementById('lc-evo-leyenda').innerHTML=LC_T.map(k=>`<span><i style="background:${lcCol(k)}"></i>${escT(lcNom(k))}</span>`).join('');
     // método
-    document.getElementById('lc-met-txt').textContent=`${LC.metodo||'Método LOCUS'}. En ${nomOla(o).toLowerCase()} se usaron ${(L.preguntas||[]).length} preguntas de la encuesta; cada una lee uno de los dos ejes: S, los principios que organizan un ámbito, y O, los actores que lo encarnan. Los electores se pesan con los mismos pesos que la estimación de voto (paso p05).`;
+    document.getElementById('lc-met-txt').textContent=`${LC.metodo||'Método LOCUS'}. En ${nomOla(o).toLowerCase()} se usaron ${(L.preguntas||[]).length} preguntas de la encuesta; cada una lee uno de los dos ejes: S, los principios que organizan un ámbito, y O, los actores que lo encarnan. ${LC.pesos==='p05'?'Los electores se pesan con los mismos pesos que la estimación de voto (paso p05).':'Esta estimación se hizo de forma autónoma, sin los pesos de la estimación de voto: la unidad es la entrevista'+(LC.pesos==='declarada'?' con la ponderación declarada de la encuesta.':'.')}${LC.prior?' Prior del clasificador: '+LC.prior+'.':''}`;
     document.getElementById('lc-preguntas').innerHTML=(L.preguntas||[]).map(q=>`<div class="fila" style="padding:6px 0;gap:10px"><span class="small">${escT(q.pregunta||q.clave)}</span><span class="small mut" style="white-space:nowrap">eje ${escT(q.eje||'—')} · ${escT(q.dominio||'')}${q.variable?' · '+escT(q.variable):''}</span></div>`).join('')||'<div class="small mut">p12 declarará aquí las preguntas usadas.</div>';
   }
   document.getElementById('lc-prev').onclick=()=>{lci=Math.max(0,lci-1);locus();};
