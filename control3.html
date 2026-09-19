@@ -234,6 +234,7 @@ table.calor td.origen,table.calor th.origen{text-align:left;font-weight:700;colo
 .grafica svg{width:100%;height:auto;display:block}
 .leyenda{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;margin-top:6px}
 .leyenda i{display:inline-block;width:12px;height:3px;vertical-align:middle;margin-right:5px;border-radius:2px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .barras{display:grid;grid-template-columns:minmax(120px,220px) 1fr auto;gap:6px 10px;align-items:center;font-size:14px;margin:0 0 14px}
 .barras .b{height:14px;background:var(--acento);border-radius:3px;opacity:.85}
 .tabs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px}
@@ -341,7 +342,7 @@ table.calor td.origen,table.calor th.origen{text-align:left;font-weight:700;colo
 
     <!-- LOCUS -->
     <section class="pantalla" id="p-locus">
-      <div class="cab"><div><div class="eyebrow" id="locus-eyebrow">LOCUS</div><h1>Segmentación LOCUS</h1><div class="sub" id="locus-sub">Los productos analíticos de LOCUS que viajan con el motor: los cuatro segmentos por era, sus subsegmentos, el mapa de posiciones en los ejes de principios (S) y actores (O), los temas, las elasticidades, el estudio de acontecimientos, las series y los informes. Solo lectura: LOCUS se produce en su propio motor.</div></div>
+      <div class="cab"><div><div class="eyebrow" id="locus-eyebrow">LOCUS</div><h1>Segmentación LOCUS</h1><div class="sub" id="locus-sub">Los productos analíticos de LOCUS que viajan con el motor: los cuatro segmentos por era, sus subsegmentos, el mapa de posiciones en los ejes de principios (S) y actores (O), los temas, las elasticidades, el estudio de acontecimientos, las series y los informes. Y los tipos LOCUS de cada ola (paso «Tipos LOCUS» de la cadena): autónomos de Vote-Transfer y cruzados con sus públicos cuando ya corrió. Todo estimado.</div></div>
         <div class="acciones" id="locus-acciones"></div></div>
       <div class="tabs" id="locus-tabs"></div>
       <div id="locus-cuerpo"></div>
@@ -761,6 +762,58 @@ function renderTerritorio(niveles){
   });
   return h+'<p class="nota">Estimación = % sobre los electores que eligen candidato en la zona (pesos anclados de la estimación nacional). Sesgo relativo = cuánto se aleja el recuerdo de esa zona del patrón de toda la muestra; en rojo si supera 10 puntos. Fila ámbar: zona a revisar.</p>';
 }
+const TIPOS_LOCUS=[['T','Transformadores'],['E','Exploradores'],['R','Renovadores'],['P','Preservadores']];
+const COLOR_TIPO={T:'#2F6F73',E:'#8C6D1F',R:'#6B4E9B',P:'#3C7A3A',U:'#9A958E'};
+const QUE_TIPO={T:'cuestionan principios y actores',E:'aceptan principios, cuestionan actores',R:'cuestionan principios, aceptan actores',P:'aceptan principios y actores'};
+function barrasTipos(lista){ // lista = [{clave,nombre,pct,electores,casos}]
+  const max=Math.max(...lista.map(t=>t.pct||0))||1;
+  return '<div class="barras">'+lista.map(t=>'<span><b>'+esc(t.nombre)+'</b><br><small style="color:var(--tinta3)">'+esc(QUE_TIPO[t.clave]||'')+'</small></span><div class="b" style="width:'+(100*(t.pct||0)/max)+'%;background:'+(COLOR_TIPO[t.clave]||'var(--acento)')+'"></div><span class="n" style="text-align:right">'+p1(t.pct)+'% '+(t.electores?'<small style="color:var(--tinta3)">'+fmt(t.electores)+'</small>':'')+(t.casos?'<br><small style="color:var(--tinta3)">'+fmt(t.casos)+' entrev.</small>':'')+'</span>').join('')+'</div>';
+}
+function tablaCruceTipos(titulo,filas,cols,colNombre){ // filas = {nombre:{col:pct}}
+  const claves=Object.keys(filas);if(!claves.length)return '';
+  return '<div class="seccion-r"><h4>'+esc(titulo)+'</h4><div class="tabla-scroll"><table class="datos"><thead><tr><th></th>'+cols.map(c=>'<th>'+esc(colNombre?colNombre(c):c)+'</th>').join('')+'</tr></thead><tbody>'
+    +claves.map(k=>{const f=filas[k]||{};const mx=Math.max(...cols.map(c=>f[c]||0),1);return '<tr><td><b>'+esc(k)+'</b></td>'+cols.map(c=>{const x=f[c];return '<td class="n" style="background:color-mix(in srgb,'+(COLOR_TIPO[c]||'var(--acento)')+' '+(esNum(x)?Math.round(55*x/mx):0)+'%,transparent)">'+(esNum(x)?p1(x)+'%':'—')+'</td>'}).join('')+'</tr>'}).join('')+'</tbody></table></div></div>';
+}
+function renderPasoLocus(r){ // resultado de p12 en la cadena de la ola
+  const lista=TIPOS_LOCUS.map(([k,n])=>({clave:k,nombre:n,...(r.tipos[k]||{})}));
+  let h='<div class="chips" style="margin:0 0 10px"><span class="chip aviso">ESTIMADO</span><span class="chip gris">rootbase '+esc(r.version_rootbase||'')+'</span><span class="chip gris">'+esc(r.base_pesos||'')+'</span><span class="chip gris">'+fmt(r.n_tipados)+' de '+fmt(r.n_encuesta)+' tipados</span></div>';
+  h+=barrasTipos(lista);
+  h+='<p class="nota">Tipo = cruce de los ejes S (principios) y O (actores). Umbral S '+(r.umbrales.S)+' · O '+(r.umbrales.O)+' — '+esc(r.umbrales.origen||'')+'.</p>';
+  if(r.lectura&&r.lectura.length)h+='<div class="seccion-r"><h4>Lectura</h4>'+r.lectura.map(x=>'<p>'+esc(x)+'</p>').join('')+'</div>';
+  const P8={voto_duro:'Voto duro',voto_a_retener:'A retener',voto_a_conquistar:'A conquistar',voto_a_movilizar:'A movilizar'};
+  const cands=Object.keys(r.cruce_publicos||{});
+  if(cands.length){h+='<div class="seccion-r"><h4>Tipos dentro de los públicos de Vote-Transfer (p08)</h4>';
+    cands.forEach(c=>{const filas={};Object.entries(r.cruce_publicos[c]).forEach(([pub,t])=>{filas[P8[pub]||pub]=Object.fromEntries(TIPOS_LOCUS.map(([k])=>[k,(t[k]||{}).pct]))});h+=tablaCruceTipos(c,filas,TIPOS_LOCUS.map(x=>x[0]),k=>SEG_NOMBRE[k])});h+='</div>'}
+  else h+='<p class="nota">Sin cruce con los públicos: p08 no ha corrido en esta ola. LOCUS corre igual, de forma autónoma.</p>';
+  if(r.tipo_por_voto&&Object.keys(r.tipo_por_voto).length){const filas={};Object.entries(r.tipo_por_voto).forEach(([p,f])=>{filas[p]=Object.fromEntries(TIPOS_LOCUS.map(([k,n])=>[k,f[n]]))});h+=tablaCruceTipos('De qué tipo es el voto a cada partido (intención declarada)',filas,TIPOS_LOCUS.map(x=>x[0]),k=>SEG_NOMBRE[k])}
+  if(r.voto_por_tipo&&Object.keys(r.voto_por_tipo).length){const parts=[...new Set(Object.values(r.voto_por_tipo).flatMap(f=>Object.keys(f)))];h+=tablaCruceTipos('A quién vota cada tipo',r.voto_por_tipo,parts)}
+  h+='<div class="seccion-r"><h4>Ejes y señales</h4><div class="tabla-scroll"><table class="datos"><thead><tr><th>Eje</th><th>Media</th><th>Umbral</th><th>Señales leídas</th></tr></thead><tbody>'+['S','O'].map(e=>'<tr><td><b>'+e+' · '+(e==='S'?'principios':'actores')+'</b></td><td class="n">'+p1((r.ejes[e]||{}).media)+'</td><td class="n">'+((r.ejes[e]||{}).umbral)+'</td><td>'+((r.ejes[e]||{}).senales||[]).map(x=>esc(x.replace(/_/g,' '))).join(' · ')+'</td></tr>').join('')+'</tbody></table></div>'
+    +(r.senales?'<p class="nota">'+r.senales.map(x=>(x.leida?'✓ ':'✗ ')+esc(x.que||x.clave)).join(' · ')+'</p>':'')+'</div>';
+  if(r.avisos&&r.avisos.length)h+='<div class="avisos">'+r.avisos.map(a=>'⚠ '+esc(a)).join('<br>')+'</div>';
+  if(r.nota)h+='<p class="nota">'+esc(r.nota)+'</p>';
+  return h;
+}
+function renderTiposOlas(L){ // bloque «tipos» del inventario LOCUS = bloque `locus` del borrador de la sala de clientes (contrato v1.1: olas aprobadas)
+  const claves=Object.keys(L.olas||{}).sort();if(!claves.length)return '<div class="vacio">Sin olas aprobadas.</div>';
+  const u=L.ultima||claves[claves.length-1];const o=L.olas[u];const id=(L.ids||{})[u]||{};
+  const lista=TIPOS_LOCUS.map(([k])=>({clave:k,nombre:(L.tipos[k]||{}).corto||SEG_NOMBRE[k],pct:(o.pct||{})[k],electores:o.unidad==='electores'?(o.electores||{})[k]:null,casos:o.unidad==='entrevistas'?(o.electores||{})[k]:null}));
+  let h='<div class="resumen-ola" style="display:block"><div class="eyebrow">Tipos LOCUS · ola '+esc(u)+'</div><h2 style="font-size:20px;margin:4px 0 8px">Los cuatro tipos en la última ola aprobada</h2>'
+    +'<div class="chips" style="margin:0 0 10px"><span class="chip aviso">'+esc(L.etiqueta||'ESTIMADO')+'</span><span class="chip gris">'+(o.pesos==='p05'?'electores: pesos de Vote-Transfer (p05)':o.pesos==='declarada'?'entrevistas: ponderación de la encuesta':'entrevistas sin ponderar')+'</span><span class="chip acento">✓ aprobado en la ola</span><span class="chip gris">'+fmt(o.n_tipificados)+' de '+fmt(o.n)+' tipificados</span></div>'
+    +barrasTipos(lista)
+    +(o.lectura||[]).map(x=>'<p>'+esc(x)+'</p>').join('');
+  if(claves.length>1){const olas=claves.map(c=>({fecha:c,valores:Object.fromEntries(TIPOS_LOCUS.map(([k])=>[k,{grafica:(L.olas[c].pct||{})[k]}]))}));
+    const save=COLORES.slice();TIPOS_LOCUS.forEach(([k],i)=>COLORES[i]=COLOR_TIPO[k]);
+    h+='<div class="seccion-r"><h4>Ola a ola (solo olas aprobadas)</h4><div class="grafica">'+graficaLineas(olas,TIPOS_LOCUS.map(x=>x[0]),Object.fromEntries(TIPOS_LOCUS),'tipos LOCUS · % de la ola')+'</div></div>';
+    save.forEach((c,i)=>COLORES[i]=c);}
+  else h+='<p class="nota">La evolución ola a ola aparece cuando haya más de una ola con el paso aprobado.</p>';
+  const P8={duro:'Voto duro',retener:'A retener',conquistar:'A conquistar',movilizar:'A movilizar'};
+  Object.entries(o.publicos||{}).forEach(([c,pubs])=>{const filas={};Object.entries(pubs).forEach(([pub,f])=>{const tot=TIPOS_LOCUS.reduce((a,[k])=>a+(f[k]||0),0)||1;filas[P8[pub]||pub]=Object.fromEntries(TIPOS_LOCUS.map(([k])=>[k,Math.round(1000*(f[k]||0)/tot)/10]))});h+=tablaCruceTipos('Públicos de '+c.toUpperCase()+' por tipo (Vote-Transfer, % del público)',filas,TIPOS_LOCUS.map(x=>x[0]),k=>SEG_NOMBRE[k])});
+  if(o.tipo_por_voto){const filas={};Object.entries(o.tipo_por_voto).forEach(([p,f])=>{filas[p.toUpperCase()]=f});h+=tablaCruceTipos('De qué tipo es el voto a cada partido',filas,TIPOS_LOCUS.map(x=>x[0]),k=>SEG_NOMBRE[k])}
+  if((o.preguntas||[]).length)h+='<div class="seccion-r"><h4>Preguntas de la encuesta que leyó LOCUS</h4><div class="tabla-scroll"><table class="datos"><thead><tr><th>Señal</th><th>Eje</th><th>Dominio</th><th>Variable</th></tr></thead><tbody>'+o.preguntas.map(q=>'<tr><td>'+esc(q.pregunta||q.clave)+'</td><td>'+esc(q.eje||'')+'</td><td>'+esc(q.dominio||'')+'</td><td><span title="nombre técnico">'+esc(q.variable||'')+'</span></td></tr>').join('')+'</tbody></table></div></div>';
+  h+='<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">'+(id.base_id?'<button class="btn" onclick="abrirOla('+id.base_id+')">Abrir la ola '+esc(id.codigo||'')+' →</button>':'')+'</div>'
+    +'<p class="nota">'+esc(L.metodo||'')+'. '+esc(L.nota||'')+' Solo entran aquí (y en la sala de clientes) las olas cuyo paso «Tipos LOCUS» tiene el visto de aprobado.</p></div>';
+  return h;
+}
 function renderResultado(r,prof=0){
   if(r==null)return '<p>—</p>';
   if(prof===0&&r&&typeof r==='object'&&!Array.isArray(r)&&r.estimacion&&typeof r.estimacion==='object'&&!Array.isArray(r.estimacion)){
@@ -769,6 +822,7 @@ function renderResultado(r,prof=0){
       const barras='<div class="barras">'+filas.map(([k,v],i)=>'<span><b>'+esc(k)+'</b></span><div class="b" style="width:'+(100*v.pct_validos/max)+'%;background:'+COLORES[i%COLORES.length]+'"></div><span class="n" style="text-align:right">'+p1(v.pct_validos)+'% <small style="color:var(--tinta3)">'+fmt(Math.round(v.electores||0))+'</small></span>').join('')+'</div>'+(abst!=null?'<p class="nota">Participación estimada '+p1(100-abst)+'% · abstención '+p1(abst)+'% del censo. Porcentajes sobre válidos; a la derecha, electores.</p>':'');
       const resto={...r};delete resto.estimacion;return barras+renderResultado(resto,1);}
   }
+  if(prof===0&&r&&typeof r==='object'&&!Array.isArray(r)&&r.tipos&&r.ejes&&r.umbrales){return renderPasoLocus(r)}
   if(prof===0&&r&&typeof r==='object'&&!Array.isArray(r)&&r.niveles&&typeof r.niveles==='object'){
     const resto={...r};delete resto.niveles;
     return renderResultado(resto,1)+'<div class="seccion-r"><h4>Territorio por nivel</h4>'+renderTerritorio(r.niveles)+'</div>';
@@ -972,11 +1026,14 @@ async function abrirLocus(){
   $('locus-cuerpo').innerHTML='<div class="vacio">Leyendo los productos LOCUS…</div>';
   try{LOCUS=await api('/dv/locus?pais='+AMBITO)}catch(e){$('locus-cuerpo').innerHTML='<div class="vacio">'+esc(nombreDe(AMBITO))+' no tiene productos LOCUS en el motor todavía. Se cargan desde LOCUS cuando el ámbito los tenga.</div>';$('locus-tabs').innerHTML='';return}
   $('locus-acciones').innerHTML='<span class="chip gris">'+esc(LOCUS.paquete||'')+(LOCUS.fecha?' · '+esc(LOCUS.fecha):'')+'</span>';
-  $('locus-tabs').innerHTML=(LOCUS.grupos||[]).map(g=>'<button class="'+(g.clave===LOCUS_GRUPO?'on':'')+'" onclick="locusGrupo(\''+g.clave+'\',this)">'+esc(g.nombre)+' <small>'+g.archivos.length+'</small></button>').join('');
+  if(LOCUS.tipos&&LOCUS_GRUPO==='analisis'&&!LOCUS._tab)LOCUS_GRUPO='tipos';
+  $('locus-tabs').innerHTML=(LOCUS.tipos?'<button class="'+(LOCUS_GRUPO==='tipos'?'on':'')+'" onclick="locusGrupo(\'tipos\',this)">Tipos en las olas <small>'+Object.keys(LOCUS.tipos.olas||{}).length+'</small></button>':'')
+    +(LOCUS.grupos||[]).map(g=>'<button class="'+(g.clave===LOCUS_GRUPO?'on':'')+'" onclick="locusGrupo(\''+g.clave+'\',this)">'+esc(g.nombre)+' <small>'+g.archivos.length+'</small></button>').join('');
   locusGrupo(LOCUS_GRUPO);
 }
 function locusGrupo(clave,btn){
-  LOCUS_GRUPO=clave;document.querySelectorAll('#locus-tabs button').forEach(b=>b.classList.toggle('on',b===btn||(!btn&&b.textContent.trim().toLowerCase().startsWith(({analisis:'análisis',series:'series',informes:'informes',electoral:'electoral'}[clave]||clave)))));
+  LOCUS_GRUPO=clave;LOCUS._tab=true;document.querySelectorAll('#locus-tabs button').forEach(b=>b.classList.toggle('on',b===btn||(!btn&&b.textContent.trim().toLowerCase().startsWith(({analisis:'análisis',series:'series',informes:'informes',electoral:'electoral',tipos:'tipos'}[clave]||clave)))));
+  if(clave==='tipos'){$('locus-cuerpo').innerHTML=LOCUS.tipos?renderTiposOlas(LOCUS.tipos):'<div class="vacio">Todavía no hay tipos LOCUS en las olas de este ámbito: corre el paso «Tipos LOCUS» en una ola.</div>';return}
   const g=(LOCUS.grupos||[]).find(x=>x.clave===clave);if(!g)return;
   $('locus-cuerpo').innerHTML='<div class="puertas" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">'+g.archivos.map(a=>'<button class="puerta" style="min-height:0;padding:14px 16px" onclick="locusAbrir(\''+esc(a.ruta)+'\')"><h2 style="font-size:16px">'+esc(a.titulo)+'</h2><p>'+esc(a.que||'')+'</p><div class="pie" style="font-size:12px;color:var(--tinta3);font-weight:500">'+esc(a.formato)+' · '+(a.bytes>1e6?(a.bytes/1e6).toFixed(1)+' MB':Math.round(a.bytes/1024)+' KB')+'</div></button>').join('')+'</div><div id="locus-det" style="margin-top:16px"></div>';
 }
