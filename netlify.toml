@@ -6,6 +6,16 @@
   from = "/app"
   to = "/app.html"
   status = 200
+# Sala de Control 3.0 (piloto España): www.devotion2vote.com/control3
+[[redirects]]
+  from = "/control3"
+  to = "/control3.html"
+  status = 200
+[[headers]]
+  for = "/control3.html"
+  [headers.values]
+    Cache-Control = "no-cache"
+    X-Robots-Tag = "noindex"
 [[headers]]
   for = "/sw.js"
   [headers.values]
