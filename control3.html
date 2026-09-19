@@ -867,14 +867,17 @@ zona.addEventListener('drop',e=>{if(e.dataTransfer.files[0]){$('arch').files=e.d
 async function previsualizar(){
   const f=$('arch').files[0];if(!f)return;
   $('arch-nombre').textContent=f.name;$('prev_res').textContent='Leyendo el archivo…';
-  const fd=new FormData();fd.append('archivo',f);
+  const fd=new FormData();fd.append('archivo',f);fd.append('pais',AMBITO);
   try{PREV=await api('/dv/bases/previsualizar','POST',null,fd)}catch(e){$('prev_res').textContent='';return}
   $('campos').style.display='grid';
   $('b_titulo').value=f.name.replace(/\.[^.]+$/,'');
   const m=f.name.toLowerCase().match(/(20\d\d)[-_ ]?(0[1-9]|1[0-2])?/);
   if(m){$('b_codigo').value=AMBITO+'_'+m[1]+(m[2]?'-'+m[2]:'');if(m[2])$('b_fecha').value=m[1]+'-'+m[2]+'-01'}
   const props=(PREV.variables||[]).filter(v=>v.canon_propuesta).length;
-  $('prev_res').innerHTML='<b>'+fmt(PREV.n_registros)+'</b> entrevistas · <b>'+PREV.n_variables+'</b> preguntas · '+props+' preguntas del método reconocidas de entrada'+((PREV.avisos||[]).length?'<br>'+PREV.avisos.map(a=>'⚠ '+esc(a)).join('<br>'):'');
+  const voto=(PREV.variables||[]).some(v=>v.familia_propuesta==='transferencia');
+  $('prev_res').innerHTML='<b>'+fmt(PREV.n_registros)+'</b> entrevistas · <b>'+PREV.n_variables+'</b> preguntas · '+props+' preguntas del método reconocidas de entrada'+(PREV.etiquetas_del_libro?' · etiquetas del libro de códigos en '+PREV.etiquetas_del_libro+' variables':'')
+    +(voto?'':'<br><b style="color:var(--aviso)">No reconozco la pregunta de voto:</b> el método correrá lo que pueda (LOCUS y descriptivos) y Dante te pedirá confirmar el diccionario en la ola.')
+    +((PREV.avisos||[]).length?'<br>'+PREV.avisos.map(a=>'⚠ '+esc(a)).join('<br>'):'');
 }
 async function lanzar(){
   if(lectura()){soloLectura();return}
@@ -888,9 +891,25 @@ async function lanzar(){
   if($('b_fecha').value)fd.append('fecha_campo_ini',$('b_fecha').value);
   fd.append('origen',dueno==='cliente'?'cliente':'publica');fd.append('ponderacion','autoponderada');
   try{const r=await api('/dv/bases','POST',null,fd);const ex=r.expediente||{};
-    p.innerHTML='<p class="okt">✓ '+esc(ex.lectura||('Cargada la ola #'+r.id))+'</p>';OLAS=null;toast('Listo: abriendo la cadena de la ola');await abrirOla(r.id);
+    if(r.estado==='analizando'){await seguirAnalisis(r.id,p);}
+    else{p.innerHTML='<p class="okt">✓ '+esc(ex.lectura||('Cargada la ola #'+r.id))+'</p>';}
+    OLAS=null;toast('Listo: abriendo la cadena de la ola');await abrirOla(r.id);
   }catch(e){p.innerHTML='<p class="mal">No se cargó: '+esc(e.message)+'</p>'}
   finally{$('btn_analizar').disabled=false}
+}
+async function seguirAnalisis(id,p){ // la carga ya respondió; el método corre en el motor y aquí se ve avanzar paso a paso
+  const t0=Date.now();let ultimo=-1;
+  for(let i=0;i<400;i++){
+    let g;try{g=await api('/dv/bases/'+id+'/progreso')}catch(e){await new Promise(r=>setTimeout(r,4000));continue}
+    const seg=Math.round((Date.now()-t0)/1000);
+    const filas=(g.pasos||[]).map(x=>'<p>'+(x.ok?'✓':'✗')+' '+esc(x.nombre)+'</p>').join('');
+    p.innerHTML='<p class="okt">✓ Ola cargada: <b>'+esc(g.codigo||'')+'</b>. Dante está corriendo el método ('+seg+' s)…</p>'+filas+(g.listo?'':'<p>· …</p>');
+    if(g.listo){p.innerHTML+='<p class="okt">✓ '+esc(g.lectura||'Análisis terminado.')+'</p>';return}
+    if(g.error&&g.estado!=='analizando'){p.innerHTML+='<p class="mal">'+esc(g.error)+'</p>';return}
+    if(g.estado!=='analizando'&&(g.pasos||[]).length===ultimo){/* sin cambios y ya no analiza: salir */ if(i>3)return}
+    ultimo=(g.pasos||[]).length;
+    await new Promise(r=>setTimeout(r,3000));
+  }
 }
 
 /* ═══════════════════ clientes ═══════════════════ */
