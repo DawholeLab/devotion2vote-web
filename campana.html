@@ -539,7 +539,7 @@ td .celda{display:inline-block;min-width:44px;padding:2px 6px;border-radius:5px}
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0">LOCUS · mentalidades del electorado</h2><span class="lc-tag" id="lc-etq" hidden><i></i>Estimado</span></div>
     <p class="mut small" style="margin-top:4px" id="lc-sub">Cada elector, según cómo se relaciona con los principios y con los actores de la política, pertenece a una de cuatro mentalidades; los que quedan entre dos se cuentan «en el umbral». Estimación del método LOCUS sobre las mismas encuestas y los mismos pesos en electores que el resto de la sala.</p>
   </div>
-  <div class="vacio" id="lc-vacio" hidden>LOCUS está en preparación para esta sala: aparecerá cuando la Sala de Control apruebe la primera estimación (paso p12 del método).</div>
+  <div class="vacio" id="lc-vacio" hidden>LOCUS está en preparación para esta sala: aparecerá con la primera estimación del método (paso p12), que la dirección de Devotion2Vote pone a disposición directamente.</div>
   <div id="lc-cuerpo" hidden>
     <div class="card" style="padding:12px 16px;margin-bottom:12px">
       <div class="ctrl">
@@ -1155,7 +1155,7 @@ let TOK=null,YO=null;
     const vac=document.getElementById('lc-vacio'), cu=document.getElementById('lc-cuerpo');
     if(!LC||!LC.olas||!Object.keys(LC.olas).length){vac.hidden=false;cu.hidden=true;return;}
     vac.hidden=true;cu.hidden=false; document.getElementById('lc-etq').hidden=false;
-    if(LC.maqueta){document.getElementById('lc-sub').innerHTML='<b>Maqueta con datos simulados</b> para diseñar la pantalla: las cifras no son reales. La versión definitiva sale del paso p12 del método, aprobado en la Sala de Control. '+document.getElementById('lc-sub').textContent;}
+    if(LC.maqueta){document.getElementById('lc-sub').innerHTML='<b>Maqueta con datos simulados</b> para diseñar la pantalla: las cifras no son reales. La versión definitiva sale del paso p12 del método, bajo control directo de la dirección. '+document.getElementById('lc-sub').textContent;}
     LC_OLAS=Object.keys(LC.olas).sort(); lci=LC_OLAS.length-1;
     const r=document.getElementById('lc-range'); r.max=LC_OLAS.length-1; r.value=lci;
     locus();
