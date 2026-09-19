@@ -954,12 +954,14 @@ async function abrirTerritorio(nivel){
   const niveles=(FICHA.niveles||[]).filter(n=>n!=='pais'&&n!=='colegio');
   $('terr-tabs').innerHTML=niveles.map(n=>'<button class="'+(n===TERR.nivel?'on':'')+'" onclick="abrirTerritorio(\''+n+'\')">'+esc(nom[n]||n)+'</button>').join('');
   $('terr-cuerpo').innerHTML='<div class="vacio">Leyendo la urna…</div>';
-  try{TERR.datos=await api('/dv/urnas/territorio?pais='+AMBITO+'&nivel='+TERR.nivel)}catch(e){TERR.datos=[]}
+  TERR.eleccion=FICHA.eleccion_referencia||null;
+  try{TERR.datos=await api('/dv/urnas/territorio?pais='+AMBITO+'&nivel='+TERR.nivel+(TERR.eleccion?'&eleccion='+encodeURIComponent(TERR.eleccion):''))}catch(e){TERR.datos=[]}
   // estimación por zona de la última ola con territorio
   TERR.p10=null;
-  try{const cs=await api('/dv/corridas?paso_clave=p10_territorio&pais='+AMBITO);const ok=(cs||[]).find(c=>c.ok);
-    if(ok){const c=await api('/dv/corridas/'+ok.id);const niv=((c.resultado||{}).niveles||{})[TERR.nivel==='comunidad'?'region':TERR.nivel];TERR.p10=niv?{ola:ok.base_id,zonas:niv.zonas||{},resumen:niv.resumen||{}}:null;TERR.ola=ok.base_id}}catch(e){}
-  $('terr-acciones').innerHTML=TERR.p10?'<button class="btn" onclick="abrirOla('+TERR.ola+')">Ver la ola de la estimación</button>':'';
+  try{const [c10,c11]=await Promise.all([api('/dv/corridas?paso_clave=p10_territorio&pais='+AMBITO).catch(()=>[]),api('/dv/corridas?paso_clave=p11_motor_territorial&pais='+AMBITO).catch(()=>[])]);
+    const ok=[...(c10||[]),...(c11||[])].filter(c=>c.ok).sort((a,b)=>b.id-a.id)[0];
+    if(ok){const c=await api('/dv/corridas/'+ok.id);const niv=((c.resultado||{}).niveles||{})[TERR.nivel==='comunidad'?'region':TERR.nivel]||((c.resultado||{}).niveles||{})[TERR.nivel];TERR.p10=niv?{ola:ok.base_id,zonas:niv.zonas||{},resumen:niv.resumen||{},paso:ok.paso_clave}:null;TERR.ola=ok.base_id}}catch(e){}
+  $('terr-acciones').innerHTML=TERR.p10?'<button class="btn" onclick="abrirOla('+TERR.ola+')">'+(TERR.p10.paso==='p11_motor_territorial'?'Ver la máquina territorial':'Ver la ola de la estimación')+'</button>':'';
   pintarTerritorio();
 }
 function pintarTerritorio(){
@@ -968,20 +970,21 @@ function pintarTerritorio(){
   const zonas=TERR.p10?TERR.p10.zonas:{};
   const normZ=t=>String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
   const idx={};Object.keys(zonas).forEach(z=>{idx[normZ(z)]=zonas[z];const x=zonas[z];if(x.urna_nombre)idx[normZ(x.urna_nombre)]=x});
-  const bloques=urna.length?Object.keys(urna[0].votos||{}).filter(k=>!['NULOS','VALIDOS','EMITIDOS','OT+BL','ABST+NUL','>18'].includes(k)):[];
+  const bloques=urna.length?Object.keys(urna[0].votos||{}).filter(k=>!['NULOS','VALIDOS','EMITIDOS','OT+BL','ABST+NUL','>18','CENSO','ABST','OT','BLANCOS','NULOS+BLANCOS','PARTICIPACION'].includes(k)):[];
   const tot={};bloques.forEach(b=>tot[b]=urna.reduce((a,u)=>a+((u.votos||{})[b]||0),0));
   const top=bloques.sort((a,b)=>tot[b]-tot[a]).slice(0,5);
-  $('terr-cuenta').textContent=urna.length+' zonas con urna oficial'+(TERR.p10?' · estimación de la última ola en '+Object.keys(zonas).length+' zonas':' · sin estimación por zona todavía');
+  const esMaq=TERR.p10&&TERR.p10.paso==='p11_motor_territorial';
+  $('terr-cuenta').textContent=urna.length+' zonas con urna oficial'+(TERR.eleccion?' ('+TERR.eleccion.replace('_',' ')+')':'')+(TERR.p10?(esMaq?' · estimación de la máquina territorial en ':' · estimación de la última ola en ')+Object.keys(zonas).length+' zonas':' · sin estimación por zona todavía');
   if(!urna.length&&!Object.keys(zonas).length){$('terr-cuerpo').innerHTML='<div class="vacio">Este nivel no tiene urna oficial cargada en el motor'+(Object.keys(zonas).length?'':' ni estimación por zona')+'.</div>';return}
   const filas=urna.length?urna:Object.keys(zonas).map(z=>({nombre:z,votos:{}}));
   const validos=u=>{const v=u.votos||{};return v.VALIDOS||(top.reduce((a,b)=>a+(v[b]||0),0)+(v['OT+BL']||0))||0};
   filas.sort((a,b)=>validos(b)-validos(a));
   const tote={};Object.values(zonas).forEach(x=>Object.entries(x.electores_por_candidato||{}).forEach(([c,n])=>{if(c!=='ABSTENCIÓN')tote[c]=(tote[c]||0)+(n||0)}));
   const cands=TERR.p10?Object.keys(tote).sort((a,b)=>tote[b]-tote[a]).slice(0,4):[];
-  $('terr-cuerpo').innerHTML='<div class="tabla-scroll"><table class="datos"><thead><tr><th>Zona</th><th>Válidos (urna)</th>'+top.map(b=>'<th>'+esc(b)+' % urna</th>').join('')+(TERR.p10?'<th>Entrev.</th>'+cands.map(c=>'<th>'+esc(c)+' % est.</th>').join('')+'<th>Sesgo</th>':'')+'</tr></thead><tbody>'
+  $('terr-cuerpo').innerHTML='<div class="tabla-scroll"><table class="datos"><thead><tr><th>Zona</th><th>Válidos (urna)</th>'+top.map(b=>'<th>'+esc(b)+' % urna</th>').join('')+(TERR.p10?(esMaq?'':'<th>Entrev.</th>')+cands.map(c=>'<th>'+esc(c)+' % est.</th>').join('')+(esMaq?'<th>Participación est.</th>':'<th>Sesgo</th>'):'')+'</tr></thead><tbody>'
     +filas.map(u=>{const v=u.votos||{};const val=validos(u);const z=idx[normZ(u.nombre)]||{};const e=z.estimacion_pct_validos||{};const sr=z.sesgo_relativo_pp||{};const peor=Object.entries(sr).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1]))[0];
-      return '<tr'+(z.revisar?' style="background:var(--aviso-suave)"':'')+'><td><b>'+esc(u.nombre)+'</b>'+(u.padre?' <small style="color:var(--tinta3)">'+esc(u.padre)+'</small>':'')+'</td><td class="n">'+(val?fmt(val):'—')+'</td>'+top.map(b=>'<td class="n">'+(val?p1(100*(v[b]||0)/val):'—')+'</td>').join('')+(TERR.p10?'<td class="n">'+(z.entrevistas?fmt(z.entrevistas):'—')+'</td>'+cands.map(c=>'<td class="n">'+(e[c]!=null?p1(e[c]):'—')+'</td>').join('')+'<td>'+(peor?'<span style="color:'+(Math.abs(peor[1])>10?'var(--mal)':'inherit')+'">'+esc(peor[0])+' '+(peor[1]>0?'+':'')+p1(peor[1])+'</span>':'—')+'</td>':'')+'</tr>'}).join('')+'</tbody></table></div>'
-    +'<p class="nota-p">Urna: resultado oficial de la elección de referencia, % sobre válidos. Estimación: la última ola con territorio, % entre quienes eligen candidato en la zona. Sesgo: el bloque en que la muestra de esa zona más se aleja del patrón general (rojo si supera 10 puntos; fila ámbar = zona a revisar).</p>';
+      return '<tr'+(z.revisar?' style="background:var(--aviso-suave)"':'')+'><td><b>'+esc(u.nombre)+'</b>'+(u.padre?' <small style="color:var(--tinta3)">'+esc(u.padre)+'</small>':'')+'</td><td class="n">'+(val?fmt(val):'—')+'</td>'+top.map(b=>'<td class="n">'+(val?p1(100*(v[b]||0)/val):'—')+'</td>').join('')+(TERR.p10?(esMaq?'':'<td class="n">'+(z.entrevistas?fmt(z.entrevistas):'—')+'</td>')+cands.map(c=>'<td class="n">'+(e[c]!=null?p1(e[c]):'—')+'</td>').join('')+(esMaq?'<td class="n">'+(z.participacion_pct!=null?p1(z.participacion_pct)+'%':'—')+'</td>':'<td>'+(peor?'<span style="color:'+(Math.abs(peor[1])>10?'var(--mal)':'inherit')+'">'+esc(peor[0])+' '+(peor[1]>0?'+':'')+p1(peor[1])+'</span>':'—')+'</td>'):'')+'</tr>'}).join('')+'</tbody></table></div>'
+    +'<p class="nota-p">'+(esMaq?'Urna: resultado oficial de la elección de referencia, % sobre válidos. Estimación: la máquina territorial (estimación provincial bajada a cada zona con la cuota ponderada de las elecciones de referencia), % sobre válidos estimados.':'Urna: resultado oficial de la elección de referencia, % sobre válidos. Estimación: la última ola con territorio, % entre quienes eligen candidato en la zona. Sesgo: el bloque en que la muestra de esa zona más se aleja del patrón general (rojo si supera 10 puntos; fila ámbar = zona a revisar).')+'</p>';
 }
 
 /* ═══════════════════ biblioteca ═══════════════════ */
