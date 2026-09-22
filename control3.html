@@ -342,7 +342,7 @@ table.calor td.origen,table.calor th.origen{text-align:left;font-weight:700;colo
 
     <!-- LOCUS -->
     <section class="pantalla" id="p-locus">
-      <div class="cab"><div><div class="eyebrow" id="locus-eyebrow">LOCUS</div><h1>Segmentación LOCUS</h1><div class="sub" id="locus-sub">Los productos analíticos de LOCUS que viajan con el motor: los cuatro segmentos por era, sus subsegmentos, el mapa de posiciones en los ejes de principios (S) y actores (O), los temas, las elasticidades, el estudio de acontecimientos, las series y los informes. Y los tipos LOCUS de cada ola (paso «Tipos LOCUS» de la cadena): autónomos de Vote-Transfer y cruzados con sus públicos cuando ya corrió. Todo estimado.</div></div>
+      <div class="cab"><div><div class="eyebrow" id="locus-eyebrow">LOCUS</div><h1>Segmentación LOCUS</h1><div class="sub" id="locus-sub">Los productos analíticos de LOCUS que viajan con el motor: los cuatro segmentos por era, sus subsegmentos, el mapa de posiciones en los ejes de principios (S) y actores (O), los temas, las elasticidades, el estudio de acontecimientos, las series y los informes. Y los tipos LOCUS de cada ola (paso «Tipos LOCUS» de la cadena, en todos los países): autónomos de Vote-Transfer y cruzados con sus públicos cuando ya corrió. Todo estimado.</div></div>
         <div class="acciones" id="locus-acciones"></div></div>
       <div class="tabs" id="locus-tabs"></div>
       <div id="locus-cuerpo"></div>
@@ -797,21 +797,21 @@ function renderTiposOlas(L){ // bloque «tipos» del inventario LOCUS = bloque `
   const claves=Object.keys(L.olas||{}).sort();if(!claves.length)return '<div class="vacio">Sin olas aprobadas.</div>';
   const u=L.ultima||claves[claves.length-1];const o=L.olas[u];const id=(L.ids||{})[u]||{};
   const lista=TIPOS_LOCUS.map(([k])=>({clave:k,nombre:(L.tipos[k]||{}).corto||SEG_NOMBRE[k],pct:(o.pct||{})[k],electores:o.unidad==='electores'?(o.electores||{})[k]:null,casos:o.unidad==='entrevistas'?(o.electores||{})[k]:null}));
-  let h='<div class="resumen-ola" style="display:block"><div class="eyebrow">Tipos LOCUS · ola '+esc(u)+'</div><h2 style="font-size:20px;margin:4px 0 8px">Los cuatro tipos en la última ola aprobada</h2>'
-    +'<div class="chips" style="margin:0 0 10px"><span class="chip aviso">'+esc(L.etiqueta||'ESTIMADO')+'</span><span class="chip gris">'+(o.pesos==='p05'?'electores: pesos de Vote-Transfer (p05)':o.pesos==='declarada'?'entrevistas: ponderación de la encuesta':'entrevistas sin ponderar')+'</span><span class="chip acento">✓ aprobado en la ola</span><span class="chip gris">'+fmt(o.n_tipificados)+' de '+fmt(o.n)+' tipificados</span></div>'
+  let h='<div class="resumen-ola" style="display:block"><div class="eyebrow">Tipos LOCUS · ola '+esc(u)+'</div><h2 style="font-size:20px;margin:4px 0 8px">Los cuatro tipos en la última ola</h2>'
+    +'<div class="chips" style="margin:0 0 10px"><span class="chip aviso">'+esc(L.etiqueta||'ESTIMADO')+'</span><span class="chip gris">'+(o.pesos==='p05'?'electores: pesos de Vote-Transfer (p05)':o.pesos==='declarada'?'entrevistas: ponderación de la encuesta':'entrevistas sin ponderar')+'</span>'+(o.visto?'<span class="chip '+(o.visto==='aprobado'?'acento':'aviso')+'">'+(o.visto==='aprobado'?'✓ visto en la ola':'◆ observado')+'</span>':'<span class="chip gris">sin visto (LOCUS publica sin esperar aprobación, por ahora)</span>')+'<span class="chip gris">'+fmt(o.n_tipificados)+' de '+fmt(o.n)+' tipificados</span></div>'
     +barrasTipos(lista)
     +(o.lectura||[]).map(x=>'<p>'+esc(x)+'</p>').join('');
   if(claves.length>1){const olas=claves.map(c=>({fecha:c,valores:Object.fromEntries(TIPOS_LOCUS.map(([k])=>[k,{grafica:(L.olas[c].pct||{})[k]}]))}));
     const save=COLORES.slice();TIPOS_LOCUS.forEach(([k],i)=>COLORES[i]=COLOR_TIPO[k]);
-    h+='<div class="seccion-r"><h4>Ola a ola (solo olas aprobadas)</h4><div class="grafica">'+graficaLineas(olas,TIPOS_LOCUS.map(x=>x[0]),Object.fromEntries(TIPOS_LOCUS),'tipos LOCUS · % de la ola')+'</div></div>';
+    h+='<div class="seccion-r"><h4>Ola a ola</h4><div class="grafica">'+graficaLineas(olas,TIPOS_LOCUS.map(x=>x[0]),Object.fromEntries(TIPOS_LOCUS),'tipos LOCUS · % de la ola')+'</div></div>';
     save.forEach((c,i)=>COLORES[i]=c);}
-  else h+='<p class="nota">La evolución ola a ola aparece cuando haya más de una ola con el paso aprobado.</p>';
+  else h+='<p class="nota">La evolución ola a ola aparece cuando haya más de una ola con el paso corrido.</p>';
   const P8={duro:'Voto duro',retener:'A retener',conquistar:'A conquistar',movilizar:'A movilizar'};
   Object.entries(o.publicos||{}).forEach(([c,pubs])=>{const filas={};Object.entries(pubs).forEach(([pub,f])=>{const tot=TIPOS_LOCUS.reduce((a,[k])=>a+(f[k]||0),0)||1;filas[P8[pub]||pub]=Object.fromEntries(TIPOS_LOCUS.map(([k])=>[k,Math.round(1000*(f[k]||0)/tot)/10]))});h+=tablaCruceTipos('Públicos de '+c.toUpperCase()+' por tipo (Vote-Transfer, % del público)',filas,TIPOS_LOCUS.map(x=>x[0]),k=>SEG_NOMBRE[k])});
   if(o.tipo_por_voto){const filas={};Object.entries(o.tipo_por_voto).forEach(([p,f])=>{filas[p.toUpperCase()]=f});h+=tablaCruceTipos('De qué tipo es el voto a cada partido',filas,TIPOS_LOCUS.map(x=>x[0]),k=>SEG_NOMBRE[k])}
   if((o.preguntas||[]).length)h+='<div class="seccion-r"><h4>Preguntas de la encuesta que leyó LOCUS</h4><div class="tabla-scroll"><table class="datos"><thead><tr><th>Señal</th><th>Eje</th><th>Dominio</th><th>Variable</th></tr></thead><tbody>'+o.preguntas.map(q=>'<tr><td>'+esc(q.pregunta||q.clave)+'</td><td>'+esc(q.eje||'')+'</td><td>'+esc(q.dominio||'')+'</td><td><span title="nombre técnico">'+esc(q.variable||'')+'</span></td></tr>').join('')+'</tbody></table></div></div>';
   h+='<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">'+(id.base_id?'<button class="btn" onclick="abrirOla('+id.base_id+')">Abrir la ola '+esc(id.codigo||'')+' →</button>':'')+'</div>'
-    +'<p class="nota">'+esc(L.metodo||'')+'. '+esc(L.nota||'')+' Solo entran aquí (y en la sala de clientes) las olas cuyo paso «Tipos LOCUS» tiene el visto de aprobado.</p></div>';
+    +'<p class="nota">'+esc(L.metodo||'')+'. '+esc(L.nota||'')+' Por decisión de dirección (19-sep), LOCUS se publica en la sala de clientes sin esperar el visto de la Sala de Control; el visto queda como supervisión. Para exigirlo más adelante: Reglas del método › P.LOCUS.exigir_visto.</p></div>';
   return h;
 }
 function renderResultado(r,prof=0){
@@ -867,14 +867,17 @@ zona.addEventListener('drop',e=>{if(e.dataTransfer.files[0]){$('arch').files=e.d
 async function previsualizar(){
   const f=$('arch').files[0];if(!f)return;
   $('arch-nombre').textContent=f.name;$('prev_res').textContent='Leyendo el archivo…';
-  const fd=new FormData();fd.append('archivo',f);
+  const fd=new FormData();fd.append('archivo',f);fd.append('pais',AMBITO);
   try{PREV=await api('/dv/bases/previsualizar','POST',null,fd)}catch(e){$('prev_res').textContent='';return}
   $('campos').style.display='grid';
   $('b_titulo').value=f.name.replace(/\.[^.]+$/,'');
   const m=f.name.toLowerCase().match(/(20\d\d)[-_ ]?(0[1-9]|1[0-2])?/);
   if(m){$('b_codigo').value=AMBITO+'_'+m[1]+(m[2]?'-'+m[2]:'');if(m[2])$('b_fecha').value=m[1]+'-'+m[2]+'-01'}
   const props=(PREV.variables||[]).filter(v=>v.canon_propuesta).length;
-  $('prev_res').innerHTML='<b>'+fmt(PREV.n_registros)+'</b> entrevistas · <b>'+PREV.n_variables+'</b> preguntas · '+props+' preguntas del método reconocidas de entrada'+((PREV.avisos||[]).length?'<br>'+PREV.avisos.map(a=>'⚠ '+esc(a)).join('<br>'):'');
+  const voto=(PREV.variables||[]).some(v=>v.familia_propuesta==='transferencia');
+  $('prev_res').innerHTML='<b>'+fmt(PREV.n_registros)+'</b> entrevistas · <b>'+PREV.n_variables+'</b> preguntas · '+props+' preguntas del método reconocidas de entrada'+(PREV.etiquetas_del_libro?' · etiquetas del libro de códigos en '+PREV.etiquetas_del_libro+' variables':'')
+    +(voto?'':'<br><b style="color:var(--aviso)">No reconozco la pregunta de voto:</b> el método correrá lo que pueda (LOCUS y descriptivos) y Dante te pedirá confirmar el diccionario en la ola.')
+    +((PREV.avisos||[]).length?'<br>'+PREV.avisos.map(a=>'⚠ '+esc(a)).join('<br>'):'');
 }
 async function lanzar(){
   if(lectura()){soloLectura();return}
@@ -888,9 +891,25 @@ async function lanzar(){
   if($('b_fecha').value)fd.append('fecha_campo_ini',$('b_fecha').value);
   fd.append('origen',dueno==='cliente'?'cliente':'publica');fd.append('ponderacion','autoponderada');
   try{const r=await api('/dv/bases','POST',null,fd);const ex=r.expediente||{};
-    p.innerHTML='<p class="okt">✓ '+esc(ex.lectura||('Cargada la ola #'+r.id))+'</p>';OLAS=null;toast('Listo: abriendo la cadena de la ola');await abrirOla(r.id);
+    if(r.estado==='analizando'){await seguirAnalisis(r.id,p);}
+    else{p.innerHTML='<p class="okt">✓ '+esc(ex.lectura||('Cargada la ola #'+r.id))+'</p>';}
+    OLAS=null;toast('Listo: abriendo la cadena de la ola');await abrirOla(r.id);
   }catch(e){p.innerHTML='<p class="mal">No se cargó: '+esc(e.message)+'</p>'}
   finally{$('btn_analizar').disabled=false}
+}
+async function seguirAnalisis(id,p){ // la carga ya respondió; el método corre en el motor y aquí se ve avanzar paso a paso
+  const t0=Date.now();let ultimo=-1;
+  for(let i=0;i<400;i++){
+    let g;try{g=await api('/dv/bases/'+id+'/progreso')}catch(e){await new Promise(r=>setTimeout(r,4000));continue}
+    const seg=Math.round((Date.now()-t0)/1000);
+    const filas=(g.pasos||[]).map(x=>'<p>'+(x.ok?'✓':'✗')+' '+esc(x.nombre)+'</p>').join('');
+    p.innerHTML='<p class="okt">✓ Ola cargada: <b>'+esc(g.codigo||'')+'</b>. Dante está corriendo el método ('+seg+' s)…</p>'+filas+(g.listo?'':'<p>· …</p>');
+    if(g.listo){p.innerHTML+='<p class="okt">✓ '+esc(g.lectura||'Análisis terminado.')+'</p>';return}
+    if(g.error&&g.estado!=='analizando'){p.innerHTML+='<p class="mal">'+esc(g.error)+'</p>';return}
+    if(g.estado!=='analizando'&&(g.pasos||[]).length===ultimo){/* sin cambios y ya no analiza: salir */ if(i>3)return}
+    ultimo=(g.pasos||[]).length;
+    await new Promise(r=>setTimeout(r,3000));
+  }
 }
 
 /* ═══════════════════ clientes ═══════════════════ */
@@ -927,7 +946,7 @@ async function cliAprobar(amb){if(lectura()){soloLectura();return}const nota=pro
 
 /* ═══════════════════ Dante ═══════════════════ */
 let DSES=null,DOCUPADO=false;
-const ACCIONES_DANTE=new Set(['correr_paso','analizar_ola','fijar_parametro','visto_paso']);
+const ACCIONES_DANTE=new Set(['correr_paso','analizar_ola','fijar_parametro','visto_paso','proponer_codigo','aplicar_codigo','revertir_codigo']);
 function danteTitulo(){return (OLA&&$('p-ola').classList.contains('activa'))?'Ola '+OLA.ola.codigo:'Sala de Control'+(AMBITO?' · '+nombreDe(AMBITO):'')}
 function dante(){$('dante').classList.toggle('abierto');if($('dante').classList.contains('abierto'))danteSesion();}
 async function danteSesion(){
@@ -1024,7 +1043,7 @@ const SEG_NOMBRE={T:'Transformadores',E:'Exploradores',P:'Preservadores',R:'Reno
 async function abrirLocus(){
   ir('locus');$('locus-eyebrow').textContent=nombreDe(AMBITO)+' · LOCUS';
   $('locus-cuerpo').innerHTML='<div class="vacio">Leyendo los productos LOCUS…</div>';
-  try{LOCUS=await api('/dv/locus?pais='+AMBITO)}catch(e){$('locus-cuerpo').innerHTML='<div class="vacio">'+esc(nombreDe(AMBITO))+' no tiene productos LOCUS en el motor todavía. Se cargan desde LOCUS cuando el ámbito los tenga.</div>';$('locus-tabs').innerHTML='';return}
+  try{LOCUS=await api('/dv/locus?pais='+AMBITO)}catch(e){$('locus-cuerpo').innerHTML='<div class="vacio">No se pudo leer LOCUS para '+esc(nombreDe(AMBITO))+'.</div>';$('locus-tabs').innerHTML='';return}
   $('locus-acciones').innerHTML='<span class="chip gris">'+esc(LOCUS.paquete||'')+(LOCUS.fecha?' · '+esc(LOCUS.fecha):'')+'</span>';
   if(LOCUS.tipos&&LOCUS_GRUPO==='analisis'&&!LOCUS._tab)LOCUS_GRUPO='tipos';
   $('locus-tabs').innerHTML=(LOCUS.tipos?'<button class="'+(LOCUS_GRUPO==='tipos'?'on':'')+'" onclick="locusGrupo(\'tipos\',this)">Tipos en las olas <small>'+Object.keys(LOCUS.tipos.olas||{}).length+'</small></button>':'')
@@ -1236,8 +1255,10 @@ async function metTab(t,btn){
   try{
     if(t==='pasos'){
       const pasos=await api('/dv/cuaderno?pais='+AMBITO);
-      c.innerHTML='<div class="lista">'+pasos.filter(p=>p.estado!=='retirado').map(p=>{const f=PASOS_NOMBRE[p.clave]||{};
-        return '<div class="asunto"><div class="lin"><b>'+esc(f.nombre||p.titulo)+'</b><span class="chip '+(p.estado==='aprobado'?'ok':'aviso')+'">'+esc(p.estado)+'</span><span style="font-size:12px;color:var(--tinta3)">'+esc(p.clave)+' · v'+p.version+(p.pais?' · solo '+esc(p.pais):' · todos los ámbitos')+(p.tiene_codigo?'':' · sin receta')+'</span><span style="margin-left:auto;font-size:12px;color:var(--tinta3)">'+(p.aprobado_por?'aprobado por '+esc(p.aprobado_por):'autor '+esc(p.autor||''))+' · '+esc(String(p.actualizado||'').slice(0,10))+'</span></div><div class="cuerpo">'+esc(p.proposito||f.que||'')+(p.entradas&&p.entradas.length?' <span style="color:var(--tinta3)">Necesita: '+esc(p.entradas.join(', '))+'.</span>':'')+'</div><div class="acc">'+(YO.rol==='director'&&!ro?(p.estado!=='aprobado'?'<button class="btn peq primario" onclick="aprobarPaso(\''+esc(p.clave)+'\')">Aprobar</button>':'')+'<button class="btn peq" onclick="descartarPaso(\''+esc(p.clave)+'\')">Retirar</button>':'')+'</div></div>'}).join('')+'</div>'
+      let pend=[];if(DIRECCION()){try{pend=await api('/dv/cuaderno-propuestas')}catch(e){}}
+      c.innerHTML=(pend.length?'<div class="aviso-caja" style="background:var(--aviso-suave);border:1px solid var(--linea);border-radius:10px;padding:10px 14px;margin:0 0 12px"><b>'+pend.length+' propuesta'+(pend.length>1?'s':'')+' de código por decidir</b> · '+pend.map(x=>'<a href="#" onclick="verCodigo(\''+esc(x.clave)+'\');return false">'+esc((PASOS_NOMBRE[x.clave]||{}).nombre||x.clave)+'</a> <small>('+esc(x.origen==='dante'?'Dante, a petición de '+x.autor:x.origen==='archivo'?'versión nueva del repositorio':x.autor)+')</small>').join(' · ')+'</div>':'')
+        +'<div class="lista">'+pasos.filter(p=>p.estado!=='retirado').map(p=>{const f=PASOS_NOMBRE[p.clave]||{};
+        return '<div class="asunto"><div class="lin"><b>'+esc(f.nombre||p.titulo)+'</b><span class="chip '+(p.estado==='aprobado'?'ok':'aviso')+'">'+esc(p.estado)+'</span><span style="font-size:12px;color:var(--tinta3)">'+esc(p.clave)+' · v'+p.version+(p.pais?' · solo '+esc(p.pais):' · todos los ámbitos')+(p.tiene_codigo?'':' · sin receta')+'</span><span style="margin-left:auto;font-size:12px;color:var(--tinta3)">'+(p.aprobado_por?'aprobado por '+esc(p.aprobado_por):'autor '+esc(p.autor||''))+' · '+esc(String(p.actualizado||'').slice(0,10))+'</span></div><div class="cuerpo">'+esc(p.proposito||f.que||'')+(p.entradas&&p.entradas.length?' <span style="color:var(--tinta3)">Necesita: '+esc(p.entradas.join(', '))+'.</span>':'')+'</div><div class="acc">'+(YO.rol==='director'&&!ro?(p.estado!=='aprobado'?'<button class="btn peq primario" onclick="aprobarPaso(\''+esc(p.clave)+'\')">Aprobar</button>':'')+'<button class="btn peq" onclick="descartarPaso(\''+esc(p.clave)+'\')">Retirar</button>':'')+(DIRECCION()?'<button class="btn peq" onclick="verCodigo(\''+esc(p.clave)+'\')">Código y versiones</button>':'')+'</div><div class="detalle oculto" id="cod-'+esc(p.clave)+'"></div></div>'}).join('')+'</div>'
         +(pasos.some(p=>p.estado==='retirado')?'<p class="nota-p">Retirados: '+esc(pasos.filter(p=>p.estado==='retirado').map(p=>p.clave).join(', '))+'.</p>':'');
     }else if(t==='parametros'){
       const ps=await api('/dv/parametros?pais='+AMBITO);
@@ -1248,6 +1269,37 @@ async function metTab(t,btn){
         +'<div class="tabla-scroll"><table class="datos"><thead><tr><th>Paso</th><th>Estado</th><th>Versión</th><th>Corridas</th><th>Correctas</th><th>Desvío medio</th><th>Reproduce solo</th></tr></thead><tbody>'+(ev.pasos||[]).map(p=>'<tr><td><b>'+esc((PASOS_NOMBRE[p.clave]||{}).nombre||p.titulo)+'</b> <small style="color:var(--tinta3)">'+esc(p.clave)+'</small></td><td><span class="chip '+(p.estado==='aprobado'?'ok':'aviso')+'">'+esc(p.estado)+'</span></td><td class="n">'+p.version+'</td><td class="n">'+fmt(p.corridas)+'</td><td class="n">'+fmt(p.corridas_ok)+'</td><td class="n">'+(p.desvio_medio!=null?p1(p.desvio_medio):'—')+'</td><td>'+(p.reproduce_solo?'sí':'no')+'</td></tr>').join('')+'</tbody></table></div>';
     }
   }catch(e){c.innerHTML='<div class="vacio">No se pudo leer.</div>'}
+}
+/* ── reprogramar pasos: propuestas de Dante o del repositorio, prueba, aplicar, revertir ── */
+async function verCodigo(clave){
+  const d=$('cod-'+clave);if(!d){toast('Abre la pestaña Pasos');return}
+  d.classList.remove('oculto');d.innerHTML='<div class="vacio">Leyendo el código y sus versiones…</div>';d.scrollIntoView({behavior:'smooth',block:'nearest'});
+  let v,cod;try{[v,cod]=await Promise.all([api('/dv/cuaderno/'+clave+'/versiones'),api('/dv/cuaderno/'+clave+'/codigo')])}catch(e){d.innerHTML='';return}
+  const ro=lectura();const vs=v.versiones||[];
+  const props=vs.filter(x=>x.estado==='propuesta');
+  const prueba=x=>{const pr=x.prueba||{};if(pr.sin_probar)return '<p class="nota">Sin probar todavía (llegó del repositorio): pídele a Dante que la pruebe o vuelve a proponerla.</p>';
+    return (pr.olas||[]).map(o=>'<div style="margin:4px 0"><b>'+esc(o.ola||'')+'</b> '+(o.propuesta_ok?(o.igual?'<span class="chip gris">no cambia nada</span>':'<span class="chip '+(o.pais&&o.pais!==pr.pais_de_la_ola?'aviso':'acento')+'">cambia</span>'):'<span class="chip mal">FALLA</span> '+esc(o.error_propuesta||''))+(o.cambios&&o.cambios.length&&!o.igual?'<ul style="margin:4px 0 0 18px">'+o.cambios.map(z=>'<li>'+esc(z)+'</li>').join('')+'</ul>':'')+'</div>').join('')
+      +((pr.otros_paises_cambian||[]).length?'<p style="color:var(--aviso)"><b>También cambia '+esc(pr.otros_paises_cambian.map(nombreDe).join(', '))+'</b>: aplicar pedirá confirmarlo.</p>':'')};
+  let h='<div style="border-top:1px solid var(--linea);margin-top:10px;padding-top:10px">';
+  h+=props.length?props.map(x=>'<div class="resumen-ola" style="display:block;margin:0 0 10px"><div class="eyebrow">Propuesta nº '+x.id+' · '+esc(x.origen==='dante'?'escrita por Dante a petición de '+x.autor:x.origen==='archivo'?'versión nueva del repositorio':'de '+x.autor)+' · '+esc(String(x.creado||'').slice(0,16).replace('T',' '))+'</div><p style="margin:6px 0"><b>'+esc(x.motivo||'(sin motivo)')+'</b></p>'+prueba(x)
+      +(DIRECCION()&&!ro?'<div style="display:flex;gap:8px;margin-top:8px"><button class="btn peq primario" onclick="aplicarPropuesta('+x.id+',\''+esc(clave)+'\','+(((x.prueba||{}).otros_paises_cambian||[]).length?'true':'false')+')"'+(((x.prueba||{}).falla_en||[]).length?' disabled title="Falló en la prueba"':'')+'>Aplicar</button><button class="btn peq" onclick="descartarPropuesta('+x.id+',\''+esc(clave)+'\')">Descartar</button></div>':'')+'</div>').join('')
+    :'<p class="nota-p">No hay propuestas pendientes para este paso. Para cambiarlo, pídeselo a Dante («corrige el paso 5 para que…»): él escribe el código, el sistema lo prueba y tú decides.</p>';
+  const hist=vs.filter(x=>x.estado!=='propuesta').slice(0,12);
+  if(hist.length)h+='<div class="seccion-r"><h4>Historial</h4><div class="tabla-scroll"><table class="datos"><thead><tr><th>Versión</th><th>Estado</th><th>Origen</th><th>Motivo</th><th>Quién</th><th>Cuándo</th></tr></thead><tbody>'+hist.map(x=>'<tr><td class="n">v'+(x.version??'')+'</td><td>'+esc({vigente:'vigente',anterior:'anterior',aplicada:'aplicada',descartada:'descartada'}[x.estado]||x.estado)+'</td><td>'+esc(x.origen)+'</td><td>'+esc(x.motivo||'')+'</td><td>'+esc(x.decidido_por||x.autor||'')+'</td><td>'+esc(String(x.decidido||x.creado||'').slice(0,16).replace('T',' '))+'</td></tr>').join('')+'</tbody></table></div></div>';
+  if(DIRECCION()&&!ro&&vs.some(x=>x.estado==='anterior'))h+='<button class="btn peq" onclick="revertirPaso(\''+esc(clave)+'\')">Volver a la versión anterior</button> ';
+  h+='<details style="margin-top:10px"><summary style="cursor:pointer">Ver el código vigente (v'+cod.version+(cod.editado_en_sala?', editado en la sala':'')+')</summary><pre style="max-height:420px;overflow:auto;font-size:12px;background:var(--gris-suave);padding:10px;border-radius:8px">'+esc(cod.codigo||'')+'</pre></details>';
+  d.innerHTML=h+'</div>';
+}
+async function aplicarPropuesta(id,clave,otros){
+  if(lectura()){soloLectura();return}
+  if(!confirm(otros?'Esta propuesta TAMBIÉN cambia otros países. ¿Aplicarla igualmente? Quedará registrado con tu nombre y la versión anterior se guarda.':'¿Aplicar la propuesta nº '+id+'? La versión anterior se guarda y las olas se vuelven a analizar solas en segundo plano.'))return;
+  try{const r=await api('/dv/cuaderno/propuestas/'+id+'/aplicar','POST',{aceptar_otros_paises:!!otros});toast(r.nota||'Aplicada');OLAS=null;await metTab('pasos');verCodigo(clave)}catch(e){}
+}
+async function descartarPropuesta(id,clave){try{await api('/dv/cuaderno/propuestas/'+id+'/descartar','POST',{});toast('Propuesta descartada');await metTab('pasos');verCodigo(clave)}catch(e){}}
+async function revertirPaso(clave){
+  if(lectura()){soloLectura();return}
+  if(!confirm('¿Volver este paso a su versión anterior? Las olas se vuelven a analizar solas.'))return;
+  try{const r=await api('/dv/cuaderno/'+clave+'/revertir','POST',{});toast('Vuelto a la versión anterior (ahora v'+r.version+')');OLAS=null;await metTab('pasos');verCodigo(clave)}catch(e){}
 }
 async function guardarParamMet(i,pclave){
   if(lectura()){soloLectura();return}
