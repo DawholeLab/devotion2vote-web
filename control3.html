@@ -752,7 +752,7 @@ function renderTerritorio(niveles){
     const bloques=[...new Set(nombres.flatMap(z=>Object.keys(zonas[z].sesgo_relativo_pp||{})))];
     const topB=bloques.map(b=>[b,nombres.reduce((a,z)=>a+Math.abs((zonas[z].urna_pct||{})[b]||0),0)]).sort((a,b)=>b[1]-a[1]).slice(0,4).map(x=>x[0]);
     const sc=res.sesgo_conjunto_pp||{};
-    h+='<div class="seccion-r"><h4>'+esc({region:'Región / comunidad',provincia:'Provincia',municipio:'Municipio'}[nivel]||nivel)+' <span style="font-weight:500;color:var(--tinta3)">· variable '+esc(d.variable||'')+' · '+(res.zonas_publicadas||nombres.length)+' zonas'+(res.zonas_casadas_con_urna!=null?' · '+res.zonas_casadas_con_urna+' casadas con la urna':'')+'</span></h4>'
+    h+='<div class="seccion-r"><h4>'+esc({pais:'País (total)',comunidad:'Comunidad',region:'Región / comunidad',provincia:'Provincia',municipio:'Municipio',distrito:'Distrito'}[nivel]||nivel)+' <span style="font-weight:500;color:var(--tinta3)">· variable '+esc(d.variable||'')+' · '+(res.zonas_publicadas||nombres.length)+' zonas'+(res.zonas_casadas_con_urna!=null?' · '+res.zonas_casadas_con_urna+' casadas con la urna':'')+'</span></h4>'
       +(res.urna?'<p style="color:var(--aviso)">'+esc(res.urna)+'</p>':'')
       +(Object.keys(sc).length?'<p>Sesgo del conjunto de la muestra (recuerdo − urna): '+topB.map(b=>'<b>'+esc(b)+'</b> '+(sc[b]>0?'+':'')+p1(sc[b])+' pp').join(' · ')+'</p>':'')
       +'<div class="tabla-scroll"><table class="datos"><thead><tr><th>Zona</th><th>Entrev.</th>'+top.map(c=>'<th>'+esc(c)+' %</th>').join('')+(topB.length?topB.map(b=>'<th>'+esc(b)+' sesgo rel.</th>').join('')+'<th>Revisar</th>':'')+'</tr></thead><tbody>'
@@ -946,7 +946,7 @@ async function cliAprobar(amb){if(lectura()){soloLectura();return}const nota=pro
 
 /* ═══════════════════ Dante ═══════════════════ */
 let DSES=null,DOCUPADO=false;
-const ACCIONES_DANTE=new Set(['correr_paso','analizar_ola','fijar_parametro','visto_paso','proponer_codigo','aplicar_codigo','revertir_codigo']);
+const ACCIONES_DANTE=new Set(['correr_paso','analizar_ola','fijar_parametro','visto_paso','proponer_codigo','aplicar_codigo','revertir_codigo','maquina_territorial']);
 function danteTitulo(){return (OLA&&$('p-ola').classList.contains('activa'))?'Ola '+OLA.ola.codigo:'Sala de Control'+(AMBITO?' · '+nombreDe(AMBITO):'')}
 function dante(){$('dante').classList.toggle('abierto');if($('dante').classList.contains('abierto'))danteSesion();}
 async function danteSesion(){
