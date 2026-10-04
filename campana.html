@@ -89,6 +89,7 @@ nav.barra button.on{color:var(--acc2)}
 .lc-pub .fila{border:0;padding:4px 0}
 #lc-resumen{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}@media (max-width:760px){#lc-resumen{grid-template-columns:1fr 1fr}}
 .lc-tabs{flex-wrap:wrap;margin-bottom:12px}.lc-tabs button{flex:1 1 auto;min-width:0;padding:8px 6px;font-size:12.5px;white-space:nowrap}
+@media(max-width:760px){#lc-tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}#lc-tabs::-webkit-scrollbar{display:none}#lc-tabs button{flex:0 0 auto;padding:8px 12px}}
 /* cartografía oficial LOCUS (tema v4): tarjeta oscura dentro de la sala */
 .lcx{--xbg:#070d1c;--xbg2:#0e1730;--xink:#eef2fb;--xmut:#8fa0c4;--xacc:#5da9ff;--xamb:#eda100;--xline:rgba(120,160,230,.16);
   background:linear-gradient(180deg,#101a36,#0b1326);border:1px solid rgba(120,160,230,.14);border-radius:18px;box-shadow:0 18px 50px rgba(4,10,26,.45);padding:18px 20px;color:var(--xink)}
@@ -683,7 +684,7 @@ td .celda{display:inline-block;min-width:44px;padding:2px 6px;border-radius:5px}
         <svg id="lc-svg" viewBox="0 0 680 300" style="width:100%;height:auto;display:block"></svg>
         <p class="lcx-nota">Cortes repetidos, no panel: lo que se ve es el cambio de composición entre encuestas («marea, no golpe»), nunca el movimiento de las mismas personas. Por eso se dice «los Transformadores crecieron X puntos», y no «el X % pasó de un tipo a otro».</p>
       </div>
-      <div class="card lcx" style="margin-top:12px"><div class="lcx-cab"><span class="lcx-tit">Trayectoria de los medallones</span><span class="lcx-sub">centro de cada mentalidad en el plano, toma a toma</span></div>
+      <div class="card lcx" style="margin-top:12px"><div class="lcx-cab"><span class="lcx-tit">Trayectoria de los medallones</span><span class="lcx-sub" id="lc-trail-sub">centro de cada mentalidad en el plano, toma a toma</span></div>
         <div class="lcx-mini" id="lc-trail-plane"></div>
         <p class="lcx-nota">Cada línea une el centro de gravedad de una mentalidad a lo largo de las tomas; el punto grande es la última. Un centro que se aleja del cruce de ejes es una mentalidad más nítida (más consolidada); uno que se acerca, una mentalidad que se difumina.</p>
       </div>
@@ -694,7 +695,7 @@ td .celda{display:inline-block;min-width:44px;padding:2px 6px;border-radius:5px}
       <div class="card lcx"><div class="lcx-cab"><span class="lcx-tit">Dónde viven los problemas</span><span class="lcx-sub">cada tema, situado en la posición media de quienes lo citan</span></div>
         <div class="chips" id="lc-temas-anos" style="margin-bottom:10px"></div>
         <div class="lcx-wrap"><div class="lcx-mini" id="lc-temas-plane"></div><div id="lc-temas-tabla"></div></div>
-        <p class="lcx-nota">Pregunta «principal problema que le afecta a usted y a su familia», macroagrupada. Se publican los temas con al menos 3 % de las menciones del año. Que un tema se desplace en el plano no significa que cambie la agenda: cambia la lectura que la gente hace de ella.</p>
+        <p class="lcx-nota" id="lc-temas-nota">Pregunta «principal problema que le afecta a usted y a su familia», macroagrupada. Se publican los temas con al menos 3 % de las menciones del año. Que un tema se desplace en el plano no significa que cambie la agenda: cambia la lectura que la gente hace de ella.</p>
       </div>
     </div>
 
@@ -703,7 +704,7 @@ td .celda{display:inline-block;min-width:44px;padding:2px 6px;border-radius:5px}
       <div class="card lcx"><div class="lcx-cab"><span class="lcx-tit">Subsegmentos</span><span class="lcx-sub">núcleos y franjas dentro de cada mentalidad</span></div>
         <div class="chips" id="lc-subs-anos" style="margin-bottom:10px"></div>
         <div id="lc-subs-lista" class="lcx-subs"></div>
-        <p class="lcx-nota">Agrupación exploratoria (versión 0) por posición dentro de cada cuadrante y año; los rasgos son diferencias frente a la media de su cuadrante, en puntos. La estabilidad mide si la agrupación se repite al partir la muestra en dos: por debajo de 0,7 se lee con cautela. Son hipótesis con nombre, no verdades cerradas.</p>
+        <p class="lcx-nota" id="lc-subs-nota">Agrupación exploratoria (versión 0) por posición dentro de cada cuadrante y año; los rasgos son diferencias frente a la media de su cuadrante, en puntos. La estabilidad mide si la agrupación se repite al partir la muestra en dos: por debajo de 0,7 se lee con cautela. Son hipótesis con nombre, no verdades cerradas.</p>
       </div>
     </div>
 
@@ -1319,7 +1320,8 @@ let TOK=null,YO=null;
   const lcUni=()=>(LC&&LC.unidad==='entrevistas')?'entrevistas':'electores';
   const cm=x=>String(x).replace('.',',');
   const MESN=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-  const lcLab=p=>p.length===4?p:MESN[+p.slice(5,7)-1]+' '+p.slice(0,4)+(p.length>7?' ('+p.slice(7).toLowerCase()+')':'');
+  const lcLab=p=>p.length===4?p:(/^\d{4}-\d{4}$/.test(p)?p.replace('-','–'):MESN[+p.slice(5,7)-1]+' '+p.slice(0,4)+(p.length>7?' ('+p.slice(7).toLowerCase()+')':''));
+  const EDL=()=>(MP&&MP.edad_etiquetas)||['18–30','31–50','51+'];
   let LC_OLAS=[], lci=0, lcTab='mapa', lcCand=null;
   const MP=LC&&LC.mapa?LC.mapa:null;   // cartografía: tomas, anos, grids, fichas, subs, temas, quad_anual
   const PL=LC&&LC.polaridades?LC.polaridades:null;
@@ -1328,7 +1330,7 @@ let TOK=null,YO=null;
   function locusInit(){
     const vac=document.getElementById('lc-vacio'), cu=document.getElementById('lc-cuerpo');
     if(!LC||!LC.olas||!Object.keys(LC.olas).length){vac.hidden=false;cu.hidden=true;return;}
-    vac.hidden=true;cu.hidden=false; document.getElementById('lc-etq').hidden=false;
+    vac.hidden=true;cu.hidden=false; document.getElementById('lc-etq').hidden=false; document.getElementById('lc-etq').lastChild.textContent=(LC.etiqueta||'Estimado').charAt(0)+(LC.etiqueta||'Estimado').slice(1).toLowerCase();
     if(LC.maqueta){document.getElementById('lc-sub').innerHTML='<b>Maqueta con datos simulados</b> para diseñar la pantalla: las cifras no son reales. '+document.getElementById('lc-sub').textContent;}
     LC_OLAS=Object.keys(LC.olas).sort(); lci=LC_OLAS.length-1;
     const r=document.getElementById('lc-range'); r.max=LC_OLAS.length-1; r.value=lci;
@@ -1348,13 +1350,13 @@ let TOK=null,YO=null;
     const o=LC_OLAS[lci], L=LC.olas[o]; const tot=Object.values(L.electores||{}).reduce((a,b)=>a+b,0)||1;
     const LC_V=LC_T.filter(k=>k!=='U'||(L.electores&&L.electores.U));
     document.getElementById('lc-ola').textContent=nomOla(o); document.getElementById('lc-range').value=lci;
-    document.getElementById('lc-titular').textContent=`${LC.etiqueta||'Estimado'} · ${fmt(tot)} ${lcUni()} tipificadas${L.n_sin_aproximar!=null?' · '+L.n_sin_aproximar+' de '+(L.n||'—')+' entrevistas sin aproximar':''}${L.n_tenues!=null?' · '+L.n_tenues+' tenues (asignación poco firme)':''}${LC.pesos&&LC.pesos!=='p05'?' · sin pesos de la estimación de voto: cada entrevista cuenta una':''}.`;
+    document.getElementById('lc-titular').textContent=`${LC.etiqueta||'Estimado'} · ${L.n==null?'composición en % (entrevistas de esta ola no cargadas en la sala)':fmt(tot)+' '+lcUni()+' tipificadas'}${L.estudio?' · '+L.estudio:''}${L.clase?' · '+L.clase:''}${L.n_sin_aproximar!=null?' · '+fmt(L.n_sin_aproximar)+' de '+(L.n!=null?fmt(L.n):'—')+' entrevistas sin aproximar':''}${L.n_tenues!=null?' · '+fmt(L.n_tenues)+' tenues (asignación poco firme)':''}${LC.pesos==='declarada'?' · con la ponderación declarada de la encuesta, sin los pesos de la estimación de voto':(LC.pesos&&LC.pesos!=='p05'?' · sin pesos de la estimación de voto: cada entrevista cuenta una':'')}.`;
     // retrato
     document.getElementById('lc-apilada').innerHTML=LC_V.map(k=>`<i style="width:${100*(L.electores[k]||0)/tot}%;background:${lcCol(k)}" title="${lcNom(k)}"></i>`).join('');
     document.getElementById('lc-leyenda').innerHTML=LC_V.map(k=>`<span><i style="background:${lcCol(k)}"></i>${escT(lcNom(k))} ${pct(L.pct?L.pct[k]:100*(L.electores[k]||0)/tot)}</span>`).join('');
     document.getElementById('lc-resumen').innerHTML=LC_V.map(k=>`<div class="card" style="padding:12px 14px"><div class="lc-tipo"><div class="cab"><i style="background:${lcCol(k)}"></i><b class="small">${escT(lcNom(k))}</b></div><div class="num" style="font-size:22px">${fmt(L.electores[k]||0)}</div><div class="small mut">${lcUni()} · ${pct(L.pct?L.pct[k]:100*(L.electores[k]||0)/tot)}${L.firmeza&&L.firmeza[k]!=null?' · firmeza '+Math.round(100*L.firmeza[k])+'/100':''}</div></div></div>`).join('');
     document.getElementById('lc-tarjetas').innerHTML=LC_T.filter(k=>k!=='U').map(k=>{const t=(LC.tipos||{})[k]||{}; const lect=(L.lecturas&&L.lecturas[k])||t.lectura||'';
-      const pf=(L.perfil||{})[k]; const pft=pf?[pf.pct_mujer!=null?pf.pct_mujer+' % mujeres':null, pf.edad?(pf.edad[0]+' % de 18-30 · '+pf.edad[2]+' % de 51+'):null, pf.region_top?'pesa más en '+pf.region_top.replace(/\s*\d+%$/,''):null, pf.S!=null?'posición S '+cm(pf.S)+' · O '+cm(pf.O):null].filter(Boolean).join(' · '):'';
+      const pf=(L.perfil||{})[k]; const pft=pf?[pf.pct_mujer!=null?pf.pct_mujer+' % mujeres':null, pf.edad?(Math.round(pf.edad[0])+' % de '+EDL()[0]+' · '+Math.round(pf.edad[2])+' % de '+EDL()[2]):null, pf.region_top?'pesa más en '+pf.region_top.replace(/\s*\d+%$/,''):null, pf.S!=null?'posición S '+cm(pf.S)+' · O '+cm(pf.O):null].filter(Boolean).join(' · '):'';
       return `<div class="card"><div class="lc-tipo"><div class="cab"><i style="background:${lcCol(k)}"></i><b>${escT(t.nombre||LC_NOM[k]||k)}</b><span class="small mut" style="margin-left:auto">${pct(L.pct?L.pct[k]:0)}</span></div><div class="barra-h"><i style="width:${L.pct?L.pct[k]:0}%;background:${lcCol(k)}"></i></div><p class="small" style="margin:6px 0 0">${escT(lect)}</p>${pft?`<p class="small mut" style="margin:6px 0 0">En esta encuesta: ${escT(pft)}.</p>`:''}</div></div>`}).join('');
     chartAnual();
     // públicos
@@ -1369,15 +1371,16 @@ let TOK=null,YO=null;
     // método
     document.getElementById('lc-met-txt').textContent=`${LC.metodo||'Método LOCUS'}. En ${nomOla(o).toLowerCase()} se usaron ${(L.preguntas||[]).length} preguntas de la encuesta; cada una lee uno de los dos ejes: S, los principios que organizan un ámbito (¿hace falta otro rumbo?), y O, los actores que lo encarnan (¿hacen falta otras caras?). ${LC.pesos==='p05'?'Los electores se pesan con los mismos pesos que la estimación de voto (paso p05).':'Esta estimación se hizo de forma autónoma, sin los pesos de la estimación de voto: la unidad es la entrevista'+(LC.pesos==='declarada'?' con la ponderación declarada de la encuesta.':'.')}${LC.prior?' Referencia del clasificador: '+LC.prior+'.':''}`;
     document.getElementById('lc-preguntas').innerHTML=(L.preguntas||[]).map(q=>`<div class="fila" style="padding:6px 0;gap:10px"><span class="small">${escT(q.pregunta||q.clave)}</span><span class="small mut" style="white-space:nowrap">eje ${escT(q.eje||'—')} · ${escT(q.dominio||'')}${q.variable?' · '+escT(q.variable):''}</span></div>`).join('')||'<div class="small mut">Las preguntas usadas se declaran con cada estimación.</div>';
-    document.getElementById('lc-honestidad').innerHTML=[
-      ['Sí','«En junio los Transformadores son el 54 % de las entrevistas clasificadas» — una composición, con su n sin clasificar declarado.'],
-      ['Sí','«Los Transformadores crecieron 37 puntos desde 2020» — una recomposición entre encuestas distintas (estimado).'],
-      ['Sí','«Los Transformadores son más jóvenes y pesan más en la Metropolitana» — un perfil de quienes hoy están en ese cuadrante.'],
-      ['No','«El 30 % de los Preservadores se pasó a Transformadores» — eso exigiría seguir a las mismas personas (panel), y no lo hay.'],
+    const topK=LC_T.filter(k=>k!=='U').sort((a,b)=>((L.pct||{})[b]||0)-((L.pct||{})[a]||0))[0]; const f0=LC.olas[LC_OLAS[0]]; const dlt=(((L.pct||{})[topK]||0)-((f0.pct||{})[topK]||0)).toFixed(1); const regTop=((L.perfil||{})[topK]||{}).region_top;
+    document.getElementById('lc-honestidad').innerHTML=(LC.honestidad||[
+      ['Sí',`«En ${nomOla(o).toLowerCase()} los ${lcNom(topK)} son el ${Math.round((L.pct||{})[topK]||0)} % de las ${lcUni()} clasificadas» — una composición, con su n sin clasificar declarado.`],
+      ['Sí',`«Los ${lcNom(topK)} ${+dlt>=0?'crecieron':'cayeron'} ${cm(Math.abs(+dlt))} puntos desde ${nomOla(LC_OLAS[0]).toLowerCase()}» — una recomposición entre encuestas distintas, no el movimiento de las mismas personas.`],
+      ['Sí',regTop?`«Los ${lcNom(topK)} pesan más en ${regTop.replace(/\s*\d+%$/,'')}» — un perfil de quienes hoy están en ese cuadrante.`:`«Los ${lcNom(topK)} son más jóvenes (o más mayores) que el resto» — un perfil de quienes hoy están en ese cuadrante.`],
+      ['No',`«El 30 % de los ${lcNom('P')} se pasó a ${lcNom(topK)}» — eso exigiría seguir a las mismas personas (panel), y no lo hay.`],
       ['No','«Fulano es Transformador» — el tipo describe la relación de una persona con el sistema en un momento, no a la persona; nunca se usa sobre individuos.'],
-      ['No','«Los Transformadores votarán por X» — la mentalidad no es una predicción de conducta; el cruce con el voto se hace aparte, con Vote-Transfer.'],
-      ['Aviso','Ejes S y O: hipótesis doctrinal aplicada con una receta portable sobre las preguntas de estas encuestas (clase inferencia, etiqueta ESTIMADO) hasta que exista la batería propia.']
-    ].map(([t,x])=>`<div class="fila" style="padding:6px 0;gap:10px;align-items:flex-start"><b style="flex:0 0 44px;color:${t==='Sí'?'var(--ok)':t==='No'?'var(--acc2)':'var(--mut)'}">${t}</b><span>${x}</span></div>`).join('');
+      ['No',`«Los ${lcNom(topK)} votarán por X» — la mentalidad no es una predicción de conducta; el cruce con el voto se hace aparte, con Vote-Transfer.`],
+      ['Aviso',LC.etiqueta==='ESTIMADO'?'Ejes S y O: hipótesis doctrinal aplicada con una receta portable sobre las preguntas de estas encuestas (clase inferencia, etiqueta ESTIMADO) hasta que exista la batería propia.':'Ejes S y O construidos con la receta LOCUS sobre las preguntas de estas encuestas; la asignación a cuadrantes es una regla del método, declarada en la ficha técnica.']
+    ]).map(([t,x])=>`<div class="fila" style="padding:6px 0;gap:10px;align-items:flex-start;justify-content:flex-start"><b style="flex:0 0 44px;color:${t==='Sí'?'var(--ok)':t==='No'?'var(--acc2)':'var(--mut)'}">${t}</b><span>${x}</span></div>`).join('');
     document.getElementById('lc-ficha-tec').innerHTML=LC.ficha_tecnica?LC.ficha_tecnica.split('\n').map(x=>'<p style="margin:0 0 8px">'+escT(x)+'</p>').join(''):'<p>La ficha técnica se publica con cada estimación.</p>';
   }
   function chartAnual(){
@@ -1385,8 +1388,8 @@ let TOK=null,YO=null;
     const QA=MP&&MP.quad_anual?MP.quad_anual:(LC.quad_anual||null); if(!QA){svg.innerHTML='';leg.innerHTML='';return;}
     const anos=Object.keys(QA).sort(); const KS=['T','E','R','P'];
     const val=(a,k)=>{const v=QA[a]; return Array.isArray(v)?v[KS.indexOf(k)]:(v[k]||0)};
-    const W=680,H=260,ml=40,mr=16,mt=16,mb=30; const xs=i=>ml+(W-ml-mr)*(anos.length>1?i/(anos.length-1):0.5); const maxv=70; const ys=v=>mt+(H-mt-mb)*(1-v/maxv);
-    svg.innerHTML=[0,25,50].map(v=>`<line x1="${ml}" x2="${W-mr}" y1="${ys(v)}" y2="${ys(v)}" stroke="rgba(120,160,230,.14)"/><text x="${ml-6}" y="${ys(v)+4}" font-size="11" text-anchor="end" fill="#8fa0c4">${v} %</text>`).join('')
+    const W=680,H=260,ml=40,mr=16,mt=16,mb=30; const xs=i=>ml+(W-ml-mr)*(anos.length>1?i/(anos.length-1):0.5); const maxv=Math.max(60,...anos.flatMap(a=>KS.map(k=>val(a,k))))*1.12; const ys=v=>mt+(H-mt-mb)*(1-v/maxv);
+    svg.innerHTML=[0,25,50].filter(v=>v<maxv).map(v=>`<line x1="${ml}" x2="${W-mr}" y1="${ys(v)}" y2="${ys(v)}" stroke="rgba(120,160,230,.14)"/><text x="${ml-6}" y="${ys(v)+4}" font-size="11" text-anchor="end" fill="#8fa0c4">${v} %</text>`).join('')
       +KS.map(k=>{const pts=anos.map((a,i)=>xs(i)+','+ys(val(a,k))); return `<path d="M${xs(0)},${ys(0)} L${pts.join(' L')} L${xs(anos.length-1)},${ys(0)}Z" fill="${lcCol(k)}" opacity=".13"/><polyline fill="none" stroke="${lcCol(k)}" stroke-width="2.5" points="${pts.join(' ')}"/>`+anos.map((a,i)=>`<circle cx="${xs(i)}" cy="${ys(val(a,k))}" r="3.5" fill="${lcCol(k)}"><title>${lcNom(k)} ${a}: ${cm(val(a,k))} %</title></circle>`).join('')}).join('')
       +anos.map((a,i)=>`<text x="${xs(i)}" y="${H-8}" font-size="11" text-anchor="middle" fill="#8fa0c4">${a}</text>`).join('');
     leg.innerHTML=KS.map(k=>`<span><i style="background:${lcCol(k)}"></i>${lcNom(k)}</span>`).join('');
@@ -1395,7 +1398,7 @@ let TOK=null,YO=null;
     const olas=LC_OLAS; const KS=LC_T.filter(k=>k!=='U'||olas.some(x=>(LC.olas[x].electores||{}).U));
     const first=LC.olas[olas[0]], last=LC.olas[olas[olas.length-1]];
     document.getElementById('lc-mov-sub').textContent=`${olas.length} encuestas · de ${nomOla(olas[0]).toLowerCase()} a ${nomOla(olas[olas.length-1]).toLowerCase()} · % de ${lcUni()} tipificadas`;
-    document.getElementById('lc-mov-kpis').innerHTML=KS.map(k=>{const d=((last.pct||{})[k]||0)-((first.pct||{})[k]||0); return `<div class="lcx-kpi"><div class="l"><i style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${lcCol(k)};margin-right:5px"></i>${lcNom(k)}</div><div class="v">${d>0?'+':''}${cm(d.toFixed(1))} pp</div><div class="l">${cm((first.pct||{})[k]||0)} % → ${cm((last.pct||{})[k]||0)} % · estimado</div></div>`}).join('');
+    document.getElementById('lc-mov-kpis').innerHTML=KS.map(k=>{const d=((last.pct||{})[k]||0)-((first.pct||{})[k]||0); return `<div class="lcx-kpi"><div class="l"><i style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${lcCol(k)};margin-right:5px"></i>${lcNom(k)}</div><div class="v">${d>0?'+':''}${cm(d.toFixed(1))} pp</div><div class="l">${cm((first.pct||{})[k]||0)} % → ${cm((last.pct||{})[k]||0)} % · ${(LC.etiqueta||'estimado').toLowerCase()}</div></div>`}).join('');
     const svg=document.getElementById('lc-svg'); const W=680,H=300,ml=40,mr=16,mt=16,mb=34; const xs=i=>ml+(W-ml-mr)*(olas.length>1?i/(olas.length-1):0.5);
     const maxv=Math.max(10,...olas.flatMap(x=>KS.map(k=>(LC.olas[x].pct||{})[k]||0)))*1.12; const ys=v=>mt+(H-mt-mb)*(1-v/maxv);
     svg.innerHTML=[0,25,50].filter(v=>v<maxv).map(v=>`<line x1="${ml}" x2="${W-mr}" y1="${ys(v)}" y2="${ys(v)}" stroke="rgba(120,160,230,.14)"/><text x="${ml-6}" y="${ys(v)+4}" font-size="11" text-anchor="end" fill="#8fa0c4">${v} %</text>`).join('')
@@ -1405,8 +1408,8 @@ let TOK=null,YO=null;
     // trayectoria de centroides
     const tp=document.getElementById('lc-trail-plane');
     if(MP&&MP.fichas){
-      const toms=MP.tomas; const px=v=>4+92*v, py=v=>100-(4+92*v);
-      let s=miniAxes();
+      const toms=(MP.tomas&&MP.tomas.length)?MP.tomas:MP.anos; const px=v=>4+92*v, py=v=>100-(4+92*v);
+      document.getElementById('lc-trail-sub').textContent='centro de cada mentalidad en el plano, '+((MP.tomas&&MP.tomas.length)?'toma a toma':'período a período'); let s=miniAxes();
       'TERP'.split('').forEach(q=>{const pts=toms.map(t=>(MP.fichas[t]||{})[q]).filter(f=>f&&f.S!=null); if(!pts.length) return;
         s+=`<polyline fill="none" stroke="${lcCol(q)}" stroke-width=".6" stroke-opacity=".7" points="${pts.map(f=>px(f.O)+','+py(f.S)).join(' ')}" vector-effect="non-scaling-stroke"/>`;
         s+=pts.map((f,i)=>`<circle cx="${px(f.O)}" cy="${py(f.S)}" r="${i===pts.length-1?2.2:0.7}" fill="${lcCol(q)}" opacity="${i===pts.length-1?1:.55}"><title>${lcNom(q)} · ${lcLab(toms[toms.indexOf(toms.filter(t=>(MP.fichas[t]||{})[q]&&(MP.fichas[t][q].S!=null))[i])])}: S ${cm(f.S)} · O ${cm(f.O)} · ${cm(f.share)} %</title></circle>`).join('');
@@ -1420,8 +1423,8 @@ let TOK=null,YO=null;
   let lcTemaAno=null;
   function temas(){
     if(!MP||!MP.temas) return; const anos=Object.keys(MP.temas).sort(); if(!anos.includes(lcTemaAno)) lcTemaAno=anos[anos.length-1];
-    document.getElementById('lc-temas-anos').innerHTML=anos.map(a=>`<button class="chip ${a===lcTemaAno?'on':''}" data-lct="${a}">${a}</button>`).join('');
-    const T=MP.temas[lcTemaAno]||{}; const ent=Object.entries(T).sort((a,b)=>b[1].share-a[1].share);
+    document.getElementById('lc-temas-anos').innerHTML=anos.map(a=>`<button class="chip ${a===lcTemaAno?'on':''}" data-lct="${a}">${lcLab(a)}</button>`).join('');
+    const T=MP.temas[lcTemaAno]||{}; const ent=Object.entries(T).sort((a,b)=>b[1].share-a[1].share); if(MP.nota_temas) document.getElementById('lc-temas-nota').textContent=MP.nota_temas;
     const px=v=>4+92*v, py=v=>100-(4+92*v);
     let s=miniAxes();
     // sombras de todos los años para ver el viaje
@@ -1435,7 +1438,7 @@ let TOK=null,YO=null;
   let lcSubAno=null;
   function subsegs(){
     if(!MP||!MP.subs) return; const anos=[...new Set(Object.keys(MP.subs).map(k=>k.split('|')[0]))].sort(); if(!anos.includes(lcSubAno)) lcSubAno=anos[anos.length-1];
-    document.getElementById('lc-subs-anos').innerHTML=anos.map(a=>`<button class="chip ${a===lcSubAno?'on':''}" data-lcs="${a}">${a}</button>`).join('');
+    document.getElementById('lc-subs-anos').innerHTML=anos.map(a=>`<button class="chip ${a===lcSubAno?'on':''}" data-lcs="${a}">${lcLab(a)}</button>`).join(''); if(MP.nota_rasgos) document.getElementById('lc-subs-nota').textContent=MP.nota_rasgos+' La estabilidad mide si la agrupación se repite al partir la muestra en dos: por debajo de 0,7 se lee con cautela. Son hipótesis con nombre, no verdades cerradas.';
     document.getElementById('lc-subs-lista').innerHTML='TERP'.split('').map(q=>{const g=MP.subs[lcSubAno+'|'+q]; if(!g) return '';
       return g.subsegmentos.map((s,i)=>`<div class="lcx-sub-card"><h4><i style="background:${lcCol(q)}"></i>${lcNom(q)} · ${q}${i+1} <span style="margin-left:auto;font-weight:400;color:#8fa0c4">${cm(s.share)} % del cuadrante</span></h4>${s.perfil?`<p class="p">${escT(s.perfil)}</p>`:''}<div class="lcx-frow"><span>Posición S / O</span><b>${cm(s.S)} / ${cm(s.O)}</b></div>${s.edad!=null?`<div class="lcx-frow"><span>Edad media aprox.</span><b>${s.edad}</b></div>`:''}${(s.rasgos||[]).map(r=>`<div class="lcx-frow"><span>${escT(r[0])}</span><b>${r[1]>0?'+':''}${cm(r[1])}</b></div>`).join('')}<div class="lcx-nota" style="margin-top:6px">n ${fmt(g.n_muestra)} · estabilidad ${cm(g.estabilidad)}${g.estabilidad<0.7?' · <span class="lcx-warn">agrupación contextual: leer con cautela</span>':''}</div></div>`).join('')}).join('')||'<div class="lcx-nota">Sin subsegmentos para ese año.</div>';
   }
@@ -1443,9 +1446,11 @@ let TOK=null,YO=null;
   let MODE='ano', PERS=[], curPer=0, curQ=null, curSub=null, playT=null, Z=1, CX=0.5, CY=0.5;
   const pcx=v=>4+92*((v-(CX-0.5/Z))*Z), pcy=v=>4+92*((v-(CY-0.5/Z))*Z), fuera=(x,y)=>x<-10||x>110||y<-10||y>110;
   const quadOf=(bx,by)=>{const o=bx>=6,s=by>=6;return s&&o?'T':(!s&&o)?'E':(s&&!o)?'R':'P';};
-  const anoDe=p=>p.slice(0,4);
+  const anoDe=p=>{const ks=Object.keys((MP&&MP.temas)||{}).concat(Object.keys((MP&&MP.subs)||{}).map(k=>k.split('|')[0])); if(ks.includes(p)) return p; const y=p.slice(0,4); const r=ks.find(k=>/^\d{4}-\d{4}$/.test(k)&&y>=k.slice(0,4)&&y<=k.slice(5,9)); return r||y;};
   function mapaInit(){
-    document.getElementById('lcx-sub').textContent=`${MP.tomas.length} tomas y ${MP.anos.length} años · ${Object.values(MP.grids[MP.anos[MP.anos.length-1]]||[]).reduce((a,c)=>a+c[2],0).toLocaleString('es-ES')} posiciones en el último año`;
+    const hayTomas=!!(MP.tomas&&MP.tomas.length); const etqA=MP.anos_etiqueta||'años';
+    document.getElementById('lcx-sub').textContent=`${hayTomas?MP.tomas.length+' tomas y ':''}${MP.anos.length} ${etqA} · ${Object.values(MP.grids[MP.anos[MP.anos.length-1]]||[]).reduce((a,c)=>a+c[2],0).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,'.')} posiciones en el último ${etqA.replace(/s$/,'')}`;
+    document.getElementById('lcx-gAno').textContent=etqA==='años'?'Año':etqA.charAt(0).toUpperCase()+etqA.slice(1).replace(/s$/,''); document.getElementById('lcx-gToma').hidden=!hayTomas; document.getElementById('lcx-lyTrail').closest('label').hidden=!hayTomas;
     if(LC.etiqueta) document.getElementById('lcx-badge').textContent=LC.etiqueta+(LC.contraste?' · '+LC.contraste:'');
     document.getElementById('lcx-lectura').innerHTML=(LC.lectura||[]).map(p=>'<p>'+p.replace(/^\*\*(.+?)\*\*/,'<b>$1</b>')+'</p>').join('');
     const slider=document.getElementById('lcx-per');
@@ -1475,12 +1480,12 @@ let TOK=null,YO=null;
     const per=PERS[curPer]; document.getElementById('lcx-perlab').textContent=lcLab(per);
     const cells=MP.grids[per]; const bp=document.getElementById('lcx-plane'); bp.innerHTML=''; if(!cells) return;
     const max=Math.max(...cells.map(c=>c[2])), tot=cells.reduce((a,c)=>a+c[2],0);
-    document.getElementById('lcx-pern').textContent='n='+tot.toLocaleString('es-ES')+' posiciones';
+    document.getElementById('lcx-pern').textContent='n='+Math.round(tot).toLocaleString('es-ES')+' posiciones';
     const agg={T:[0,0,0],E:[0,0,0],R:[0,0,0],P:[0,0,0]};
     cells.forEach(([bx,by,w])=>{const q=quadOf(bx,by); const cx=pcx(bx/12),cy=pcy(by/12); agg[q][0]+=w*(bx+0.5)/12;agg[q][1]+=w*(by+0.5)/12;agg[q][2]+=w; if(fuera(cx,cy)) return;
       const d=document.createElement('div'); d.className='lcx-cell'; d.style.left=cx+'%'; d.style.bottom=cy+'%'; const cw=(92*Z/12); d.style.width='calc('+cw+'% - 2px)'; d.style.height='calc('+cw+'% - 2px)'; d.style.background=lcCol(q); d.style.opacity=(0.05+0.5*Math.sqrt(w/max)).toFixed(2); bp.appendChild(d);});
     if(document.getElementById('lcx-lyVar').checked){const tt2=MP.temas[anoDe(per)]||{}; const puestos=[];
-      Object.entries(tt2).sort((a,b)=>b[1].share-a[1].share).forEach(([t,v])=>{const tx2=pcx(v.O); let ty2=pcy(v.S); if(fuera(tx2,ty2)) return; while(puestos.some(([px,py])=>Math.abs(px-tx2)<16&&Math.abs(py-ty2)<4.2)) ty2-=4.4; puestos.push([tx2,ty2]);
+      Object.entries(tt2).filter(([t,v])=>v.share>=3).sort((a,b)=>b[1].share-a[1].share).forEach(([t,v],ix)=>{const ox=pcx(v.O), oy=pcy(v.S); if(fuera(ox,oy)) return; const cand=[[0,0],[0,4.6],[0,-4.6],[0,9.2],[0,-9.2],[22,0],[-22,0],[22,4.6],[-22,4.6],[22,-4.6],[-22,-4.6],[0,13.8],[0,-13.8],[22,9.2],[-22,9.2],[22,-9.2],[-22,-9.2]]; let tx2=ox, ty2=oy; for(const [dx,dy] of cand){const x=Math.max(8,Math.min(92,ox+dx)), y=Math.max(2,Math.min(94,oy+dy)); if(!puestos.some(([px,py])=>Math.abs(px-x)<20&&Math.abs(py-y)<4.4)){tx2=x;ty2=y;break;}} puestos.push([tx2,ty2]);
         const d=document.createElement('div'); d.className='lcx-tema'; d.style.left=tx2+'%'; d.style.bottom=ty2+'%'; d.style.fontSize=(v.share>25?11.5:10)+'px'; d.textContent=t+' '+cm(v.share)+'%'; d.title='S='+cm(v.S)+' · O='+cm(v.O)+' · share de menciones de '+anoDe(per); bp.appendChild(d);});}
     if(document.getElementById('lcx-lySub').checked){'TERP'.split('').forEach(q=>{const g=MP.subs[anoDe(per)+'|'+q]; if(!g) return;
       g.subsegmentos.forEach((s,i)=>{const sx2=pcx(s.O),sy2=pcy(s.S); if(fuera(sx2,sy2)) return; const d=document.createElement('div'); d.className='lcx-sat lcx-'+q; const sz=Math.max(18,Math.sqrt(s.share)*4.2); d.style.width=d.style.height=sz+'px'; d.style.left=sx2+'%'; d.style.bottom=sy2+'%'; d.style.background=lcCol(q); d.textContent=q+(i+1); d.title=(s.perfil||q+(i+1))+' — '+cm(s.share)+'% del cuadrante'; d.onclick=ev=>{ev.stopPropagation();fichaSub(q,i);}; bp.appendChild(d);});});}
@@ -1492,8 +1497,8 @@ let TOK=null,YO=null;
   }
   function ficha(q){curQ=q;curSub=null; const per=PERS[curPer]; const f=(MP.fichas[per]||{})[q]; if(!f) return; const ed=f.edad||[0,0,0];
     const t=document.getElementById('lcx-f_t'); t.textContent=lcNom(q); t.style.color=lcCol(q);
-    document.getElementById('lcx-f_s').textContent=lcLab(per)+' · '+cm(f.share)+' % · n='+f.n.toLocaleString('es-ES');
-    document.getElementById('lcx-f_body').innerHTML=`<div class="lcx-frow"><span>Posición media S / O</span><b>${cm(f.S)} / ${cm(f.O)}</b></div><div class="lcx-frow"><span>Mujeres</span><b>${f.pct_mujer!=null?f.pct_mujer+' %':'—'}</b></div><div class="lcx-frow"><span>Región con más peso</span><b>${f.region_top||'—'}</b></div><div style="font-size:11.5px;color:#8fa0c4;margin-top:10px">Estructura de edad</div>${[['18–30',ed[0]],['31–50',ed[1]],['51+',ed[2]]].map(([l,v])=>`<div class="lcx-frow"><span>${l}</span><b>${v} %</b></div><div class="lcx-mini-bar"><div style="width:${v}%;background:${lcCol(q)}"></div></div>`).join('')}<p class="lcx-nota">${escT(((LC.tipos||{})[q]||{}).lectura||'')}</p>`;}
+    document.getElementById('lcx-f_s').textContent=lcLab(per)+' · '+cm(f.share)+' %'+(f.n!=null?' · n='+f.n.toLocaleString('es-ES'):'');
+    document.getElementById('lcx-f_body').innerHTML=`<div class="lcx-frow"><span>Posición media S / O</span><b>${cm(f.S)} / ${cm(f.O)}</b></div><div class="lcx-frow"><span>Mujeres</span><b>${f.pct_mujer!=null?cm(Math.round(f.pct_mujer*10)/10)+' %':'—'}</b></div>${f.region_top?`<div class="lcx-frow"><span>Región con más peso</span><b>${escT(f.region_top)}</b></div>`:''}${(f.extra||[]).map(x=>`<div class="lcx-frow"><span>${escT(x[0])}</span><b>${cm(x[1])}</b></div>`).join('')}<div style="font-size:11.5px;color:#8fa0c4;margin-top:10px">Estructura de edad</div>${[[EDL()[0],Math.round(ed[0])],[EDL()[1],Math.round(ed[1])],[EDL()[2],Math.round(ed[2])]].map(([l,v])=>`<div class="lcx-frow"><span>${l}</span><b>${v} %</b></div><div class="lcx-mini-bar"><div style="width:${v}%;background:${lcCol(q)}"></div></div>`).join('')}<p class="lcx-nota">${escT(((LC.tipos||{})[q]||{}).lectura||'')}</p>`;}
   function fichaSub(q,i){const per=PERS[curPer]; const g=MP.subs[anoDe(per)+'|'+q]; if(!g||!g.subsegmentos[i]){ficha(q);return;} curSub=[q,i];curQ=null; const s=g.subsegmentos[i];
     const t=document.getElementById('lcx-f_t'); t.textContent=lcNom(q)+' · '+q+(i+1); t.style.color=lcCol(q);
     document.getElementById('lcx-f_s').textContent='Subsegmentos de '+anoDe(per)+' · '+cm(s.share)+' % del cuadrante · estabilidad '+cm(g.estabilidad);
@@ -1506,7 +1511,7 @@ let TOK=null,YO=null;
   const lastZ=o=>{const ks=Object.keys(o.data).sort();const vs=ks.map(k=>o.data[k]);const mu=vs.reduce((a,b)=>a+b,0)/vs.length;const sd=Math.sqrt(vs.reduce((a,b)=>a+(b-mu)**2,0)/vs.length)||1;return (vs[vs.length-1]-mu)/sd;};
   const polOrder=()=>{const ks=Object.keys(PL.series); return polOrd?ks.sort((a,b)=>lastZ(PL.series[b])-lastZ(PL.series[a])):ks.sort((a,b)=>PL.series[a].orden-PL.series[b].orden);};
   function polInit(){
-    document.getElementById('lc-pol-sub').textContent=`${Object.keys(PL.series).length} polaridades en monitoreo de un catálogo de ${(PL.catalogo||[]).length} · ${PL.ventana||''} · actualizado ${PL.actualizado||''}`;
+    document.getElementById('lc-pol-sub').textContent=`${Object.keys(PL.series).length} polaridades en monitoreo de un catálogo de ${(PL.catalogo||[]).length} · ${Array.isArray(PL.ventana)?PL.ventana.join(' – '):(PL.ventana||'')} · actualizado ${PL.actualizado||''}`;
     document.querySelectorAll('#lc-polaridades [data-pv]').forEach(b=>b.onclick=()=>{polView=b.dataset.pv;document.querySelectorAll('#lc-polaridades [data-pv]').forEach(x=>x.classList.toggle('on',x===b));polRender();});
     document.getElementById('lc-pol-hit').onclick=e=>{polHit=!polHit;e.currentTarget.classList.toggle('on',polHit);polRender();};
     document.getElementById('lc-pol-esc').onclick=e=>{polAbs=!polAbs;e.currentTarget.classList.toggle('on',polAbs);polRender();};
